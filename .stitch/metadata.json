@@ -1,0 +1,16 @@
+{
+  "projectId": "10713205666795309809",
+  "title": "Elite Gate API Gateway",
+  "deviceType": "DESKTOP",
+  "Last Sync Time": "2026-07-05T03:20:23Z",
+  "screens": {
+    "15814282087604638634": {
+      "id": "15814282087604638634",
+      "label": "Welcome Dashboard",
+      "sourceScreen": "projects/10713205666795309809/screens/15814282087604638634",
+      "width": 2560,
+      "height": 2048,
+      "canvasPosition": { "x": 10427, "y": 1808 }
+    }
+  }
+}

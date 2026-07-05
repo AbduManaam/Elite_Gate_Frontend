@@ -1,0 +1,321 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Control Plane Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#3e627a",
+                        "on-secondary-container": "#57646f",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-surface": "#171c1f",
+                        "surface-container-high": "#e3e7eb",
+                        "surface-dim": "#d6dade",
+                        "primary-fixed": "#c6e7ff",
+                        "on-tertiary-container": "#fbfcff",
+                        "on-background": "#171c1f",
+                        "on-primary-fixed-variant": "#254b61",
+                        "inverse-primary": "#a6cbe6",
+                        "surface": "#fefefe",
+                        "surface-bright": "#fefefe",
+                        "primary": "#587c94",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#edf1f5",
+                        "surface-container-highest": "#dfe3e7",
+                        "background": "#f6fafe",
+                        "secondary-fixed": "#d6e4f1",
+                        "inverse-surface": "#2c3134",
+                        "secondary-fixed-dim": "#bac8d5",
+                        "tertiary": "#3e6074",
+                        "outline-variant": "#e3e7eb",
+                        "surface-container": "#eaeef2",
+                        "tertiary-container": "#57798d",
+                        "on-secondary-fixed-variant": "#3b4853",
+                        "surface-variant": "#dfe3e7",
+                        "on-primary-container": "#fcfcff",
+                        "on-primary-fixed": "#001e2d",
+                        "on-tertiary-fixed-variant": "#284b5d",
+                        "surface-container-low": "#f0f4f8",
+                        "on-secondary-fixed": "#0f1d26",
+                        "tertiary-fixed-dim": "#a9cbe2",
+                        "primary-container": "#587c94",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#d3e1ee",
+                        "secondary": "#52606b",
+                        "outline": "#72787d",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#c4e7ff",
+                        "on-tertiary-fixed": "#001e2c",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#a6cbe6",
+                        "on-surface-variant": "#42474c",
+                        "on-error": "#ffffff",
+                        "sidebar-bg": "#0a1821",
+                        "sidebar-hover": "#123749"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "margin-desktop": "32px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["IBM Plex Sans"],
+                        "body-md": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "display-lg": ["IBM Plex Sans"],
+                        "label-md": ["IBM Plex Sans"],
+                        "code-sm": ["monospace"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"],
+                        "display-lg-mobile": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "code-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen antialiased flex">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen w-[240px] fixed left-0 top-0 bg-sidebar-bg border-r border-sidebar-hover py-md z-20">
+<div class="px-md mb-xl flex items-center gap-sm"><div class="flex items-center gap-sm w-full"><div class="bg-primary/10 p-sm rounded-lg flex items-center justify-center"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMNMzsutofipclMtCLx10yT0XijWcwH3yQMT11UYckObcnqyeOYysEx4zjtw9zJQ158vHgc3HSYbK5ifhbqL23KyYFY0E8jgOfjLd-dxrla8yjIHCGdfPjS4OONSGJThGqbujzvytpQlUT_UCkln-dlOicqsVaATzo9K8LAKzLK4enKvtX_zqaRZ2bA7porNygVc6rCZVtkt2Td5QCZNDrY0MlvNokPc7_a07FLSuUa6E9lilI0xciZ5VcX-RAZdRt-0Bxgo9EvTmt" alt="Elite Gateway Logo" class="h-8 w-auto object-contain"></div><span class="font-headline-sm text-white tracking-tight">Elite Gateway</span></div></div>
+<ul class="flex-1 flex flex-col gap-xs font-body-md text-body-md">
+<li class="">
+<a class="flex items-center gap-md px-md py-sm text-white font-bold border-l-2 border-primary bg-sidebar-hover transition-colors duration-200" href="#" style="border-left-color: rgb(83, 117, 140);">
+<span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">hub</span>
+                    Connectivity
+                </a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm border-l-2 border-transparent text-slate-400 hover:text-white hover:bg-sidebar-hover transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">apps</span>
+                    Applications
+                </a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm border-l-2 border-transparent text-slate-400 hover:text-white hover:bg-sidebar-hover transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">fingerprint</span>
+                    Identity
+                </a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm border-l-2 border-transparent text-slate-400 hover:text-white hover:bg-sidebar-hover transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+                    Analytics
+                </a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm border-l-2 border-transparent text-slate-400 hover:text-white hover:bg-sidebar-hover transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                    Settings
+                </a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm border-l-2 border-transparent text-slate-400 hover:text-white hover:bg-sidebar-hover transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+                    Logs
+                </a>
+</li>
+</ul>
+</nav>
+<!-- TopNavBar -->
+<header class="hidden md:flex fixed top-0 right-0 w-[calc(100%-240px)] h-[56px] bg-surface border-b border-outline-variant justify-between items-center px-lg z-10">
+<div class="flex items-center gap-sm text-on-surface-variant font-label-md text-label-md">
+<span class="font-headline-sm text-headline-sm font-black text-on-surface">serverless-default</span>
+<span class="px-sm py-xs bg-surface-container rounded-DEFAULT text-on-surface-variant font-code-sm text-code-sm ml-sm border border-outline-variant">Control Plane</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-on-surface-variant hover:text-primary hover:bg-surface-container-low p-sm rounded-full transition-all cursor-pointer flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary hover:bg-surface-container-low p-sm rounded-full transition-all cursor-pointer flex items-center justify-center">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-secondary-container border border-outline-variant flex items-center justify-center text-on-secondary-container cursor-pointer ml-sm">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full md:ml-[240px] pt-[56px] min-h-screen bg-background">
+<!-- Page Header Section -->
+<div class="bg-surface border-b border-outline-variant pt-lg px-margin-desktop">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-xs font-label-md text-label-md text-on-surface-variant mb-md">
+<a class="hover:text-primary transition-colors" href="#">API Gateway</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Control planes</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface">serverless-default</span>
+</nav>
+<!-- Title & Actions -->
+<div class="flex justify-between items-center mb-lg">
+<h1 class="font-display-lg text-display-lg text-on-surface">serverless-default</h1>
+<div class="flex items-center gap-sm">
+<button class="px-md py-sm bg-surface border border-outline-variant text-on-surface font-label-md text-label-md rounded-DEFAULT hover:bg-surface-container-low transition-colors flex items-center gap-xs">
+                        Connect
+                    </button>
+<button class="px-md py-sm bg-primary text-on-primary font-label-md text-label-md rounded-DEFAULT hover:bg-sidebar-hover transition-colors flex items-center gap-xs" style="background-color: rgb(17, 51, 70);">
+                        Actions
+                        <span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+</div>
+</div>
+<!-- Sub-nav Tabs -->
+<div class="flex items-center gap-xl overflow-x-auto border-b border-transparent">
+<a class="font-label-md text-label-md text-primary border-b-2 border-primary pb-sm whitespace-nowrap" href="#" style="color: rgb(83, 117, 140); border-bottom-color: rgb(83, 117, 140);">Overview</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Control plane logs</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Custom domains</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Gateway services</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Routes</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Consumers</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Plugins</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Upstreams</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Certificates</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary hover:border-outline-variant border-b-2 border-transparent pb-sm whitespace-nowrap transition-colors" href="#">Keys</a>
+</div>
+</div>
+<!-- Dashboard Content -->
+<div class="p-margin-desktop">
+<!-- Main Getting Started Card -->
+<div class="bg-surface border border-outline-variant rounded-lg overflow-hidden">
+<div class="p-lg border-b border-outline-variant">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-sm">Define and route traffic to your services</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Configure your gateway to manage incoming API requests and route them to your backend services securely.</p>
+</div>
+<!-- Stepper -->
+<div class="flex items-center gap-0 border-b border-outline-variant bg-surface-container-low">
+<div class="flex-1 p-md flex items-center gap-sm relative bg-surface">
+<div class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-md text-label-md" style="background-color: rgb(17, 51, 70);">1</div>
+<span class="font-label-md text-label-md text-on-surface font-bold">Add configuration</span>
+<div class="absolute right-0 top-0 bottom-0 w-px bg-outline-variant"></div>
+</div>
+<div class="flex-1 p-md flex items-center gap-sm relative opacity-60">
+<div class="w-6 h-6 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center font-label-md text-label-md border border-outline-variant">2</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Add plugins</span>
+<div class="absolute right-0 top-0 bottom-0 w-px bg-outline-variant"></div>
+</div>
+<div class="flex-1 p-md flex items-center gap-sm opacity-60">
+<div class="w-6 h-6 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center font-label-md text-label-md border border-outline-variant">3</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Next steps</span>
+</div>
+</div>
+<!-- Interactive Diagram Area -->
+<div class="p-xl bg-background flex flex-col items-center justify-center min-h-[300px] border-b border-outline-variant">
+<div class="flex items-center justify-center w-full max-w-4xl gap-md relative">
+<!-- Node: Client -->
+<div class="flex flex-col items-center gap-sm z-10">
+<div class="w-16 h-16 bg-surface border border-outline-variant rounded-full flex items-center justify-center text-on-surface-variant shadow-sm">
+<span class="material-symbols-outlined text-[32px]">devices</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Client</span>
+</div>
+<!-- Connector -->
+<div class="flex-1 flex flex-col items-center justify-center relative">
+<span class="font-code-sm text-code-sm text-on-surface-variant mb-xs bg-background px-sm">Request</span>
+<div class="w-full border-t-2 border-dashed border-outline-variant relative">
+<span class="material-symbols-outlined absolute right-[-8px] top-[-13px] text-outline-variant text-[24px]">play_arrow</span>
+</div>
+</div>
+<!-- Node: Route -->
+<div class="flex flex-col items-center gap-sm z-10">
+<div class="w-16 h-16 bg-primary-fixed border border-primary-fixed-dim rounded-lg flex items-center justify-center text-primary shadow-sm" style="background-color: rgb(83, 117, 140); color: rgb(255, 255, 255); border-color: rgb(17, 51, 70);">
+<span class="material-symbols-outlined text-[32px]">alt_route</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Route</span>
+</div>
+<!-- Connector -->
+<div class="w-12 border-t-2 border-outline-variant relative">
+<span class="material-symbols-outlined absolute right-[-8px] top-[-13px] text-outline-variant text-[24px]">play_arrow</span>
+</div>
+<!-- Node: Service -->
+<div class="flex flex-col items-center gap-sm z-10">
+<div class="w-16 h-16 bg-secondary-fixed border border-secondary-fixed-dim rounded-lg flex items-center justify-center text-on-secondary-fixed shadow-sm">
+<span class="material-symbols-outlined text-[32px]">settings_ethernet</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Service</span>
+</div>
+<!-- Connector -->
+<div class="flex-1 flex flex-col items-center justify-center relative">
+<span class="font-code-sm text-code-sm text-on-surface-variant mb-xs bg-background px-sm">Response</span>
+<div class="w-full border-t-2 border-dashed border-outline-variant relative">
+<span class="material-symbols-outlined absolute right-[-8px] top-[-13px] text-outline-variant text-[24px]">play_arrow</span>
+</div>
+</div>
+<!-- Node: Backend API -->
+<div class="flex flex-col items-center gap-sm z-10">
+<div class="w-16 h-16 bg-surface border border-outline-variant rounded-full flex items-center justify-center text-on-surface-variant shadow-sm">
+<span class="material-symbols-outlined text-[32px]">storage</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Backend API</span>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-lg bg-surface flex items-center gap-md">
+<button class="px-md py-sm bg-primary text-on-primary font-label-md text-label-md rounded-DEFAULT hover:bg-sidebar-hover transition-colors flex items-center gap-xs shadow-sm" style="background-color: rgb(17, 51, 70);">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                        Add a service and route
+                    </button>
+<button class="px-md py-sm bg-surface border border-outline-variant text-on-surface font-label-md text-label-md rounded-DEFAULT hover:bg-surface-container-low transition-colors flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">upload_file</span>
+                        Import via OAS spec
+                    </button>
+</div>
+</div>
+<!-- Additional filler content -->
+<div class="mt-lg grid grid-cols-1 md:grid-cols-3 gap-md opacity-70">
+<div class="bg-surface border border-outline-variant rounded-lg p-md flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<div>
+<div class="font-body-md text-body-md text-on-surface">Recent Activity</div>
+<div class="font-label-md text-label-md text-on-surface-variant">No logs today</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+
+
+
+
+
+
+
+</body></html>

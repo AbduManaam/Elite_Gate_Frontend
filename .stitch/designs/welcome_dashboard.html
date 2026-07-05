@@ -1,0 +1,379 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Elite Gate - Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#3e627a",
+                      "on-secondary-container": "#57646f",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "on-surface": "#171c1f",
+                      "surface-container-high": "#e5e9ed",
+                      "surface-dim": "#d6dade",
+                      "primary-fixed": "#c6e7ff",
+                      "on-tertiary-container": "#fbfcff",
+                      "on-background": "#171c1f",
+                      "on-primary-fixed-variant": "#254b61",
+                      "inverse-primary": "#a6cbe6",
+                      "surface": "#f6fafe",
+                      "surface-bright": "#f6fafe",
+                      "primary": "#587c94",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#edf1f5",
+                      "inverse-surface": "#2c3134",
+                      "on-primary-container": "#fcfcff",
+                      "on-primary-fixed": "#001e2d",
+                      "on-tertiary-fixed-variant": "#284b5d",
+                      "surface-container-low": "#f0f4f8",
+                      "on-secondary-fixed": "#0f1d26",
+                      "tertiary-fixed-dim": "#a9cbe2",
+                      "primary-container": "#557991",
+                      "error-container": "#ffdad6",
+                      "secondary-container": "#d3e1ee",
+                      "secondary": "#52606b",
+                      "outline": "#72787d",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed": "#c4e7ff",
+                      "on-tertiary-fixed": "#001e2c",
+                      "on-primary": "#ffffff",
+                      "primary-fixed-dim": "#a6cbe6",
+                      "on-surface-variant": "#42474c",
+                      "on-error": "#ffffff",
+                      "outline-variant": "#e3e7eb",
+                      "surface-container": "#eaeef2",
+                      "surface-container-highest": "#dfe3e7",
+                      "background": "#f6fafe",
+                      "brand-dark": "#0a1821",
+                      "brand-hover": "#123749"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "margin-desktop": "32px",
+                      "lg": "24px",
+                      "margin-mobile": "16px",
+                      "base": "4px",
+                      "xs": "4px",
+                      "xl": "32px",
+                      "sm": "8px",
+                      "gutter": "16px",
+                      "stack-sm": "8px",
+                      "stack-lg": "24px",
+                      "stack-md": "16px",
+                      "stack-xs": "4px"
+              },
+              "fontFamily": {
+                      "headline-md": ["IBM Plex Sans"],
+                      "headline-lg": ["IBM Plex Sans"],
+                      "code-label": ["JetBrains Mono"],
+                      "nav-label": ["IBM Plex Sans"],
+                      "body-md": ["IBM Plex Sans"],
+                      "headline-sm": ["IBM Plex Sans"],
+                      "body-sm": ["IBM Plex Sans"],
+                      "display-lg": ["IBM Plex Sans"],
+                      "label-md": ["IBM Plex Sans"],
+                      "body-lg": ["IBM Plex Sans"]
+              },
+              "fontSize": {
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "code-label": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "nav-label": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #fefefe;
+            color: #171c1f;
+        }
+        .surface-level-1 {
+            background-color: #ffffff;
+            border: 1px solid #e3e7eb;
+        }
+        .ghost-hover:hover {
+            box-shadow: 0 4px 12px rgba(10, 24, 33, 0.05);
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md bg-background text-on-background antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="bg-brand-dark fixed left-0 top-0 h-screen w-[240px] border-r border-white/10 flat no shadows flex flex-col py-md z-20">
+<div class="px-md mb-lg flex items-center gap-sm"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMNMzsutofipclMtCLx10yT0XijWcwH3yQMT11UYckObcnqyeOYysEx4zjtw9zJQ158vHgc3HSYbK5ifhbqL23KyYFY0E8jgOfjLd-dxrla8yjIHCGdfPjS4OONSGJThGqbujzvytpQlUT_UCkln-dlOicqsVaATzo9K8LAKzLK4enKvtX_zqaRZ2bA7porNygVc6rCZVtkt2Td5QCZNDrY0MlvNokPc7_a07FLSuUa6E9lilI0xciZ5VcX-RAZdRt-0Bxgo9EvTmt" alt="Elite Gate Logo" class="h-10 w-auto object-contain"><span class="text-white font-bold text-[18px] tracking-tight">Elite Gateway</span></div>
+<div class="px-md mb-md">
+<div class="flex items-center gap-sm py-sm px-sm bg-white/5 border border-white/10 rounded-lg">
+<span class="w-6 h-6 rounded bg-primary text-on-primary flex items-center justify-center font-bold text-xs">B</span>
+<span class="font-label-md text-label-md font-bold text-white">BRIDGEON</span>
+<span class="material-symbols-outlined ml-auto text-white/40 text-[18px]" data-icon="unfold_more">unfold_more</span>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto px-sm">
+<ul class="space-y-1">
+<li class="">
+<a class="flex items-center gap-md px-md py-sm rounded-lg transition-colors duration-200 text-white font-bold" href="#" style="border-left: 4px solid #113346; color: #113346;">
+<span class="material-symbols-outlined text-[20px]" data-icon="home">home</span>
+<span class="">Welcome</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-brand-hover transition-colors duration-200 text-white/70 hover:text-white" href="#">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMNMzsutofipclMtCLx10yT0XijWcwH3yQMT11UYckObcnqyeOYysEx4zjtw9zJQ158vHgc3HSYbK5ifhbqL23KyYFY0E8jgOfjLd-dxrla8yjIHCGdfPjS4OONSGJThGqbujzvytpQlUT_UCkln-dlOicqsVaATzo9K8LAKzLK4enKvtX_zqaRZ2bA7porNygVc6rCZVtkt2Td5QCZNDrY0MlvNokPc7_a07FLSuUa6E9lilI0xciZ5VcX-RAZdRt-0Bxgo9EvTmt" alt="" class="w-5 h-5 object-contain">
+<span class="">Connectivity</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-brand-hover transition-colors duration-200 text-white/70 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="apps">apps</span>
+<span class="">Applications</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-brand-hover transition-colors duration-200 text-white/70 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="fingerprint">fingerprint</span>
+<span class="">Identity</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-brand-hover transition-colors duration-200 text-white/70 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="monitoring">monitoring</span>
+<span class="">Analytics</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-brand-hover transition-colors duration-200 text-white/70 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+<span class="">Settings</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-md py-sm rounded-lg hover:bg-brand-hover transition-colors duration-200 text-white/70 hover:text-white" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="history">history</span>
+<span class="">Logs</span>
+</a>
+</li>
+</ul>
+</nav>
+</aside>
+<!-- Main Content Area Wrapper -->
+<div class="flex-1 flex flex-col ml-[240px]">
+<!-- TopNavBar -->
+<header class="bg-white fixed top-0 right-0 w-[calc(100%-240px)] h-[56px] border-b border-outline-variant flat no shadows flex justify-between items-center px-lg z-10">
+<div class="flex items-center flex-1 max-w-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]" data-icon="search">search</span>
+<input class="w-full h-8 pl-9 pr-12 text-sm bg-surface-container-low border border-outline-variant rounded focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all placeholder:text-outline text-on-surface" placeholder="Search..." type="text">
+<div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+<span class="text-[10px] text-outline font-code-label bg-surface-container px-1 rounded border border-outline-variant">Ctrl</span>
+<span class="text-[10px] text-outline font-code-label bg-surface-container px-1 rounded border border-outline-variant">K</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm">
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant rounded-full font-label-md text-label-md border border-outline-variant">Trial: 28 days left</span>
+<button class="bg-primary text-white px-3 py-1.5 rounded font-label-md text-label-md font-medium hover:bg-brand-hover transition-colors flex items-center gap-1" style="background-color: rgb(17, 51, 70);">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span> Upgrade
+                </button>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container transition-all rounded p-1" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container transition-all rounded p-1" data-icon="help_outline">help_outline</span>
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold font-label-md text-label-md cursor-pointer border border-outline-variant">
+                    AM
+                </div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto mt-[56px] p-margin-desktop bg-[#fefefe]">
+<div class="max-w-[1600px] mx-auto">
+<div class="mb-xl">
+<h2 class="font-display-lg text-display-lg text-on-surface mb-2">Welcome to Elite Gate 👋</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Manage your API lifecycle, connect services seamlessly, and secure your digital ecosystem from a single control plane.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Left Column: Core Services -->
+<div class="lg:col-span-2 flex flex-col gap-lg">
+<!-- Cards Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- API Gateway Card -->
+<div class="surface-level-1 rounded-xl p-lg ghost-hover transition-all cursor-pointer relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-md">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]" data-icon="api">api</span>
+</div>
+<span class="px-2 py-1 bg-surface-container text-primary rounded-full font-label-md text-label-md border border-outline-variant text-[10px] font-bold uppercase tracking-wider" style="color: rgb(83, 117, 140);">Recommended</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">API Gateway</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg h-10">Route, secure, and manage API traffic across modern microservices environments.</p>
+<div class="flex items-center gap-2 text-primary font-label-md text-label-md group-hover:underline" style="color: rgb(83, 117, 140);">
+                                Configure Routes <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- AI Gateway Card -->
+<div class="surface-level-1 rounded-xl p-lg ghost-hover transition-all cursor-pointer relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-md">
+<div class="w-12 h-12 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[24px]" data-icon="psychology">psychology</span>
+</div>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">AI Gateway</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg h-10">Govern and proxy AI model traffic, enforce rate limits, and monitor usage.</p>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md group-hover:text-primary transition-colors">
+                                Manage AI Providers <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- Dev Portal Card -->
+<div class="surface-level-1 rounded-xl p-lg ghost-hover transition-all cursor-pointer relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]" data-icon="developer_board">developer_board</span>
+</div>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Dev Portal</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg h-10">Publish APIs, manage consumer access, and generate interactive documentation.</p>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md group-hover:text-primary transition-colors">
+                                View Portal <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+<!-- Service Mesh Placeholder -->
+<div class="surface-level-1 rounded-xl p-lg ghost-hover transition-all cursor-pointer relative overflow-hidden group opacity-80 border-dashed">
+<div class="flex justify-between items-start mb-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[24px]" data-icon="account_tree">account_tree</span>
+</div>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Service Mesh</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-lg h-10">Secure service-to-service communication with mTLS and advanced traffic routing.</p>
+<div class="flex items-center gap-2 text-outline font-label-md text-label-md">
+                                Enable Mesh <span class="material-symbols-outlined text-[16px]" data-icon="add_circle">add_circle</span>
+</div>
+</div>
+</div>
+<!-- Quick Stats Row -->
+<div class="grid grid-cols-3 gap-md mt-sm">
+<div class="surface-level-1 rounded-lg p-md flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-outline uppercase tracking-tight">Active Services</p>
+<p class="font-headline-md text-headline-md text-on-surface font-bold">12</p>
+</div>
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+</div>
+<div class="surface-level-1 rounded-lg p-md flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-outline uppercase tracking-tight">Total Requests (24h)</p>
+<p class="font-headline-md text-headline-md text-on-surface font-bold">1.2M</p>
+</div>
+<span class="material-symbols-outlined text-green-500 text-[16px]" data-icon="trending_up">trending_up</span>
+</div>
+<div class="surface-level-1 rounded-lg p-md flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-outline uppercase tracking-tight">Error Rate</p>
+<p class="font-headline-md text-headline-md text-on-surface font-bold">0.02%</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[16px]" data-icon="horizontal_rule">horizontal_rule</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Widgets -->
+<div class="flex flex-col gap-lg">
+<!-- Konnect Trial Widget -->
+<div class="surface-level-1 rounded-xl overflow-hidden shadow-sm">
+<div class="h-1.5 bg-primary w-full"></div>
+<div class="p-lg">
+<div class="flex items-center gap-md mb-md">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="workspace_premium">workspace_premium</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Konnect Trial</h3>
+</div>
+<div class="mb-md">
+<div class="flex justify-between text-label-md font-label-md mb-1">
+<span class="text-on-surface-variant">Usage</span>
+<span class="text-on-surface font-bold">28 days left</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 25%"></div>
+</div>
+<p class="font-label-md text-label-md text-outline mt-2">Expires Jan 15, 2026</p>
+</div>
+<button class="w-full bg-white border border-outline-variant text-on-surface px-4 py-2 rounded font-label-md text-label-md font-medium hover:bg-surface-container transition-colors" style="color: rgb(83, 117, 140);">
+                                View Plan Details
+                            </button>
+</div>
+</div>
+<!-- Support Widget -->
+<div class="surface-level-1 rounded-xl p-lg bg-gradient-to-br from-white to-surface-container-low">
+<div class="flex items-center gap-md mb-md">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="support_agent">support_agent</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Need Help?</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">24/7 Enterprise Support</p>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-md">Our engineering team is ready to assist you with architecture or deployment queries.</p>
+<button class="w-full bg-primary text-white px-4 py-2 rounded font-label-md text-label-md font-medium hover:bg-brand-hover transition-colors flex justify-center items-center gap-2" style="background-color: rgb(17, 51, 70);">
+<span class="material-symbols-outlined text-[16px]" data-icon="chat">chat</span> Chat now
+                        </button>
+</div>
+<!-- Recent Activity Minimal List -->
+<div class="surface-level-1 rounded-xl p-lg">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-md">Recent Activity</h3>
+<ul class="space-y-4">
+<li class="flex gap-sm items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5" data-icon="update">update</span>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium">Updated route config</p>
+<p class="font-label-md text-label-md text-outline">2 mins ago • API Gateway</p>
+</div>
+</li>
+<li class="flex gap-sm items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5" data-icon="person_add">person_add</span>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium">Added new team member</p>
+<p class="font-label-md text-label-md text-outline">1 hr ago • Settings</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+
+
+
+
+
+
+
+
+
+</body></html>
