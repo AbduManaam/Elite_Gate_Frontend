@@ -1,32 +1,19 @@
 import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import {
   SIDEBAR_NAV_ITEMS,
   MOCK_PROJECTS,
   ELITE_GATE_LOGO_URL,
-  SidebarProject,
-  SidebarNavItem
+  SidebarProject
 } from '../../mocks/sidebarMock';
 
 export interface SidebarProps {
-  readonly activeItem?: string;
-  readonly onItemClick?: (label: string) => void;
   readonly className?: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({
-  activeItem = 'Welcome',
-  onItemClick,
-  className = ''
-}) => {
+export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
   const [selectedProject, setSelectedProject] = useState<SidebarProject>(MOCK_PROJECTS[0]);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
-
-  const handleItemClick = (label: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    if (onItemClick) {
-      onItemClick(label);
-    }
-  };
 
   const toggleProjectDropdown = () => {
     setIsProjectDropdownOpen((prev) => !prev);
@@ -102,50 +89,52 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigation Links — real routing via NavLink, no more onItemClick/activeTab state */}
       <nav className="flex-1 overflow-y-auto px-sm">
         <ul className="space-y-1">
-          {SIDEBAR_NAV_ITEMS.map((item: SidebarNavItem) => {
-            const isActive = activeItem.toLowerCase() === item.label.toLowerCase();
-            return (
-              <li key={item.label}>
-                <a
-                  href={`#${item.label.toLowerCase()}`}
-                  onClick={(e) => handleItemClick(item.label, e)}
-                  className={`flex items-center gap-md px-md py-sm rounded-lg transition-colors duration-200 ${
-                    isActive
-                      ? 'text-white font-bold'
-                      : 'text-white/70 hover:text-white hover:bg-brand-hover'
-                  }`}
-                  style={
-                    isActive
-                      ? {
-                          borderLeft: '4px solid #113346',
-                          color: '#113346', // Keeping faithful to HTML export's exact inline styles
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)'
-                        }
-                      : undefined
-                  }
-                >
-                  {item.isImage && item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt=""
-                      className="w-5 h-5 object-contain"
-                    />
-                  ) : (
-                    <span
-                      className="material-symbols-outlined text-[20px]"
-                      style={{ fontVariationSettings: isActive ? '"FILL" 1' : '"FILL" 0' }}
-                    >
-                      {item.icon}
-                    </span>
-                  )}
-                  <span>{item.label}</span>
-                </a>
-              </li>
-            );
-          })}
+          {SIDEBAR_NAV_ITEMS.map((item) => (
+            <li key={item.label}>
+              <NavLink
+                to={item.path}
+                end={item.path === '/'}
+                className={({ isActive }) =>
+                  `flex items-center gap-md px-md py-sm rounded-lg transition-colors duration-200 ${isActive
+                    ? 'text-white font-bold'
+                    : 'text-white/70 hover:text-white hover:bg-brand-hover'
+                  }`
+                }
+                style={({ isActive }) =>
+                  isActive
+                    ? {
+                      borderLeft: '4px solid #113346',
+                      color: '#113346', // Keeping faithful to HTML export's exact inline styles
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                    }
+                    : undefined
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {item.isImage && item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt=""
+                        className="w-5 h-5 object-contain"
+                      />
+                    ) : (
+                      <span
+                        className="material-symbols-outlined text-[20px]"
+                        style={{ fontVariationSettings: isActive ? '"FILL" 1' : '"FILL" 0' }}
+                      >
+                        {item.icon}
+                      </span>
+                    )}
+                    <span>{item.label}</span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+          ))}
         </ul>
       </nav>
     </aside>

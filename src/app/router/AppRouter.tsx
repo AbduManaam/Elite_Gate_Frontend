@@ -1,35 +1,30 @@
+// It defines the main layout of the application after the user logs in.
+// It displays the Sidebar, Header, and the currently selected page, and handles
+// navigation-related UI such as logout and analytics tabs.
+
 import React, { useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../shared/layouts/Sidebar/Sidebar';
-import { WelcomeDashboard } from '../../features/dashboard';
-import { ObservabilitySummaryPage, ObservabilityExplorerPage } from '../../features/observability';
-import { LoginPage } from '../../features/auth';
-import { GatewaysPage } from '../../features/gateways';
-import { PoliciesPage } from '../../features/policies';
-import { MembersPage } from '../../features/members';
-import { ProjectSettings } from '../../features/projects';
-import { AuditLogsPage } from '../../features/auditLogs';
+import { useAuthGate } from './AuthGate';
 
 export const AppRouter: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('Welcome');
-  const [analyticsSubTab, setAnalyticsSubTab] = useState<'Summary' | 'Explorer'>('Summary');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuthGate();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setIsUserMenuOpen(false);
-    setActiveTab('Welcome');
-  };
+  const isAnalytics = location.pathname.startsWith('/analytics');
 
-  // If not authenticated, render the LoginPage
-  if (!isAuthenticated) {
-    return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
-  }
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    navigate('/login', { replace: true });
+  };
 
   return (
     <div className="font-body-md text-body-md bg-background text-on-background antialiased flex h-screen overflow-hidden select-none">
       {/* Sidebar Layout */}
-      <Sidebar activeItem={activeTab} onItemClick={setActiveTab} />
+      <Sidebar />
 
       {/* Main Content Area Wrapper */}
       <div className="flex-1 flex flex-col ml-[240px] relative">
@@ -39,26 +34,31 @@ export const AppRouter: React.FC = () => {
 
           {/* Left Controls: Search bar or Sub-Navigation tabs for Analytics */}
           <div className="flex items-center flex-1 max-w-lg gap-lg">
-            {activeTab === 'Analytics' ? (
+            {isAnalytics ? (
               <nav className="flex gap-md border-b-2 border-transparent h-full items-center">
-                <button
-                  onClick={() => setAnalyticsSubTab('Summary')}
-                  className={`font-semibold text-sm px-sm py-1 rounded transition-colors cursor-pointer ${analyticsSubTab === 'Summary'
-                    ? 'text-[#113346] bg-[#113346]/10'
-                    : 'text-on-surface-variant hover:text-[#113346]'
-                    }`}
+                <NavLink
+                  to="/analytics"
+                  end
+                  className={({ isActive }) =>
+                    `font-semibold text-sm px-sm py-1 rounded transition-colors cursor-pointer ${isActive
+                      ? 'text-[#113346] bg-[#113346]/10'
+                      : 'text-on-surface-variant hover:text-[#113346]'
+                    }`
+                  }
                 >
                   Summary
-                </button>
-                <button
-                  onClick={() => setAnalyticsSubTab('Explorer')}
-                  className={`font-semibold text-sm px-sm py-1 rounded transition-colors cursor-pointer ${analyticsSubTab === 'Explorer'
-                    ? 'text-[#113346] bg-[#113346]/10'
-                    : 'text-on-surface-variant hover:text-[#113346]'
-                    }`}
+                </NavLink>
+                <NavLink
+                  to="/analytics/explorer"
+                  className={({ isActive }) =>
+                    `font-semibold text-sm px-sm py-1 rounded transition-colors cursor-pointer ${isActive
+                      ? 'text-[#113346] bg-[#113346]/10'
+                      : 'text-on-surface-variant hover:text-[#113346]'
+                    }`
+                  }
                 >
                   Explorer
-                </button>
+                </NavLink>
               </nav>
             ) : (
               <div className="relative w-full max-w-md">
@@ -135,40 +135,10 @@ export const AppRouter: React.FC = () => {
           </div>
         </header>
 
-        {/* Main Content Canvas */}
+        {/* Main Content Canvas — routed pages render here */}
         <main className="flex-1 overflow-y-auto mt-[56px] p-margin-desktop bg-[#fefefe]">
           <div className="max-w-[1600px] mx-auto pb-xl">
-            {activeTab === 'Welcome' && (
-              <WelcomeDashboard />
-            )}
-
-            {activeTab === 'Connectivity' && (
-              <GatewaysPage />
-            )}
-
-            {activeTab === 'Applications' && (
-              <PoliciesPage />
-            )}
-
-            {activeTab === 'Identity' && (
-              <MembersPage />
-            )}
-
-            {activeTab === 'Analytics' && (
-              analyticsSubTab === 'Summary' ? (
-                <ObservabilitySummaryPage />
-              ) : (
-                <ObservabilityExplorerPage />
-              )
-            )}
-
-            {activeTab === 'Settings' && (
-              <ProjectSettings />
-            )}
-
-            {activeTab === 'Logs' && (
-              <AuditLogsPage />
-            )}
+            <Outlet />
           </div>
         </main>
       </div>
