@@ -5,7 +5,7 @@
 import React from 'react';
 import { createBrowserRouter, useNavigate } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
-import { RequireAuth, useAuthGate } from './AuthGate';
+import { RequireAuth } from './AuthGate';
 import { LoginPage } from '../../features/auth';
 import { WelcomeDashboard } from '../../features/dashboard';
 import { ObservabilitySummaryPage, ObservabilityExplorerPage } from '../../features/observability';
