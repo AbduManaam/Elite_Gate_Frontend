@@ -51,8 +51,9 @@ apiClient.interceptors.response.use(
         const originalRequest = error.config as RetriableRequestConfig | undefined;
         const isUnauthorized = error.response?.status === 401;
         const alreadyRetried = originalRequest?._retry === true;
+        const isLoginRequest = originalRequest?.url?.endsWith('/login') === true;
 
-        if (!isUnauthorized || !originalRequest || alreadyRetried) {
+        if (!isUnauthorized || !originalRequest || alreadyRetried || isLoginRequest) {
             return Promise.reject(error);
         }
 

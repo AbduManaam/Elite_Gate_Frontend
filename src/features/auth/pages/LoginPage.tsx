@@ -1,16 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import LoginForm from '../components/LoginForm';
+import SignupForm from '../components/SignupForm';
 
 export interface LoginPageProps {
-  readonly onLogin: () => void;
+  readonly onLoginSuccess: () => void;
   readonly className?: string;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, className = '' }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className = '' }) => {
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+
   return (
-    <div className={`bg-[#001710] text-[#cbe9dc] min-h-screen font-body-md overflow-x-hidden relative w-full flex flex-col justify-center select-none ${className}`}>
-      {/* Ambient Motion: Scanning Line */}
-      <div className="scanning-line animate-scan-line"></div>
+    <div className={`bg-[#001710] text-[#cbe9dc] min-h-screen font-body-md relative w-full flex flex-col justify-center select-none ${className}`}>
+      {/* Ambient Motion: Scanning Line in isolated non-overflowing container */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="scanning-line animate-scan-line"></div>
+      </div>
 
       {/* Background Grid */}
       <div className="absolute inset-0 opacity-5 pointer-events-none z-0">
@@ -27,7 +32,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, className = '' })
       {/* Main Content */}
       <main className="relative z-10 min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop">
         <div className="w-full max-w-[1100px] flex flex-col md:flex-row items-center gap-xl md:gap-[120px]">
-          
+
           {/* Left Side: Branding & Messaging */}
           <div className="w-full md:w-1/2 flex flex-col justify-center text-left">
             {/* Entrance Animation: Logo fade and scale */}
@@ -41,15 +46,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, className = '' })
                 />
               </div>
             </div>
-            {/* Entrance Animation: Delayed reveal */}
-            <h1 className="font-display-lg text-display-lg text-on-surface mb-xl leading-[1.1] tracking-tight animate-fade-in-up stagger-1">
-              Next-gen API Gateway for <span className="text-primary italic">hybrid-cloud</span> architectures.
+            {/* Entrance Animation: Delayed reveal. Text is colored white/green for readability on dark background */}
+            <h1 className="font-display-lg text-display-lg text-[#cbe9dc] mb-xl leading-[1.1] tracking-tight animate-fade-in-up stagger-1">
+              Next-gen API Gateway for <span className="text-white italic font-semibold">hybrid-cloud</span> architectures.
             </h1>
           </div>
 
-          {/* Right Side: Login Form wrapper */}
-          <div className="w-full md:w-auto md:min-w-[420px]">
-            <LoginForm onLogin={onLogin} />
+          {/* Right Side: Form wrapper (login/signup toggled dynamically) */}
+          <div className="w-full md:w-auto md:min-w-[420px] relative z-10">
+            {authMode === 'login' ? (
+              <LoginForm onLoginSuccess={onLoginSuccess} onToggleSignup={() => setAuthMode('signup')} />
+            ) : (
+              <SignupForm onSignupSuccess={onLoginSuccess} onToggleLogin={() => setAuthMode('login')} />
+            )}
           </div>
         </div>
       </main>

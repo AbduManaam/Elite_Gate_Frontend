@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { isAxiosError } from 'axios';
-import { useLoginMutation } from '../hooks/useLoginMutation';
+import { useSignupMutation } from '../hooks/useSignupMutation';
 
-export interface LoginFormProps {
-  readonly onLoginSuccess: () => void;
-  readonly onToggleSignup: () => void;
+export interface SignupFormProps {
+  readonly onSignupSuccess: () => void;
+  readonly onToggleLogin: () => void;
 }
 
-function describeLoginError(error: unknown): string {
+function describeSignupError(error: unknown): string {
   if (isAxiosError(error)) {
     if (!error.response) {
       return 'Could not reach the server. Check your connection and try again.';
@@ -16,50 +16,49 @@ function describeLoginError(error: unknown): string {
     const status = error.response.status;
     const backendMessage = (error.response.data as { error?: string } | undefined)?.error;
 
-    // Messages mapped to the exact statuses your backend's auth_handler.go
-    // actually returns: 429 rate limit, 423 locked account, 401 bad creds.
-    if (status === 429) {
-      return 'Too many login attempts. Please wait a minute before trying again.';
+    if (status === 409) {
+      return 'This username is already taken. Please choose another one.';
     }
-    if (status === 423) {
-      return 'This account is temporarily locked due to repeated failed attempts.';
+    if (status === 400) {
+      return backendMessage ?? 'Invalid registration data or weak password.';
     }
-    return backendMessage ?? 'Login failed. Please try again.';
+    return backendMessage ?? 'Signup failed. Please try again.';
   }
   return 'An unexpected error occurred. Please try again.';
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSignup }) => {
+export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggleLogin }) => {
+  const [companyName, setCompanyName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState('');
-  const loginMutation = useLoginMutation();
+  const signupMutation = useSignupMutation();
 
-  const isSubmitting = loginMutation.isPending;
+  const isSubmitting = signupMutation.isPending;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
-    if (!username.trim() || !password.trim()) {
-      setFormError('Please initialize all security fields.');
+    if (!companyName.trim() || !username.trim() || !password.trim()) {
+      setFormError('Please initialize all onboarding fields.');
       return;
     }
 
-    loginMutation.mutate(
-      { username: username.trim(), password },
+    signupMutation.mutate(
+      { company: companyName.trim(), username: username.trim(), password },
       {
-        onSuccess: () => {
-          console.log('[LoginForm] Login successful! Backend returned tokens:');
-          onLoginSuccess();
+        onSuccess: (data) => {
+          console.log('[SignupForm] Onboarding successful! Backend returned tokens:', data);
+          onSignupSuccess();
         },
         onError: (error) => {
-          console.error('[LoginForm] Login failed:', error);
+          console.error('[SignupForm] Onboarding failed:', error);
           if (isAxiosError(error)) {
-            console.error('[LoginForm] Backend error response status:', error.response?.status);
-            console.error('[LoginForm] Backend error response data:', error.response?.data);
+            console.error('[SignupForm] Backend error response status:', error.response?.status);
+            console.error('[SignupForm] Backend error response data:', error.response?.data);
           }
-          setFormError(describeLoginError(error));
+          setFormError(describeSignupError(error));
         },
       }
     );
@@ -71,8 +70,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 blur-[100px] rounded-full"></div>
 
       <div className="mb-lg relative z-10 text-left">
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-xs tracking-tight">Access Terminal</h2>
-        <p className="font-body-md text-sm text-on-surface-variant">Initialize secure authentication sequence.</p>
+        <h2 className="font-headline-md text-headline-md text-on-surface mb-xs tracking-tight">Onboarding Terminal</h2>
+        <p className="font-body-md text-sm text-on-surface-variant">Provision a new tenant and admin workspace.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-md relative z-10 text-left">
@@ -82,8 +81,32 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
           </div>
         )}
 
-        {/* User Name Input (Reveal Sequential) */}
+        {/* Company Name Input */}
         <div className="flex flex-col gap-xs animate-reveal-sequential stagger-3">
+          <label className="font-label-mono text-[11px] uppercase tracking-widest text-[#94A39E]" htmlFor="company">
+            Company Name
+          </label>
+          <div className="relative group input-glow">
+            <span className="material-symbols-outlined absolute left-sm top-1/2 transform -translate-y-1/2 text-[#94A39E] transition-colors duration-300 group-focus-within:text-primary">
+              domain
+            </span>
+            <input
+              className="w-full bg-[#00120b] border border-[#0F4032] text-on-surface font-body-md text-sm rounded pl-xl py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all duration-300 placeholder:text-[#3C4A46]"
+              id="company"
+              placeholder="e.g. Acme Corp"
+              type="text"
+              value={companyName}
+              disabled={isSubmitting}
+              onChange={(e) => {
+                setCompanyName(e.target.value);
+                setFormError('');
+              }}
+            />
+          </div>
+        </div>
+
+        {/* User Name Input */}
+        <div className="flex flex-col gap-xs animate-reveal-sequential stagger-4">
           <label className="font-label-mono text-[11px] uppercase tracking-widest text-[#94A39E]" htmlFor="email">
             User Name
           </label>
@@ -106,20 +129,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
           </div>
         </div>
 
-        {/* Password Input (Reveal Sequential) */}
-        <div className="flex flex-col gap-xs animate-reveal-sequential stagger-4">
-          <div className="flex justify-between items-center">
-            <label className="font-label-mono text-[11px] uppercase tracking-widest text-[#94A39E]" htmlFor="password">
-              Password
-            </label>
-            <a
-              className="font-label-mono text-[11px] text-primary hover:text-primary-fixed-dim transition-colors duration-300"
-              href="#recover"
-              onClick={(e) => e.preventDefault()}
-            >
-              RECOVER
-            </a>
-          </div>
+        {/* Password Input */}
+        <div className="flex flex-col gap-xs animate-reveal-sequential stagger-5">
+          <label className="font-label-mono text-[11px] uppercase tracking-widest text-[#94A39E]" htmlFor="password">
+            Password
+          </label>
           <div className="relative group input-glow">
             <span className="material-symbols-outlined absolute left-sm top-1/2 transform -translate-y-1/2 text-[#94A39E] transition-colors duration-300 group-focus-within:text-primary">
               key
@@ -145,42 +159,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
           disabled={isSubmitting}
           className="w-full mt-sm bg-primary text-[#00120b] font-bold text-sm py-3 rounded-lg hover:brightness-110 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(195,255,146,0.4)] transition-all duration-300 animate-reveal-sequential stagger-5 flex justify-center items-center gap-sm active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
         >
-          {isSubmitting ? 'AUTHENTICATING…' : 'LOGIN'}
-          <span className="material-symbols-outlined text-[18px]">bolt</span>
-        </button>
-
-        <div className="relative my-md animate-reveal-sequential stagger-5">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-[#0F4032]"></div>
-          </div>
-          <div className="relative flex justify-center">
-            <span className="bg-surface-container-low px-sm font-label-mono text-[10px] text-[#94A39E] tracking-widest">
-              FEDERATED AUTH
-            </span>
-          </div>
-        </div>
-
-        {/* Secondary Action — disabled: no SSO endpoint exists on the backend yet.
-            Previously this silently faked a successful login; that fake path
-            is removed now that real auth exists. */}
-        <button
-          type="button"
-          disabled
-          title="SSO login is not available yet"
-          className="w-full bg-transparent border border-[#0F4032] text-on-surface/40 font-label-mono text-[13px] py-3 rounded-lg transition-all duration-300 animate-reveal-sequential stagger-5 flex justify-center items-center gap-sm cursor-not-allowed"
-        >
-          <span className="material-symbols-outlined text-[20px]">fingerprint</span>
-          SSO LOGIN
+          {isSubmitting ? 'PROVISIONING…' : 'PROVISION WORKSPACE'}
+          <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
         </button>
 
         <div className="text-center mt-md animate-reveal-sequential stagger-5">
-          <span className="font-body-sm text-[11px] text-[#94A39E] mr-xs">Don't have a tenant?</span>
+          <span className="font-body-sm text-[11px] text-[#94A39E] mr-xs">Already have an account?</span>
           <button
             type="button"
-            onClick={onToggleSignup}
+            onClick={onToggleLogin}
             className="font-label-mono text-[11px] text-primary hover:text-primary-fixed-dim transition-colors duration-300 cursor-pointer bg-transparent border-none uppercase tracking-widest outline-none"
           >
-            Onboard Company
+            Access Terminal
           </button>
         </div>
       </form>
@@ -188,4 +178,4 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
   );
 };
 
-export default LoginForm;
+export default SignupForm;

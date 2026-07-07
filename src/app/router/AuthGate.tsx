@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
+
 
 interface AuthGateContextValue {
     readonly isAuthenticated: boolean;
@@ -25,16 +27,15 @@ export const AuthGateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return <AuthGateContext.Provider value={value}>{children}</AuthGateContext.Provider>;
 };
 
-export const useAuthGate = (): AuthGateContextValue => {
-    const ctx = useContext(AuthGateContext);
-    if (!ctx) {
-        throw new Error('useAuthGate must be used within an AuthGateProvider');
-    }
-    return ctx;
+export const useAuthGate = () => {
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+    const clearSession = useAuthStore((s) => s.clearSession);
+    return { isAuthenticated, logout: clearSession };
 };
 
+
 export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated } = useAuthGate();
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }

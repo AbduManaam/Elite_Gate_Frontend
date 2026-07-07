@@ -16,17 +16,8 @@ import { ProjectSettings } from '../../features/projects';
 import { AuditLogsPage } from '../../features/auditLogs';
 
 const LoginRoute: React.FC = () => {
-    const { login } = useAuthGate();
     const navigate = useNavigate();
-
-    return (
-        <LoginPage
-            onLogin={() => {
-                login();
-                navigate('/', { replace: true });
-            }}
-        />
-    );
+    return <LoginPage onLoginSuccess={() => navigate('/', { replace: true })} />;
 };
 
 export const router = createBrowserRouter([
