@@ -11,7 +11,7 @@ interface PluginCard {
 export const PoliciesPage: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'Plugins' | string>('Plugins');
   
-  const [plugins, setPlugins] = useState<readonly PluginCard[]>([
+  const [plugins, _setPlugins] = useState<readonly PluginCard[]>([
     {
       id: 'key-auth',
       name: 'Key Authentication',

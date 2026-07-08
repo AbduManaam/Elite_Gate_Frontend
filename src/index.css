@@ -68,6 +68,13 @@
   --spacing-stack-md: 16px;
   --spacing-stack-xs: 4px;
 
+  /* Max Widths */
+  --max-w-xs: 20rem;
+  --max-w-sm: 24rem;
+  --max-w-md: 28rem;
+  --max-w-lg: 32rem;
+  --max-w-xl: 36rem;
+
   /* Fonts */
   --font-headline-md: "IBM Plex Sans", sans-serif;
   --font-headline-lg: "IBM Plex Sans", sans-serif;

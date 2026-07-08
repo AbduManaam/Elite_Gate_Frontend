@@ -30,16 +30,6 @@ export const SIDEBAR_NAV_ITEMS: readonly SidebarNavItem[] = [
     imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBMNMzsutofipclMtCLx10yT0XijWcwH3yQMT11UYckObcnqyeOYysEx4zjtw9zJQ158vHgc3HSYbK5ifhbqL23KyYFY0E8jgOfjLd-dxrla8yjIHCGdfPjS4OONSGJThGqbujzvytpQlUT_UCkln-dlOicqsVaATzo9K8LAKzLK4enKvtX_zqaRZ2bA7porNygVc6rCZVtkt2Td5QCZNDrY0MlvNokPc7_a07FLSuUa6E9lilI0xciZ5VcX-RAZdRt-0Bxgo9EvTmt'
   },
   {
-    label: 'Applications',
-    path: '/applications',
-    icon: 'apps'
-  },
-  {
-    label: 'Identity',
-    path: '/identity',
-    icon: 'fingerprint'
-  },
-  {
     label: 'Analytics',
     path: '/analytics',
     icon: 'monitoring'

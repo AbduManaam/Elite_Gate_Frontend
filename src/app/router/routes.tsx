@@ -10,8 +10,6 @@ import { LoginPage } from '../../features/auth';
 import { WelcomeDashboard } from '../../features/dashboard';
 import { ObservabilitySummaryPage, ObservabilityExplorerPage } from '../../features/observability';
 import { GatewaysPage } from '../../features/gateways';
-import { PoliciesPage } from '../../features/policies';
-import { MembersPage } from '../../features/members';
 import { ProjectSettings } from '../../features/projects';
 import { AuditLogsPage } from '../../features/auditLogs';
 
@@ -35,8 +33,6 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <WelcomeDashboard /> },
             { path: 'connectivity', element: <GatewaysPage /> },
-            { path: 'applications', element: <PoliciesPage /> },
-            { path: 'identity', element: <MembersPage /> },
             { path: 'analytics', element: <ObservabilitySummaryPage /> },
             { path: 'analytics/explorer', element: <ObservabilityExplorerPage /> },
             { path: 'settings', element: <ProjectSettings /> },

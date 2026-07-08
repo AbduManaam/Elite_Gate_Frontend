@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { RouteRecord } from '../api/types';
+import React, { useState } from 'react';
+import { RouteRecord } from '../api/route.types';
 import { RouteInput } from '../api/routesApi';
 import { useCreateRouteMutation, useUpdateRouteMutation } from '../hooks/useRouteMutations';
-import { useUpstreamsQuery } from '../../upstreams/hooks/useUpstreams';
+import { useUpstreamsQuery, useCreateUpstreamMutation } from '../../upstreams/hooks/useUpstreams';
 import { usePoliciesQuery } from '../../policies/hooks/usePolicies';
 import { toApiError } from '../../../shared/api/apiError';
 
@@ -20,6 +20,14 @@ export const RouteFormDrawer: React.FC<RouteFormDrawerProps> = ({ projectId, mod
     const { data: policies } = usePoliciesQuery(projectId);
     const createRoute = useCreateRouteMutation(projectId);
     const updateRoute = useUpdateRouteMutation(projectId);
+    const createUpstream = useCreateUpstreamMutation(projectId);
+
+    const [isCreatingUpstreamInline, setIsCreatingUpstreamInline] = useState(false);
+    const [inlineUpstream, setInlineUpstream] = useState({
+        name: '',
+        target_url: '',
+        protocol: 'http' as 'http' | 'grpc',
+    });
 
     const [form, setForm] = useState<RouteInput>({
         name: route?.name ?? '',
@@ -34,17 +42,38 @@ export const RouteFormDrawer: React.FC<RouteFormDrawerProps> = ({ projectId, mod
     // The selected upstream's protocol drives the "path" label — this is the
     // ONLY thing that changes for a gRPC route. There is no separate gRPC form.
     const selectedUpstream = upstreams?.find((u) => u.id === form.upstream_id);
-    const isGrpc = selectedUpstream?.protocol === 'grpc';
+    const activeProtocol = isCreatingUpstreamInline ? inlineUpstream.protocol : selectedUpstream?.protocol;
+    const isGrpc = activeProtocol === 'grpc';
 
     const mutation = mode === 'create' ? createRoute : updateRoute;
     const apiError = mutation.error ? toApiError(mutation.error) : null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (mode === 'create') {
-            createRoute.mutate(form, { onSuccess: onClose });
-        } else if (route) {
-            updateRoute.mutate({ id: route.id, input: form }, { onSuccess: onClose });
+        try {
+            let upstreamId = form.upstream_id;
+            if (isCreatingUpstreamInline && mode === 'create') {
+                const newUpstream = await createUpstream.mutateAsync({
+                    name: inlineUpstream.name,
+                    target_url: inlineUpstream.target_url,
+                    protocol: inlineUpstream.protocol,
+                    enabled: true,
+                });
+                upstreamId = newUpstream.id;
+            }
+
+            const routeInput = {
+                ...form,
+                upstream_id: upstreamId,
+            };
+
+            if (mode === 'create') {
+                createRoute.mutate(routeInput, { onSuccess: onClose });
+            } else if (route) {
+                updateRoute.mutate({ id: route.id, input: routeInput }, { onSuccess: onClose });
+            }
+        } catch (err) {
+            console.error('Failed to create upstream inline:', err);
         }
     };
 
@@ -87,22 +116,98 @@ export const RouteFormDrawer: React.FC<RouteFormDrawerProps> = ({ projectId, mod
                 )}
             </label>
 
-            <label className="flex flex-col gap-xs text-sm">
-                Upstream
-                <select
-                    required
-                    value={form.upstream_id}
-                    onChange={(e) => setForm((f) => ({ ...f, upstream_id: e.target.value }))}
-                    className="border border-outline-variant rounded px-2 py-1"
-                >
-                    <option value="">Select an upstream…</option>
-                    {upstreams?.map((u) => (
-                        <option key={u.id} value={u.id}>
-                            {u.name} ({u.protocol})
-                        </option>
-                    ))}
-                </select>
-            </label>
+            {mode === 'create' ? (
+                <div className="flex flex-col gap-xs text-sm border-l-2 border-[#587c94]/30 pl-3 py-1 bg-slate-50/50 rounded-r">
+                    <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-xs text-on-surface-variant">Gateway Service (Upstream)</span>
+                        <button
+                            type="button"
+                            onClick={() => setIsCreatingUpstreamInline(!isCreatingUpstreamInline)}
+                            className="text-[#587c94] text-xs font-semibold hover:underline cursor-pointer"
+                        >
+                            {isCreatingUpstreamInline ? 'Select Existing' : '+ Add New Service inline'}
+                        </button>
+                    </div>
+
+                    {isCreatingUpstreamInline ? (
+                        <div className="flex flex-col gap-sm mt-1">
+                            <label className="flex flex-col gap-1 text-xs">
+                                Service Name
+                                <input
+                                    required
+                                    value={inlineUpstream.name}
+                                    onChange={(e) => setInlineUpstream(u => ({ ...u, name: e.target.value }))}
+                                    placeholder="e.g. auth-service"
+                                    className="border border-outline-variant bg-white rounded px-2 py-1 outline-none focus:border-[#587c94]"
+                                />
+                            </label>
+                            <label className="flex flex-col gap-1 text-xs">
+                                Target Host URL
+                                <input
+                                    required
+                                    value={inlineUpstream.target_url}
+                                    onChange={(e) => setInlineUpstream(u => ({ ...u, target_url: e.target.value }))}
+                                    placeholder="e.g. http://auth-svc:8080"
+                                    className="border border-outline-variant bg-white rounded px-2 py-1 font-mono outline-none focus:border-[#587c94]"
+                                />
+                            </label>
+                            <div className="flex gap-md text-xs mt-1">
+                                <label className="flex items-center gap-1.5 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="inline-protocol"
+                                        checked={inlineUpstream.protocol === 'http'}
+                                        onChange={() => setInlineUpstream(u => ({ ...u, protocol: 'http' }))}
+                                        className="accent-[#113346]"
+                                    />
+                                    HTTP
+                                </label>
+                                <label className="flex items-center gap-1.5 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="inline-protocol"
+                                        checked={inlineUpstream.protocol === 'grpc'}
+                                        onChange={() => setInlineUpstream(u => ({ ...u, protocol: 'grpc' }))}
+                                        className="accent-[#113346]"
+                                    />
+                                    gRPC
+                                </label>
+                            </div>
+                        </div>
+                    ) : (
+                        <select
+                            required
+                            value={form.upstream_id}
+                            onChange={(e) => setForm((f) => ({ ...f, upstream_id: e.target.value }))}
+                            className="border border-outline-variant bg-white rounded px-2 py-1 outline-none focus:border-[#587c94] w-full text-xs"
+                        >
+                            <option value="">Select an upstream…</option>
+                            {upstreams?.map((u) => (
+                                <option key={u.id} value={u.id}>
+                                    {u.name} ({u.protocol})
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+            ) : (
+                <label className="flex flex-col gap-xs text-sm">
+                    Upstream
+                    <select
+                        required
+                        value={form.upstream_id}
+                        onChange={(e) => setForm((f) => ({ ...f, upstream_id: e.target.value }))}
+                        className="border border-outline-variant rounded px-2 py-1 outline-none focus:border-[#587c94]"
+                    >
+                        <option value="">Select an upstream…</option>
+                        {upstreams?.map((u) => (
+                            <option key={u.id} value={u.id}>
+                                {u.name} ({u.protocol})
+                            </option>
+                        ))}
+                    </select>
+                </label>
+            )}
 
             {!isGrpc && (
                 <div className="flex flex-col gap-xs text-sm">
@@ -114,8 +219,8 @@ export const RouteFormDrawer: React.FC<RouteFormDrawerProps> = ({ projectId, mod
                                 key={m}
                                 onClick={() => toggleMethod(m)}
                                 className={`px-2 py-1 rounded text-xs font-bold border ${form.methods.includes(m)
-                                        ? 'bg-[#113346] text-white border-[#113346]'
-                                        : 'bg-white text-on-surface-variant border-outline-variant'
+                                    ? 'bg-[#113346] text-white border-[#113346]'
+                                    : 'bg-white text-on-surface-variant border-outline-variant'
                                     }`}
                             >
                                 {m}

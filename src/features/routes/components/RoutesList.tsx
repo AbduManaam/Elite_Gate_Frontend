@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
-import { useRoutesQuery, useDeleteRouteMutation } from '../hooks/useRoutes';
+import { useRoutesQuery, useDeleteRouteMutation, useDisableRouteMutation } from '../hooks/useRoutes';
+import {
+  useEnableRouteMutation,
+  useAssignPolicyMutation,
+  useRemovePolicyMutation
+} from '../hooks/useRouteMutations';
+import { RouteRecord } from '../api/routesApi';
+import { usePoliciesQuery } from '../../policies/hooks/usePolicies';
+import { RouteFormDrawer } from './RouteFormDrawer';
 import { toApiError } from '../../../shared/api/apiError';
+import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 
 export const RoutesList: React.FC = () => {
   const { projectId } = useActiveProject();
@@ -10,17 +18,44 @@ export const RoutesList: React.FC = () => {
   const [routeSearchQuery, setRouteSearchQuery] = useState('');
   const [routeMethodFilter, setRouteMethodFilter] = useState('Method: All');
 
-  const { data: routes, isLoading, error } = useRoutesQuery(projectId);
-  const deleteRoute = useDeleteRouteMutation(projectId ?? '');
+  const [drawerState, setDrawerState] = useState<{
+    isOpen: boolean;
+    mode: 'create' | 'edit';
+    route?: RouteRecord;
+  }>({ isOpen: false, mode: 'create' });
 
-  // RBAC('editor') gates DELETE /routes/:id on the backend — mirror it here
-  // so a viewer never sees a control they'd get a 403 clicking.
+  const { data: routes, isLoading, error } = useRoutesQuery(projectId);
+  const { data: policies } = usePoliciesQuery(projectId);
+
+  const deleteRoute = useDeleteRouteMutation(projectId ?? '');
+  const disableRoute = useDisableRouteMutation(projectId ?? '');
+  const enableRoute = useEnableRouteMutation(projectId ?? '');
+
+  const assignPolicy = useAssignPolicyMutation(projectId ?? '');
+  const removePolicy = useRemovePolicyMutation(projectId ?? '');
+
+  const handleToggleRoute = (route: RouteRecord) => {
+    if (route.enabled) {
+      disableRoute.mutate(route.id);
+    } else {
+      enableRoute.mutate(route.id);
+    }
+  };
+
+  const handlePolicyChange = (routeId: string, policyId: string) => {
+    if (policyId === '') {
+      removePolicy.mutate(routeId);
+    } else {
+      assignPolicy.mutate({ routeId, policyId });
+    }
+  };
+
   const canManageRoutes = can('editor');
 
   const filteredRoutes = (routes ?? []).filter((route) => {
     const matchesSearch =
       route.path.toLowerCase().includes(routeSearchQuery.toLowerCase()) ||
-      route.upstream_url.toLowerCase().includes(routeSearchQuery.toLowerCase());
+      (route.upstream_url && route.upstream_url.toLowerCase().includes(routeSearchQuery.toLowerCase()));
     const matchesMethod =
       routeMethodFilter === 'Method: All' || route.methods.includes(routeMethodFilter.replace('Method: ', ''));
     return matchesSearch && matchesMethod;
@@ -29,14 +64,17 @@ export const RoutesList: React.FC = () => {
   const apiError = error ? toApiError(error) : null;
 
   return (
-    <div className="flex flex-col gap-lg">
+    <div className="flex flex-col gap-lg text-left">
       <div className="flex justify-between items-end">
         <div>
           <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-xs">Routes</h2>
           <p className="font-body-md text-body-md text-[#587c94]">Manage API ingress routing rules and policies.</p>
         </div>
         {canManageRoutes && (
-          <button className="bg-[#113346] text-white px-stack-md py-stack-sm rounded font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center gap-stack-xs shadow-sm cursor-pointer">
+          <button
+            onClick={() => setDrawerState({ isOpen: true, mode: 'create' })}
+            className="bg-[#113346] text-white px-4 py-2 rounded font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
+          >
             <span className="material-symbols-outlined text-[18px]">add</span>
             New Route
           </button>
@@ -44,24 +82,27 @@ export const RoutesList: React.FC = () => {
       </div>
 
       <div className="bg-white border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-sm">
-        <div className="p-stack-md border-b border-outline-variant flex gap-stack-md items-center bg-white">
+        <div className="p-4 border-b border-outline-variant flex gap-4 items-center bg-white">
           <div className="relative flex-1 max-w-md">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
             <input
-              className="w-full pl-9 pr-3 py-1 text-sm border border-outline-variant rounded focus:border-[#587c94] focus:ring-1 focus:ring-[#587c94] transition-all outline-none"
+              className="w-full pl-9 pr-3 py-1.5 text-sm border border-outline-variant rounded focus:border-[#587c94] focus:ring-1 focus:ring-[#587c94] transition-all outline-none"
               placeholder="Search routes..."
               value={routeSearchQuery}
               onChange={(e) => setRouteSearchQuery(e.target.value)}
             />
           </div>
           <select
-            className="border border-outline-variant rounded font-body-sm text-sm py-1 pl-2 pr-6 bg-transparent"
+            className="border border-outline-variant rounded font-body-sm text-sm py-1.5 pl-2 pr-6 bg-transparent"
             value={routeMethodFilter}
             onChange={(e) => setRouteMethodFilter(e.target.value)}
           >
             <option>Method: All</option>
             <option>GET</option>
             <option>POST</option>
+            <option>PUT</option>
+            <option>PATCH</option>
+            <option>DELETE</option>
           </select>
         </div>
 
@@ -98,32 +139,70 @@ export const RoutesList: React.FC = () => {
                   <th className="py-3 px-md font-medium">Upstream</th>
                   <th className="py-3 px-md font-medium">Methods</th>
                   <th className="py-3 px-md font-medium">Protocol</th>
-                  <th className="py-3 px-md font-medium">Auth</th>
+                  <th className="py-3 px-md font-medium">Policy</th>
                   <th className="py-3 px-md font-medium">Status</th>
                   {canManageRoutes && <th className="py-3 px-md w-[48px]" />}
                 </tr>
               </thead>
               <tbody className="font-mono text-xs text-on-surface divide-y divide-outline-variant">
                 {filteredRoutes.map((route) => (
-                  <tr key={route.id} className="hover:bg-surface-container-low transition-colors group">
+                  <tr
+                    key={route.id}
+                    onClick={() => canManageRoutes && setDrawerState({ isOpen: true, mode: 'edit', route })}
+                    className={`transition-colors group ${canManageRoutes ? 'hover:bg-surface-container-low cursor-pointer' : ''}`}
+                  >
                     <td className="py-4 px-md font-medium text-[#587c94]">{route.path}</td>
                     <td className="py-4 px-md text-on-surface-variant">{route.upstream_url || '—'}</td>
                     <td className="py-4 px-md">
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 flex-wrap">
                         {route.methods.map((m) => (
                           <span key={m} className="bg-[#587c94] text-white px-1 py-0.5 rounded font-bold text-[9px]">{m}</span>
                         ))}
                       </div>
                     </td>
                     <td className="py-4 px-md text-on-surface-variant">{route.protocol}</td>
-                    <td className="py-4 px-md">{route.auth_required ? 'Required' : '—'}</td>
-                    <td className="py-4 px-md">
-                      <span className={route.enabled ? 'text-green-600' : 'text-outline'}>
-                        {route.enabled ? 'Active' : 'Disabled'}
-                      </span>
+                    <td className="py-4 px-md" onClick={(e) => e.stopPropagation()}>
+                      {canManageRoutes ? (
+                        <select
+                          className="border border-outline-variant rounded font-body-sm text-xs py-1 px-2 bg-transparent focus:ring-1 focus:ring-[#587c94] outline-none"
+                          value={route.policy_id ?? ''}
+                          onChange={(e) => handlePolicyChange(route.id, e.target.value)}
+                        >
+                          <option value="">No Policy</option>
+
+                          {policies?.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span>
+                          {policies?.find((p) => p.id === route.policy_id)?.name ?? '—'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-4 px-md" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-2">
+                        {canManageRoutes ? (
+                          <label className="relative inline-block w-10 h-5 cursor-pointer shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={route.enabled}
+                              onChange={() => handleToggleRoute(route)}
+                              disabled={disableRoute.isPending || enableRoute.isPending}
+                              className="sr-only peer"
+                            />
+                            <div className="w-10 h-5 bg-[#e3e7eb] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-[14px] after:w-[14px] after:transition-all peer-checked:bg-[#587c94] opacity-80 hover:opacity-100 transition-opacity"></div>
+                          </label>
+                        ) : null}
+                        <span className={route.enabled ? 'text-green-600 font-medium' : 'text-outline'}>
+                          {route.enabled ? 'Active' : 'Disabled'}
+                        </span>
+                      </div>
                     </td>
                     {canManageRoutes && (
-                      <td className="py-4 px-md text-right">
+                      <td className="py-4 px-md text-right" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => deleteRoute.mutate(route.id)}
                           disabled={deleteRoute.isPending}
@@ -140,15 +219,23 @@ export const RoutesList: React.FC = () => {
           )}
         </div>
 
-        <div className="p-stack-sm px-stack-md border-t border-outline-variant bg-white rounded-b-xl flex justify-between items-center text-on-surface-variant text-xs">
+        <div className="p-4 border-t border-outline-variant bg-white rounded-b-xl flex justify-between items-center text-on-surface-variant text-xs">
           <span>Showing {filteredRoutes.length} routes</span>
-          {routes && routes.length >= 500 && (
-            <span className="text-error">
-              Large result set — this endpoint has no server-side pagination yet.
-            </span>
-          )}
         </div>
       </div>
+
+      {drawerState.isOpen && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
+          <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
+            <RouteFormDrawer
+              projectId={projectId ?? ''}
+              mode={drawerState.mode}
+              route={drawerState.route}
+              onClose={() => setDrawerState({ isOpen: false, mode: 'create' })}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

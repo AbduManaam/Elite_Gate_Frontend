@@ -1,4 +1,5 @@
 import { apiClient } from '../../../lib/api/client';
+import { tokenStore } from '../../../lib/api/tokenStore';
 
 export interface TokenResponse {
     access_token: string;
@@ -27,5 +28,6 @@ export async function refresh(refreshToken: string): Promise<TokenResponse> {
 }
 
 export async function logout(): Promise<void> {
-    await apiClient.post('/logout');
+    const refreshToken = tokenStore.getRefreshToken() || '';
+    await apiClient.post('/logout', { refresh_token: refreshToken });
 }

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../../shared/api/queryKeys';
 import { listRoutes, disableRoute, deleteRoute, RouteRecord } from '../api/routesApi';
 import { toApiError } from '../../../shared/api/apiError';
+import { queryKeys } from '../../../shared/api/queryKeys';
 
 export function useRoutesQuery(projectId: string | null) {
     return useQuery({
@@ -30,6 +30,16 @@ export function useDeleteRouteMutation(projectId: string) {
             if (context?.previous) qc.setQueryData(key, context.previous);
         },
         onSettled: () => qc.invalidateQueries({ queryKey: key }),
+    });
+}
+
+export function useDisableRouteMutation(projectId: string) {
+    const qc = useQueryClient();
+    const key = queryKeys.routes(projectId);
+
+    return useMutation({
+        mutationFn: (id: string) => disableRoute(projectId, id),
+        onSuccess: () => qc.invalidateQueries({ queryKey: key }),
     });
 }
 

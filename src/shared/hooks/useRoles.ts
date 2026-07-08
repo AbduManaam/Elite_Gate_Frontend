@@ -1,10 +1,11 @@
-import { useAuthStore } from '../../store/authStore';
+import { useActiveProject } from './useActiveProject';
 import { hasRole, Role } from '../auth/roles';
 
 export function useRoles() {
-    const role = useAuthStore((s) => s.user?.role);
+    const { projectRole } = useActiveProject();
+
     return {
-        role,
-        can: (minRole: Role) => hasRole(role, minRole),
+        role: projectRole,
+        can: (minRole: Role) => hasRole(projectRole || undefined, minRole),
     };
 }

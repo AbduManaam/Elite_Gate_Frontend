@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createRoute, updateRoute, enableRoute, assignPolicy, removePolicy, RouteInput } from '../api/routesApi';
 import { queryKeys } from '../../../shared/api/queryKeys';
-import { createRoute, updateRoute, enableRoute, RouteInput } from '../api/routesApi';
-import { RouteRecord } from '../api/types';
 
 export function useCreateRouteMutation(projectId: string) {
     const qc = useQueryClient();
@@ -22,7 +21,24 @@ export function useUpdateRouteMutation(projectId: string) {
 export function useEnableRouteMutation(projectId: string) {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (route: RouteRecord) => enableRoute(projectId, route),
+        mutationFn: (id: string) => enableRoute(projectId, id),
+        onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.routes(projectId) }),
+    });
+}
+
+export function useAssignPolicyMutation(projectId: string) {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ routeId, policyId }: { routeId: string; policyId: string }) =>
+            assignPolicy(projectId, routeId, policyId),
+        onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.routes(projectId) }),
+    });
+}
+
+export function useRemovePolicyMutation(projectId: string) {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (routeId: string) => removePolicy(projectId, routeId),
         onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.routes(projectId) }),
     });
 }

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useActiveProject } from '../../hooks/useActiveProject';
+import { useProjectsQuery, useCreateProjectMutation } from '../../hooks/useProjects';
+import { Project } from '../../api/projectsApi';
+import { useAuthStore } from '../../../store/authStore';
 import {
   SIDEBAR_NAV_ITEMS,
-  MOCK_PROJECTS,
-  ELITE_GATE_LOGO_URL,
-  SidebarProject
+  ELITE_GATE_LOGO_URL
 } from '../../mocks/sidebarMock';
 
 export interface SidebarProps {
@@ -12,15 +14,79 @@ export interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
-  const [selectedProject, setSelectedProject] = useState<SidebarProject>(MOCK_PROJECTS[0]);
+  const { projectId, setActiveProjectId, setActiveProjectRole } = useActiveProject();
+  const { data: projectsData } = useProjectsQuery();
+  const createProject = useCreateProjectMutation();
+  const user = useAuthStore((s) => s.user);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+  const hasAttemptedCreation = useRef(false);
+  // Stable random suffix — generated once per mount, never changes
+  const slugSuffix = useRef(Math.random().toString(36).substring(2, 6));
+
+  const projects = projectsData?.items ?? [];
+  const selectedProject = projects.find((p) => p.id === projectId) ?? null;
+
+  // Auto-select a project and sync the role as soon as the project list loads
+  useEffect(() => {
+    if (!projectsData) return;
+
+    if (projects.length === 0 && !hasAttemptedCreation.current) {
+      // No projects exist yet — create a default one for this user
+      hasAttemptedCreation.current = true;
+      const prefix = user?.username
+        ? `${user.username.replace(/_admin$/, '').replace(/_/g, '-')}-default`
+        : 'serverless-default';
+      const defaultProjSlug = `${prefix}-${slugSuffix.current}`;
+      const defaultProjName = user?.username
+        ? `${user.username.replace(/_admin$/, '').replace(/_/g, ' ')} default`.trim()
+        : 'Serverless Default';
+      createProject.mutate(
+        { name: defaultProjName, slug: defaultProjSlug, description: 'Default workspace', plan: '' },
+        {
+          onSuccess: (newProj) => {
+            setActiveProjectId(newProj.id);
+            setActiveProjectRole((newProj as any).role ?? 'owner');
+          },
+        }
+      );
+      return;
+    }
+
+    // Projects exist — if none is selected yet, auto-pick the first one
+    if (!projectId && projects.length > 0) {
+      const first = projects[0];
+      setActiveProjectId(first.id);
+      // Default to 'owner' when the API doesn't return a role (e.g. the user
+      // created this project and is implicitly the owner).
+      setActiveProjectRole((first as any).role ?? 'owner');
+      return;
+    }
+
+    // Keep role in sync whenever the selected project changes
+    if (projectId && !selectedProject) {
+      // Selected project was deleted; fall back to first available
+      const first = projects[0];
+      if (first) {
+        setActiveProjectId(first.id);
+        setActiveProjectRole((first as any).role ?? 'owner');
+      }
+      return;
+    }
+
+    // Always sync role when the selected project is known
+    if (selectedProject) {
+      setActiveProjectRole((selectedProject as any).role ?? 'owner');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, projectsData]);
 
   const toggleProjectDropdown = () => {
     setIsProjectDropdownOpen((prev) => !prev);
   };
 
-  const handleProjectSelect = (project: SidebarProject) => {
-    setSelectedProject(project);
+  const handleProjectSelect = (project: Project) => {
+    setActiveProjectId(project.id);
+    setActiveProjectRole((project as any).role ?? 'owner');
     setIsProjectDropdownOpen(false);
   };
 
@@ -50,10 +116,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           aria-expanded={isProjectDropdownOpen}
         >
           <span className="w-6 h-6 rounded bg-primary text-on-primary flex items-center justify-center font-bold text-xs">
-            {selectedProject.initials}
+            {selectedProject ? (selectedProject.name[0]?.toUpperCase() || 'P') : 'P'}
           </span>
-          <span className="font-label-md text-label-md font-bold text-white uppercase">
-            {selectedProject.name}
+          <span className="font-label-md text-label-md font-bold text-white uppercase truncate flex-1">
+            {selectedProject ? selectedProject.name : (projectsData ? 'No Project' : 'Loading...')}
           </span>
           <span
             className="material-symbols-outlined ml-auto text-white/40 text-[18px]"
@@ -66,22 +132,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         {/* Dropdown Menu */}
         {isProjectDropdownOpen && (
           <ul
-            className="absolute left-md right-md mt-1 bg-brand-dark border border-white/10 rounded-lg shadow-lg py-1 z-30"
+            className="absolute left-md right-md mt-1 bg-brand-dark border border-white/10 rounded-lg shadow-lg py-1 z-30 max-h-60 overflow-y-auto"
             role="listbox"
           >
-            {MOCK_PROJECTS.map((project) => (
+            {projects.map((project) => (
               <li key={project.id}>
                 <button
                   onClick={() => handleProjectSelect(project)}
                   className="w-full flex items-center gap-sm py-2 px-3 hover:bg-brand-hover text-white text-sm transition-colors text-left"
                   type="button"
                   role="option"
-                  aria-selected={selectedProject.id === project.id}
+                  aria-selected={selectedProject?.id === project.id}
                 >
                   <span className="w-6 h-6 rounded bg-primary text-on-primary flex items-center justify-center font-bold text-xs">
-                    {project.initials}
+                    {project.name[0]?.toUpperCase() || 'P'}
                   </span>
-                  <span className="font-semibold">{project.name}</span>
+                  <span className="font-semibold truncate">{project.name}</span>
                 </button>
               </li>
             ))}
