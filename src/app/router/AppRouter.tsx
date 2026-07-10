@@ -7,6 +7,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../shared/layouts/Sidebar/Sidebar';
 import { useAuthGate } from './AuthGate';
 import { useProjectSummaryQuery } from '../../shared/hooks/useProjectSummary';
+import { useUIStore } from '../../store/uiStore';
 
 interface SearchItem {
   category: string;
@@ -20,6 +21,21 @@ export const AppRouter: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuthGate();
+  const isSidebarCollapsed = useUIStore((s) => s.isSidebarCollapsed);
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        useUIStore.setState({ isSidebarCollapsed: true });
+      } else {
+        useUIStore.setState({ isSidebarCollapsed: false });
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -107,13 +123,21 @@ export const AppRouter: React.FC = () => {
       <Sidebar />
 
       {/* Main Content Area Wrapper */}
-      <div className="flex-1 flex flex-col ml-[240px] relative">
+      <div className={`flex-1 flex flex-col min-h-screen relative transition-all duration-300 ${isSidebarCollapsed ? 'ml-0' : 'ml-0 lg:ml-[240px]'}`}>
 
         {/* TopNavBar matching the layout height */}
-        <header className="bg-white fixed top-0 right-0 w-[calc(100%-240px)] h-[56px] border-b border-outline-variant flex justify-between items-center px-lg z-10 text-left">
+        <header className={`bg-white fixed top-0 right-0 h-[56px] border-b border-outline-variant flex justify-between items-center px-lg z-10 text-left transition-all duration-300 ${isSidebarCollapsed ? 'w-full' : 'w-full lg:w-[calc(100%-240px)]'}`}>
 
           {/* Left Controls: Search bar or Sub-Navigation tabs for Analytics */}
           <div className="flex items-center flex-1 max-w-lg gap-lg">
+            <button
+              onClick={toggleSidebar}
+              className="text-on-surface-variant hover:bg-surface-container rounded p-1 cursor-pointer transition-colors duration-200"
+              type="button"
+              aria-label="Toggle Sidebar"
+            >
+              <span className="material-symbols-outlined text-[24px]">menu</span>
+            </button>
             {isAnalytics ? (
               <nav className="flex gap-md border-b-2 border-transparent h-full items-center">
                 <NavLink
@@ -206,7 +230,7 @@ export const AppRouter: React.FC = () => {
         </header>
 
         {/* Main Content Canvas — routed pages render here */}
-        <main className="flex-1 overflow-y-auto mt-[56px] p-margin-desktop bg-[#fefefe]">
+        <main className="flex-1 overflow-y-auto mt-[56px] p-margin-mobile lg:p-margin-desktop bg-[#fefefe]">
           <div className="max-w-[1600px] mx-auto pb-xl">
             <Outlet />
           </div>

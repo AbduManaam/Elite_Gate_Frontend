@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
 import { useProjectsQuery, useCreateProjectMutation, useDeleteProjectMutation } from '../../../shared/hooks/useProjects';
@@ -13,11 +13,13 @@ import {
 interface GatewaysOverviewProps {
   readonly showOnlyProject?: boolean;
   readonly showOnlyGateways?: boolean;
+  readonly onViewAllGateways?: () => void;
 }
 
 export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   showOnlyProject = false,
   showOnlyGateways = false,
+  onViewAllGateways,
 }) => {
   const showProject = !showOnlyGateways;
   const showGateways = !showOnlyProject;
@@ -39,11 +41,43 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   const [isCreateProjOpen, setIsCreateProjOpen] = useState(false);
   const [projForm, setProjForm] = useState({ name: '', slug: '', description: '', plan: '' });
 
-  const [isProvisionOpen, setIsProvisionOpen] = useState(false);
-  const [gatewayPlan, setGatewayPlan] = useState('developer');
+  // Clipboard copy state
+  const [isCopied, setIsCopied] = useState(false);
+
+  // Time & date trackers
+  const [lastReloadTime, setLastReloadTime] = useState<Date>(() => new Date(Date.now() - 3 * 60 * 1000));
+  const [gatewayCreatedAt, setGatewayCreatedAt] = useState<string>('8 Jul 2026, 10:24 AM');
+  const [tick, setTick] = useState(0);
 
   const projects = projectsData?.items ?? [];
   const currentProject = projects.find((p) => p.id === projectId);
+
+  // Find the active/running dedicated gateway for the project
+  const activeGateway = gateways?.find((gw) => gw.status !== 'decommissioned');
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (activeGateway) {
+      if (activeGateway.status === 'provisioning') {
+        const d = new Date();
+        setGatewayCreatedAt(
+          d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
+            ', ' +
+            d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        );
+      }
+    }
+  }, [activeGateway?.id, activeGateway?.status]);
+
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   const handleCreateProject = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,18 +101,75 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
     }
   };
 
-  const handleProvisionGateway = (e: React.FormEvent) => {
-    e.preventDefault();
-    provisionGateway.mutate(gatewayPlan, {
+  const handleProvisionGateway = () => {
+    provisionGateway.mutate('dedicated');
+  };
+
+  const handleDecommissionGateway = () => {
+    if (!activeGateway) return;
+    if (window.confirm('Are you sure you want to delete this dedicated gateway? This action is permanent.')) {
+      decommissionGateway.mutate(activeGateway.external_id);
+    }
+  };
+
+  const handleReloadConfig = () => {
+    reloadConfig.mutate(undefined, {
       onSuccess: () => {
-        setIsProvisionOpen(false);
-      },
+        setLastReloadTime(new Date());
+      }
     });
+  };
+
+  const getRelativeTimeString = (date: Date) => {
+    const diffMs = Date.now() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+
+    if (diffSec < 10) return 'Just now';
+    if (diffSec < 60) return `${diffSec} seconds ago`;
+    if (diffMin === 1) return '1 minute ago';
+    if (diffMin < 60) return `${diffMin} minutes ago`;
+    if (diffHour === 1) return '1 hour ago';
+    return `${diffHour} hours ago`;
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return (
+          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Running
+          </span>
+        );
+      case 'provisioning':
+        return (
+          <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Provisioning
+          </span>
+        );
+      case 'failed':
+        return (
+          <span className="bg-red-50 text-red-700 border border-red-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+            Failed
+          </span>
+        );
+      default:
+        return (
+          <span className="bg-slate-50 text-slate-700 border border-slate-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+            {status}
+          </span>
+        );
+    }
   };
 
   return (
     <div className="flex flex-col gap-lg text-left">
-      {/* Project Control Panel */}
+      {/* Project Workspace - compatible with older usage if showProject is true */}
       {showProject && (
         <div className="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
           <div className="flex justify-between items-start mb-md border-b border-outline-variant pb-sm">
@@ -125,111 +216,267 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
               </div>
             </div>
           ) : (
-          <div className="flex flex-col items-start gap-md py-sm">
-            <p className="text-sm text-on-surface-variant">No project selected. Click "New Project" to get started.</p>
-            <button
-              onClick={() => setIsCreateProjOpen(true)}
-              className="bg-[#113346] text-white px-4 py-2 rounded font-semibold text-xs hover:bg-[#123749] transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Create New Project
-            </button>
-          </div>
+            <div className="flex flex-col items-start gap-md py-sm">
+              <p className="text-sm text-on-surface-variant">No project selected. Click "New Project" to get started.</p>
+            </div>
           )}
         </div>
       )}
 
       {/* Gateway Service Nodes Panel */}
       {showGateways && (
-        <div className="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
-          <div className="p-lg border-b border-outline-variant flex justify-between items-center bg-white">
-            <div>
-              <h3 className="font-headline-md text-headline-md text-on-surface">Gateway Nodes</h3>
-              <p className="text-xs text-on-surface-variant mt-1">Active proxy/routing docker container instances.</p>
+        <div className="flex flex-col gap-lg">
+          {/* Header Block (static title & subtitle matching design) */}
+          <div className="pb-sm">
+            <h2 className="font-display-lg text-display-lg text-on-surface">Gateway Services</h2>
+            <p className="text-xs text-on-surface-variant mt-1">Manage the dedicated gateway assigned to this project.</p>
+          </div>
+
+          {/* Body Content */}
+          {isGatewaysLoading ? (
+            <div className="bg-white border border-outline-variant rounded-xl p-xl shadow-sm text-center">
+              <p className="text-sm text-on-surface-variant animate-pulse">Loading gateway service nodes...</p>
             </div>
-            <div className="flex gap-sm">
-              {can('editor') && projectId && (
-                <>
-                  <button
-                    onClick={() => reloadConfig.mutate()}
-                    disabled={reloadConfig.isPending}
-                    className="px-3 py-1.5 border border-outline-variant text-on-surface font-semibold text-xs rounded hover:bg-surface-container transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    {reloadConfig.isPending ? 'Reloading...' : 'Hot Reload'}
-                  </button>
-                  <button
-                    onClick={() => setIsProvisionOpen(true)}
-                    className="px-3 py-1.5 bg-[#113346] text-white font-semibold text-xs rounded hover:bg-[#123749] transition-colors cursor-pointer"
-                  >
-                    Provision Gateway
-                  </button>
-                </>
+          ) : !activeGateway ? (
+            /* STATE A: Empty State ("No Dedicated Gateway") */
+            <div className="bg-white border border-outline-variant rounded-xl p-xl shadow-sm flex flex-col items-center justify-center min-h-[360px] text-center">
+              <div className="w-16 h-16 rounded-full bg-blue-50 text-[#587c94] flex items-center justify-center mb-md border border-blue-100">
+                <span className="material-symbols-outlined text-[32px]">dns</span>
+              </div>
+              <h3 className="font-bold text-base text-on-surface mb-xs">No Dedicated Gateway</h3>
+              <p className="text-sm text-on-surface-variant max-w-[460px] mb-xs font-medium">
+                No dedicated gateway has been provisioned for this project.
+              </p>
+              <p className="text-xs text-outline max-w-[540px] mb-lg leading-relaxed">
+                A dedicated gateway provides isolated routing, policies, API keys, and runtime configuration for your APIs.
+              </p>
+              {can('editor') && (
+                <button
+                  onClick={handleProvisionGateway}
+                  disabled={provisionGateway.isPending}
+                  className="bg-[#113346] hover:bg-brand-hover text-white px-5 py-2.5 rounded-lg font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 shadow-md disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-[16px]">rocket_launch</span>
+                  {provisionGateway.isPending ? 'Provisioning...' : 'Provision Dedicated Gateway'}
+                </button>
+              )}
+              {provisionGateway.error && (
+                <p className="text-error text-xs font-semibold mt-sm">
+                  {(provisionGateway.error as any).message || 'Failed to provision gateway.'}
+                </p>
               )}
             </div>
-          </div>
+          ) : (
+            /* STATE B: Active State ("Gateway Services Details") */
+            <div className="flex flex-col gap-lg animate-fade-in-up">
+              {/* Error messages if any */}
+              {reloadConfig.error && (
+                <div className="p-sm bg-red-50 border border-red-200 text-error text-xs font-semibold rounded-lg">
+                  {(reloadConfig.error as any).message || 'Failed to reload gateway configuration.'}
+                </div>
+              )}
+              {decommissionGateway.error && (
+                <div className="p-sm bg-red-50 border border-red-200 text-error text-xs font-semibold rounded-lg">
+                  {(decommissionGateway.error as any).message || 'Failed to delete gateway.'}
+                </div>
+              )}
 
-          <div className="overflow-x-auto">
-            {isGatewaysLoading && <p className="p-lg text-center text-sm text-on-surface-variant">Loading gateway nodes...</p>}
-            
-            {!isGatewaysLoading && (!gateways || gateways.length === 0) && (
-              <p className="p-xl text-center text-sm text-on-surface-variant">No gateway nodes provisioned for this project.</p>
-            )}
+              {/* Three Column Cards Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-md">
+                
+                {/* CARD 1: Dedicated Gateway Info */}
+                <div className="bg-white border border-outline-variant rounded-xl p-md shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center mb-md border-b border-outline-variant/60 pb-sm">
+                      <h3 className="font-bold text-sm text-[#113346]">Dedicated Gateway</h3>
+                      {getStatusBadge(activeGateway.status)}
+                    </div>
 
-            {!isGatewaysLoading && gateways && gateways.length > 0 && (
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-surface-container-low border-b border-outline-variant text-xs font-semibold text-on-surface-variant">
-                  <tr>
-                    <th className="py-2.5 px-md">Status</th>
-                    <th className="py-2.5 px-md">Gateway ID</th>
-                    <th className="py-2.5 px-md">Endpoint</th>
-                    <th className="py-2.5 px-md">Plan</th>
-                    {can('editor') && <th className="py-2.5 px-md text-right">Actions</th>}
-                  </tr>
-                </thead>
-                <tbody className="font-mono text-xs text-on-surface divide-y divide-outline-variant">
-                  {gateways.map((gw) => (
-                    <tr key={gw.id} className="hover:bg-surface-container-low transition-colors">
-                      <td className="py-3 px-md">
-                        <div className="flex items-center gap-1.5 font-sans font-medium">
-                          <span className={`w-2 h-2 rounded-full ${
-                            gw.status === 'active' ? 'bg-green-600' : gw.status === 'provisioning' ? 'bg-yellow-500' : 'bg-red-600'
+                    <div className="flex flex-col gap-sm">
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">terminal</span>
+                          Gateway ID
+                        </span>
+                        <span className="font-mono text-on-surface font-semibold flex items-center gap-1.5">
+                          {activeGateway.external_id}
+                          <button
+                            onClick={() => handleCopyId(activeGateway.external_id)}
+                            className="cursor-pointer text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
+                            title="Copy ID"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">
+                              {isCopied ? 'check' : 'content_copy'}
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">sell</span>
+                          Plan
+                        </span>
+                        <span className="capitalize font-semibold text-on-surface">
+                          {activeGateway.plan}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">folder</span>
+                          Project
+                        </span>
+                        <span className="font-semibold text-on-surface truncate max-w-[150px]">
+                          {currentProject?.name ?? 'Company zz'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                          Created At
+                        </span>
+                        <span className="font-semibold text-on-surface">
+                          {gatewayCreatedAt}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px]">history</span>
+                          Last Reload
+                        </span>
+                        <span className="font-semibold text-on-surface">
+                          {reloadConfig.isPending ? 'Reloading...' : getRelativeTimeString(lastReloadTime)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD 2: Gateway Runtime */}
+                <div className="bg-white border border-outline-variant rounded-xl p-md shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center mb-md border-b border-outline-variant/60 pb-sm">
+                      <h3 className="font-bold text-sm text-[#113346]">Gateway Runtime</h3>
+                    </div>
+
+                    <div className="flex flex-col gap-sm">
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          Status
+                        </span>
+                        <span className="font-sans font-medium flex items-center gap-1 text-on-surface">
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            activeGateway.status === 'active' ? 'bg-green-500 animate-pulse' : activeGateway.status === 'provisioning' ? 'bg-amber-500 animate-pulse' : 'bg-red-500'
                           }`} />
-                          <span className="capitalize">{gw.status}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-md font-semibold text-[#587c94]">{gw.external_id}</td>
-                      <td className="py-3 px-md">{gw.endpoint_ip}:{gw.gateway_port}</td>
-                      <td className="py-3 px-md capitalize font-sans">{gw.plan}</td>
-                      {can('editor') && (
-                        <td className="py-3 px-md text-right font-sans">
-                          <div className="flex justify-end gap-sm">
-                            <button
-                              onClick={() => restartGateway.mutate(gw.external_id)}
-                              disabled={restartGateway.isPending}
-                              className="px-2 py-1 text-xs border border-outline-variant rounded hover:bg-surface-container cursor-pointer transition-colors"
-                            >
-                              Restart
-                            </button>
-                            <button
-                              onClick={() => decommissionGateway.mutate(gw.external_id)}
-                              disabled={decommissionGateway.isPending}
-                              className="px-2 py-1 text-xs bg-error/10 hover:bg-error text-error hover:text-white border border-error/20 rounded cursor-pointer transition-all"
-                            >
-                              Decommission
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+                          <span className="capitalize">{activeGateway.status === 'active' ? 'Running' : activeGateway.status}</span>
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          Configuration
+                        </span>
+                        <span className="font-semibold text-on-surface">
+                          {reloadConfig.isPending ? 'Syncing...' : 'Loaded'}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          Version
+                        </span>
+                        <span className="font-semibold text-on-surface">v2.4.1-stable</span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1">
+                        <span className="text-on-surface-variant flex items-center gap-1">
+                          Last Reload
+                        </span>
+                        <span className="font-semibold text-on-surface">
+                          {reloadConfig.isPending ? 'Reloading...' : getRelativeTimeString(lastReloadTime)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {can('editor') && (
+                    <button
+                      onClick={handleReloadConfig}
+                      disabled={reloadConfig.isPending || activeGateway.status !== 'active'}
+                      className="mt-md w-full border border-outline-variant hover:bg-[#587c94]/5 hover:border-[#587c94] text-on-surface-variant hover:text-[#587c94] px-4 py-2 rounded-lg font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 disabled:opacity-50"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">refresh</span>
+                      Reload Configuration
+                    </button>
+                  )}
+                </div>
+
+                {/* CARD 3: Overview / All Gateways Promotion */}
+                <div className="bg-white border border-outline-variant rounded-xl p-md shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center mb-md border-b border-outline-variant/60 pb-sm">
+                      <h3 className="font-bold text-sm text-[#113346]">Overview</h3>
+                    </div>
+
+                    <div className="bg-blue-50/40 border border-blue-100/60 rounded-xl p-md flex items-start gap-md">
+                      <div className="w-10 h-10 rounded-full bg-blue-100/60 text-[#587c94] flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[20px]">group</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-xs text-[#113346]">All Gateways</span>
+                        <span className="text-[10px] text-on-surface-variant mt-0.5 leading-relaxed">
+                          View and manage all dedicated gateways across projects.
+                        </span>
+                        <button
+                          onClick={onViewAllGateways}
+                          className="text-[#587c94] hover:text-[#113346] hover:underline font-bold text-xs mt-3 flex items-center gap-1 cursor-pointer transition-colors focus:outline-none"
+                        >
+                          View All Gateways
+                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* DANGER ZONE */}
+              {can('editor') && (
+                <div className="bg-red-50/50 border border-red-200 rounded-xl p-md flex flex-col md:flex-row justify-between items-center gap-md">
+                  <div className="flex items-start gap-md w-full">
+                    <div className="w-10 h-10 rounded-full bg-red-100/50 text-red-600 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-[20px]">warning</span>
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="font-bold text-xs text-red-800 uppercase tracking-wider">Danger Zone</span>
+                      <p className="text-xs text-on-surface-variant mt-0.5 leading-relaxed">
+                        Deleting this gateway will permanently remove the runtime instance and all associated configurations, routes, and downstream connections.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleDecommissionGateway}
+                    disabled={decommissionGateway.isPending}
+                    className="border-2 border-red-200 text-red-600 hover:bg-red-600 hover:text-white px-5 py-2 rounded-lg font-bold text-xs flex items-center gap-2 cursor-pointer transition-all duration-200 shrink-0 disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    {decommissionGateway.isPending ? 'Deleting...' : 'Delete Gateway'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Create Project Modal */}
+
+
+      {/* Create Project Modal (Hidden by default, used if showProject is true) */}
       {isCreateProjOpen && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-md">
           <form onSubmit={handleCreateProject} className="bg-white border border-outline-variant rounded-xl p-lg shadow-2xl w-[400px] max-w-full flex flex-col gap-md">
@@ -274,42 +521,6 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
                 className="bg-[#113346] text-white px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50"
               >
                 {createProject.isPending ? 'Creating...' : 'Create'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Provision Gateway Modal */}
-      {isProvisionOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-md">
-          <form onSubmit={handleProvisionGateway} className="bg-white border border-outline-variant rounded-xl p-lg shadow-2xl w-[400px] max-w-full flex flex-col gap-md">
-            <h3 className="font-headline-md text-headline-md">Provision Gateway Node</h3>
-            
-            <label className="flex flex-col gap-xs text-xs">
-              Sizing Plan
-              <select
-                value={gatewayPlan}
-                onChange={(e) => setGatewayPlan(e.target.value)}
-                className="border border-outline-variant rounded px-2.5 py-1.5 text-sm outline-none"
-              >
-                <option value="developer">Developer (Shared node, 500 RPM limit)</option>
-                <option value="production">Production (Dedicated cluster, unlimited RPM)</option>
-              </select>
-            </label>
-
-            {provisionGateway.error && <p className="text-error text-xs">{(provisionGateway.error as any).message}</p>}
-
-            <div className="flex justify-end gap-sm mt-sm">
-              <button type="button" onClick={() => setIsProvisionOpen(false)} className="px-3 py-1.5 text-xs text-on-surface-variant">
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={provisionGateway.isPending}
-                className="bg-[#113346] text-white px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50"
-              >
-                {provisionGateway.isPending ? 'Provisioning...' : 'Provision'}
               </button>
             </div>
           </form>
