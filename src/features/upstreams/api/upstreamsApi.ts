@@ -9,6 +9,7 @@ export interface UpstreamInput {
     protocol: 'http' | 'grpc';
     health_path?: string;
     enabled: boolean;
+    lb_strategy?: string;
 }
 
 interface ListUpstreamsResponse {

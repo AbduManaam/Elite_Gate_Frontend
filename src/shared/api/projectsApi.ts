@@ -25,6 +25,23 @@ export interface ProjectSummary {
     readonly role?: string;
     readonly created_at: string;
     readonly updated_at: string;
+    readonly metrics?: {
+        readonly total_gateways: number;
+        readonly total_routes: number;
+        readonly enabled_routes: number;
+        readonly total_upstreams: number;
+        readonly enabled_upstreams: number;
+        readonly total_policies: number;
+        readonly total_api_keys: number;
+        readonly active_api_keys: number;
+        readonly total_members: number;
+        readonly total_audit_logs_4d: number;
+    };
+    readonly plan?: string;
+    readonly subscription?: {
+        readonly plan: string;
+        readonly status: string;
+    };
 }
 
 /**

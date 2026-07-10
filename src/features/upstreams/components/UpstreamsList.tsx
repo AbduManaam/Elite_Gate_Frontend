@@ -1,194 +1,232 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
-import { useUpstreamsQuery, useDeleteUpstreamMutation, useDisableUpstreamMutation } from '../hooks/useUpstreams';
-import { UpstreamTargetsDrawer } from './UpstreamTargetsDrawer';
+import {
+    useUpstreamsQuery,
+    useDeleteUpstreamMutation,
+    useDisableUpstreamMutation,
+    useUpdateUpstreamMutation,
+} from '../hooks/useUpstreams';
+import { UpstreamSummaryCards } from './UpstreamSummaryCards';
+import { UpstreamFilters } from './UpstreamFilters';
+import { UpstreamTable } from './UpstreamTable';
+import { UpstreamEmptyState } from './UpstreamEmptyState';
+import { UpstreamDeleteDialog } from './UpstreamDeleteDialog';
 import { UpstreamFormDrawer } from './UpstreamFormDrawer';
-import { UpstreamRecord } from '../api/upstreamsApi';
+import { UpstreamTargetsDrawer } from './UpstreamTargetsDrawer';
+import { UpstreamRecord } from '../api/types';
 import { toApiError } from '../../../shared/api/apiError';
 
+type FilterType = 'all' | 'http' | 'grpc' | 'enabled' | 'disabled';
+
 export const UpstreamsList: React.FC = () => {
-  const { projectId } = useActiveProject();
-  const { can } = useRoles();
-  const [upstreamSearchQuery, setUpstreamSearchQuery] = useState('');
-  const [selectedUpstream, setSelectedUpstream] = useState<UpstreamRecord | null>(null);
-  const [formDrawer, setFormDrawer] = useState<{ isOpen: boolean; mode: 'create' | 'edit'; upstream?: UpstreamRecord }>({
-    isOpen: false,
-    mode: 'create',
-  });
+    const { projectId } = useActiveProject();
+    const { can } = useRoles();
+    const [searchParams, setSearchParams] = useSearchParams();
+    
+    // Local UI states
+    const [upstreamSearchQuery, setUpstreamSearchQuery] = useState('');
+    const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
+    const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+    const [formDrawer, setFormDrawer] = useState<{
+        isOpen: boolean;
+        mode: 'create' | 'edit';
+        upstream?: UpstreamRecord;
+    }>({
+        isOpen: false,
+        mode: 'create',
+    });
 
-  const { data: upstreams, isLoading, error } = useUpstreamsQuery(projectId);
-  const deleteUpstream = useDeleteUpstreamMutation(projectId ?? '');
-  const disableUpstream = useDisableUpstreamMutation(projectId ?? '');
+    useEffect(() => {
+        if (searchParams.get('action') === 'create-upstream') {
+            setFormDrawer({ isOpen: true, mode: 'create' });
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('action');
+            setSearchParams(newParams, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
+    const [deleteTarget, setDeleteTarget] = useState<UpstreamRecord | null>(null);
+    const [selectedUpstreamForTargets, setSelectedUpstreamForTargets] = useState<UpstreamRecord | null>(null);
 
-  // RBAC('editor') gates create/update/disable/delete on the backend.
-  const canManage = can('editor');
+    // Queries & Mutations
+    const { data: upstreams, isLoading, error } = useUpstreamsQuery(projectId);
+    const deleteUpstream = useDeleteUpstreamMutation(projectId ?? '');
+    const disableUpstream = useDisableUpstreamMutation(projectId ?? '');
+    const updateUpstream = useUpdateUpstreamMutation(projectId ?? '');
 
-  const filteredUpstreams = (upstreams ?? []).filter((u) =>
-    u.name.toLowerCase().includes(upstreamSearchQuery.toLowerCase()) ||
-    u.protocol.toLowerCase().includes(upstreamSearchQuery.toLowerCase())
-  );
+    const canManage = can('editor');
 
-  const apiError = error ? toApiError(error) : null;
+    // Toggle Enabled (Disables via PATCH, Enables via PUT update)
+    const handleToggleEnabled = (u: UpstreamRecord) => {
+        if (u.enabled) {
+            disableUpstream.mutate(u.id);
+        } else {
+            updateUpstream.mutate({
+                id: u.id,
+                input: {
+                    name: u.name,
+                    target_url: u.target_url,
+                    protocol: u.protocol,
+                    health_path: u.health_path,
+                    enabled: true,
+                    lb_strategy: u.lb_strategy,
+                },
+            });
+        }
+    };
 
-  return (
-    <div className="flex flex-col gap-lg text-left">
-      <div className="flex justify-between items-end">
-        <div>
-          <h2 className="font-display-lg text-display-lg text-on-surface">Upstreams</h2>
-          <p className="font-body-md text-body-md text-[#587c94] mt-1">
-            Manage backend routing destinations and load balancing configurations.
-          </p>
-        </div>
-        <div className="flex gap-md">
-          <div className="relative w-72">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">
-              filter_list
-            </span>
-            <input
-              className="w-full pl-9 pr-3 py-1.5 rounded border border-outline-variant bg-white focus:border-[#587c94] focus:ring-2 focus:ring-[#587c94]/10 text-sm outline-none placeholder-on-surface-variant transition-all h-[36px]"
-              placeholder="Search upstreams..."
-              type="text"
-              value={upstreamSearchQuery}
-              onChange={(e) => setUpstreamSearchQuery(e.target.value)}
-            />
-          </div>
-          {canManage && (
-            <button 
-              onClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
-              className="bg-[#113346] text-white font-bold px-md py-sm rounded hover:bg-[#123749] transition-colors flex items-center gap-sm h-[36px] cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              New Upstream
-            </button>
-          )}
-        </div>
-      </div>
+    // Confirm Deletion
+    const handleConfirmDelete = () => {
+        if (!deleteTarget) return;
+        deleteUpstream.mutate(deleteTarget.id, {
+            onSuccess: () => {
+                setDeleteTarget(null);
+            },
+        });
+    };
 
-      <div className="bg-white border border-outline-variant rounded-lg overflow-hidden shadow-sm">
-        {isLoading && <div className="p-lg text-center text-on-surface-variant text-sm">Loading upstreams…</div>}
+    // Row expansion toggle
+    const handleToggleExpand = (id: string) => {
+        setExpandedRowId((prev) => (prev === id ? null : id));
+    };
 
-        {apiError && (
-          <div className="p-lg text-center text-sm">
-            {apiError.kind === 'forbidden' ? (
-              <span className="text-on-surface-variant">You don't have permission to view upstreams for this project.</span>
-            ) : apiError.kind === 'network' ? (
-              <span className="text-error">Can't reach the server — check your connection.</span>
-            ) : (
-              <span className="text-error">{apiError.message}</span>
+    // Client-side filtering logic
+    const filteredUpstreams = (upstreams ?? []).filter((u) => {
+        // Search filter
+        const matchesSearch =
+            u.name.toLowerCase().includes(upstreamSearchQuery.toLowerCase()) ||
+            u.target_url.toLowerCase().includes(upstreamSearchQuery.toLowerCase()) ||
+            u.protocol.toLowerCase().includes(upstreamSearchQuery.toLowerCase());
+
+        if (!matchesSearch) return false;
+
+        // Filter chips
+        if (selectedFilter === 'http') return u.protocol === 'http';
+        if (selectedFilter === 'grpc') return u.protocol === 'grpc';
+        if (selectedFilter === 'enabled') return u.enabled;
+        if (selectedFilter === 'disabled') return !u.enabled;
+
+        return true;
+    });
+
+    const apiError = error ? toApiError(error) : null;
+    const hasNoUpstreams = !isLoading && !apiError && (upstreams ?? []).length === 0;
+
+    return (
+        <div className="flex flex-col gap-lg text-left">
+            {/* Header section */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-md">
+                <div>
+                    <h2 className="font-display-lg text-display-lg text-on-surface">Upstreams</h2>
+                    <p className="font-body-md text-body-md text-[#587c94] mt-1">
+                        Manage backend routing destinations and load balancing configurations.
+                    </p>
+                </div>
+                {canManage && !hasNoUpstreams && (
+                    <button
+                        onClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
+                        className="bg-[#113346] text-white font-bold px-md py-sm rounded-lg hover:bg-[#123749] transition-colors flex items-center justify-center gap-sm h-[36px] cursor-pointer whitespace-nowrap shadow-sm"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">add</span>
+                        New Upstream
+                    </button>
+                )}
+            </div>
+
+            {/* Error state */}
+            {apiError && (
+                <div className="bg-red-50 border border-red-100 rounded-lg p-lg text-center text-sm text-error">
+                    {apiError.kind === 'forbidden'
+                        ? "You don't have permission to view upstreams for this project."
+                        : apiError.kind === 'network'
+                        ? "Can't reach the server — check your connection."
+                        : apiError.message}
+                </div>
             )}
-          </div>
-        )}
 
-        {!isLoading && !apiError && (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container-low border-b border-outline-variant">
-                <th className="py-3 px-md font-bold text-[10px] uppercase tracking-wider text-on-surface-variant w-[60px]">Status</th>
-                <th className="py-3 px-md font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Name</th>
-                <th className="py-3 px-md font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Target URL</th>
-                <th className="py-3 px-md font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Protocol</th>
-                <th className="py-3 px-md font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">LB Strategy</th>
-                <th className="py-3 px-md font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Health Path</th>
-                {canManage && <th className="py-3 px-md font-bold text-[10px] uppercase tracking-wider text-on-surface-variant text-right">Actions</th>}
-              </tr>
-            </thead>
-            <tbody className="text-sm text-on-surface divide-y divide-outline-variant">
-              {filteredUpstreams.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="p-xl text-center text-on-surface-variant text-sm">
-                    {upstreams?.length === 0 ? 'No upstreams yet. Create one to start routing traffic.' : 'No upstreams match your search.'}
-                  </td>
-                </tr>
-              )}
-              {filteredUpstreams.map((upstream) => (
-                <tr
-                  key={upstream.id}
-                  onClick={() => setSelectedUpstream(upstream)}
-                  className="hover:bg-surface-container-low transition-colors group cursor-pointer"
-                >
-                  <td className="py-4 px-md">
-                    <div className={`w-2.5 h-2.5 rounded-full ${upstream.enabled ? 'bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-outline-variant'}`}></div>
-                  </td>
-                  <td className="py-4 px-md font-medium text-on-surface flex items-center gap-sm">
-                    <span className="material-symbols-outlined text-[#587c94] text-[18px]">route</span>
-                    {upstream.name}
-                  </td>
-                  <td className="py-4 px-md text-on-surface-variant font-mono text-xs">{upstream.target_url}</td>
-                  <td className="py-4 px-md text-on-surface-variant uppercase text-xs font-bold">{upstream.protocol}</td>
-                  <td className="py-4 px-md text-on-surface-variant">{upstream.lb_strategy || '—'}</td>
-                  <td className="py-4 px-md text-on-surface-variant font-mono text-xs">{upstream.health_path || '—'}</td>
-                  {canManage && (
-                    <td className="py-4 px-md text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex justify-end gap-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => setFormDrawer({ isOpen: true, mode: 'edit', upstream })}
-                          className="text-on-surface-variant hover:text-[#587c94] transition-colors p-xs cursor-pointer"
-                          title="Edit"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">edit</span>
-                        </button>
-                        {upstream.enabled && (
-                          <button
-                            onClick={() => disableUpstream.mutate(upstream.id)}
-                            disabled={disableUpstream.isPending}
-                            className="text-on-surface-variant hover:text-[#587c94] transition-colors p-xs cursor-pointer disabled:opacity-40"
-                            title="Disable"
-                          >
-                            <span className="material-symbols-outlined text-[18px]">pause_circle</span>
-                          </button>
-                        )}
-                        <button
-                          onClick={() => deleteUpstream.mutate(upstream.id)}
-                          disabled={deleteUpstream.isPending}
-                          className="text-on-surface-variant hover:text-error transition-colors p-xs cursor-pointer disabled:opacity-40"
-                          title="Delete"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            {/* Loading state */}
+            {isLoading && (
+                <div className="p-xl text-center text-on-surface-variant text-sm bg-white border border-outline-variant rounded-xl shadow-sm">
+                    Loading upstreams…
+                </div>
+            )}
 
-        <div className="bg-surface-container-low border-t border-outline-variant p-sm px-md flex justify-between items-center text-xs">
-          <p className="text-on-surface-variant">Showing {filteredUpstreams.length} upstreams</p>
+            {/* Main content grid */}
+            {!isLoading && !apiError && (
+                <>
+                    {hasNoUpstreams ? (
+                        <UpstreamEmptyState
+                            onCreateClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
+                        />
+                    ) : (
+                        <div className="flex flex-col gap-lg">
+                            {/* Summary Metric Cards */}
+                            <UpstreamSummaryCards upstreams={upstreams ?? []} />
+
+                            {/* Search + Filter control bar */}
+                            <UpstreamFilters
+                                searchText={upstreamSearchQuery}
+                                onSearchChange={setUpstreamSearchQuery}
+                                selectedFilter={selectedFilter}
+                                onFilterChange={setSelectedFilter}
+                            />
+
+                            {/* Data Table */}
+                            <UpstreamTable
+                                upstreams={filteredUpstreams}
+                                expandedRowId={expandedRowId}
+                                onToggleExpand={handleToggleExpand}
+                                onEdit={(u) => setFormDrawer({ isOpen: true, mode: 'edit', upstream: u })}
+                                onToggleEnabled={handleToggleEnabled}
+                                onViewTargets={(u) => setSelectedUpstreamForTargets(u)}
+                                onDelete={(u) => setDeleteTarget(u)}
+                            />
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* Target Instances Side Drawer */}
+            {selectedUpstreamForTargets && (
+                <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
+                    <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
+                        <UpstreamTargetsDrawer
+                            projectId={projectId ?? ''}
+                            upstreamId={selectedUpstreamForTargets.id}
+                            upstreamName={selectedUpstreamForTargets.name}
+                            onClose={() => setSelectedUpstreamForTargets(null)}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Upstream Form Drawer (Create Stepper / Edit Form) */}
+            {formDrawer.isOpen && (
+                <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
+                    <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
+                        <UpstreamFormDrawer
+                            projectId={projectId ?? ''}
+                            mode={formDrawer.mode}
+                            upstream={formDrawer.upstream}
+                            onClose={() => setFormDrawer({ isOpen: false, mode: 'create' })}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteTarget && (
+                <UpstreamDeleteDialog
+                    upstream={deleteTarget}
+                    isOpen={!!deleteTarget}
+                    isDeleting={deleteUpstream.isPending}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={() => setDeleteTarget(null)}
+                />
+            )}
         </div>
-      </div>
-
-      {/* Target Instances Side Drawer */}
-      {selectedUpstream && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
-          <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
-            <UpstreamTargetsDrawer
-              projectId={projectId ?? ''}
-              upstreamId={selectedUpstream.id}
-              upstreamName={selectedUpstream.name}
-              onClose={() => setSelectedUpstream(null)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Upstream Form Drawer */}
-      {formDrawer.isOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
-          <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
-            <UpstreamFormDrawer
-              projectId={projectId ?? ''}
-              mode={formDrawer.mode}
-              upstream={formDrawer.upstream}
-              onClose={() => setFormDrawer({ isOpen: false, mode: 'create' })}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default UpstreamsList;

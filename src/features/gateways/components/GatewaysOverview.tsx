@@ -9,6 +9,7 @@ import {
   useReloadConfigMutation,
   useRestartGatewayMutation
 } from '../hooks/useGateways';
+import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 
 interface GatewaysOverviewProps {
   readonly showOnlyProject?: boolean;
@@ -40,6 +41,8 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
 
   const [isCreateProjOpen, setIsCreateProjOpen] = useState(false);
   const [projForm, setProjForm] = useState({ name: '', slug: '', description: '', plan: '' });
+  const [isDeleteProjectOpen, setIsDeleteProjectOpen] = useState(false);
+  const [isDecommissionGatewayOpen, setIsDecommissionGatewayOpen] = useState(false);
 
   // Clipboard copy state
   const [isCopied, setIsCopied] = useState(false);
@@ -91,14 +94,17 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   };
 
   const handleDeleteProject = () => {
+    setIsDeleteProjectOpen(true);
+  };
+
+  const handleDeleteProjectConfirm = () => {
     if (!projectId) return;
-    if (window.confirm(`Are you absolutely sure you want to delete project "${currentProject?.name}"? This action is permanent.`)) {
-      deleteProject.mutate(projectId, {
-        onSuccess: () => {
-          setActiveProjectId(null);
-        },
-      });
-    }
+    deleteProject.mutate(projectId, {
+      onSuccess: () => {
+        setIsDeleteProjectOpen(false);
+        setActiveProjectId(null);
+      },
+    });
   };
 
   const handleProvisionGateway = () => {
@@ -107,9 +113,16 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
 
   const handleDecommissionGateway = () => {
     if (!activeGateway) return;
-    if (window.confirm('Are you sure you want to delete this dedicated gateway? This action is permanent.')) {
-      decommissionGateway.mutate(activeGateway.external_id);
-    }
+    setIsDecommissionGatewayOpen(true);
+  };
+
+  const handleDecommissionGatewayConfirm = () => {
+    if (!activeGateway) return;
+    decommissionGateway.mutate(activeGateway.external_id, {
+      onSuccess: () => {
+        setIsDecommissionGatewayOpen(false);
+      },
+    });
   };
 
   const handleReloadConfig = () => {
@@ -526,6 +539,36 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
           </form>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={isDeleteProjectOpen}
+        title="Delete Project"
+        isDanger
+        message={
+          <span>
+            Are you sure you want to delete <span className="font-bold">"{currentProject?.name}"</span>?
+          </span>
+        }
+        description="This action is permanent and irreversible. It will immediately remove all routes, upstreams, and credentials linked to this project."
+        confirmLabel="Delete Permanently"
+        cancelLabel="Cancel"
+        onConfirm={handleDeleteProjectConfirm}
+        onClose={() => setIsDeleteProjectOpen(false)}
+        isPending={deleteProject.isPending}
+      />
+
+      <ConfirmModal
+        isOpen={isDecommissionGatewayOpen}
+        title="Delete Gateway"
+        isDanger
+        message="Are you sure you want to delete this dedicated gateway?"
+        description="This action is permanent and irreversible. The running gateway container and its configuration will be decommissioned immediately."
+        confirmLabel="Delete Gateway"
+        cancelLabel="Cancel"
+        onConfirm={handleDecommissionGatewayConfirm}
+        onClose={() => setIsDecommissionGatewayOpen(false)}
+        isPending={decommissionGateway.isPending}
+      />
     </div>
   );
 };

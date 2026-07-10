@@ -1,42 +1,41 @@
 import { apiClient } from '../../../lib/api/client';
+import { ApiKeyRecord, CreateApiKeyInput, ListApiKeysResponse } from '../types/apiKey';
 
-export interface ApiKeyRecord {
-    readonly id: string;
-    readonly project_id: string;
-    readonly name: string;
-    readonly status: string;
-    readonly roles: string[];
-    readonly scopes: string[];
-    readonly expires_at?: string;
-    readonly created_at: string;
-    readonly updated_at: string;
-    readonly api_key?: string;
-    readonly raw_key?: string;
-}
+export async function listApiKeys(
+    projectId: string,
+    page: number = 1,
+    limit: number = 10,
+    search?: string
+): Promise<ListApiKeysResponse> {
+    const { data } = await apiClient.get<ListApiKeysResponse | ApiKeyRecord[]>(
+        `/v1/projects/${projectId}/keys`,
+        {
+            params: { page, limit, search }
+        }
+    );
 
-export interface ListApiKeysResponse {
-    readonly keys?: ApiKeyRecord[];
-    readonly api_keys?: ApiKeyRecord[];
-    readonly items?: ApiKeyRecord[];
-    readonly pagination?: {
-        readonly page: number;
-        readonly limit: number;
-        readonly total: number;
-        readonly total_pages: number;
+    if (Array.isArray(data)) {
+        return {
+            keys: data,
+            pagination: {
+                page,
+                limit,
+                total: data.length,
+                total_pages: Math.ceil(data.length / limit) || 1
+            }
+        };
+    }
+
+    const keysList = data.keys ?? data.api_keys ?? data.items ?? [];
+    return {
+        keys: keysList,
+        pagination: data.pagination ?? {
+            page,
+            limit,
+            total: keysList.length,
+            total_pages: Math.ceil(keysList.length / limit) || 1
+        }
     };
-}
-
-export interface CreateApiKeyInput {
-    readonly name: string;
-    readonly expires_at?: string | null;
-    readonly roles: string[];
-    readonly scopes: string[];
-}
-
-export async function listApiKeys(projectId: string): Promise<ApiKeyRecord[]> {
-    const { data } = await apiClient.get<ListApiKeysResponse | ApiKeyRecord[]>(`/v1/projects/${projectId}/keys`);
-    if (Array.isArray(data)) return data;
-    return data.keys ?? data.api_keys ?? data.items ?? [];
 }
 
 export async function createApiKey(projectId: string, input: CreateApiKeyInput): Promise<ApiKeyRecord> {

@@ -4,7 +4,7 @@ import { RoutesList } from '../../routes';
 import { UpstreamsList } from '../../upstreams';
 import { GatewaysOverview } from '../components/GatewaysOverview';
 import { PoliciesOverview } from '../components/PoliciesOverview';
-import { ApiKeysOverview } from '../../apiKeys/components/ApiKeysOverview';
+import { ApiCredentialsPage } from '../../apiKeys/components/ApiCredentialsPage';
 import { MembersOverview } from '../../members/components/MembersOverview';
 import { LetsGetStartedBanner } from '../components/LetsGetStartedBanner';
 import { ConfigureApiModal } from '../components/ConfigureApiModal';
@@ -87,8 +87,8 @@ export const GatewaysPage: React.FC = () => {
         </div>
 
         {/* Sub-nav Tabs & Actions Container */}
-        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-sm pr-margin-mobile lg:pr-margin-desktop mb-sm md:mb-0">
-          <div className="flex items-center gap-xl overflow-x-auto border-b border-transparent flex-1">
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-md md:gap-lg pr-margin-mobile lg:pr-margin-desktop mb-sm md:mb-0">
+          <div className="flex items-center gap-xl overflow-x-auto scrollbar-none border-b border-transparent flex-1">
             {subTabs.map((tab) => {
               const isActive = activeSubTab === tab;
               return (
@@ -179,7 +179,7 @@ export const GatewaysPage: React.FC = () => {
         )}
 
         {activeSubTab === 'API Credentials' && (
-          <ApiKeysOverview />
+          <ApiCredentialsPage />
         )}
 
         {activeSubTab === 'Team Collaboration' && (

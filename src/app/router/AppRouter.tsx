@@ -191,13 +191,6 @@ export const AppRouter: React.FC = () => {
           {/* Right Controls: Notifications, Profile */}
           <div className="flex items-center gap-lg">
             <div className="flex items-center gap-md relative">
-              <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container transition-all rounded p-1">
-                notifications
-              </span>
-              <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container transition-all rounded p-1">
-                help_outline
-              </span>
-
               {/* User Avatar & Dropdown */}
               <div className="relative">
                 <button
@@ -215,8 +208,19 @@ export const AppRouter: React.FC = () => {
                       <p className="text-xs text-on-surface-variant">System Administrator</p>
                     </div>
                     <button
+                      onClick={() => {
+                        navigate('/settings');
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-container flex items-center gap-sm transition-colors cursor-pointer"
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">person</span>
+                      Profile Settings
+                    </button>
+                    <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error/5 flex items-center gap-sm transition-colors cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error/5 flex items-center gap-sm transition-colors cursor-pointer border-t border-outline-variant"
                       type="button"
                     >
                       <span className="material-symbols-outlined text-[18px]">logout</span>

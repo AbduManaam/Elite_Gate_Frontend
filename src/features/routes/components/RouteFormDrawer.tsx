@@ -85,7 +85,7 @@ export const RouteFormDrawer: React.FC<RouteFormDrawerProps> = ({ projectId, mod
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-md p-lg w-[420px]">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-md p-lg w-screen sm:w-[420px] max-w-full">
             <h3 className="font-headline-sm text-headline-sm">
                 {mode === 'create' ? 'New Route' : `Edit ${route?.name}`}
             </h3>

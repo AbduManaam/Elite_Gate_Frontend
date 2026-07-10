@@ -11,6 +11,7 @@ import { useRoutesQuery } from '../../routes/hooks/useRoutes';
 import { useUpstreamsQuery } from '../../upstreams/hooks/useUpstreams';
 import { useApiKeysQuery } from '../../apiKeys/hooks/useApiKeys';
 import { toApiError } from '../../../shared/api/apiError';
+import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 
 /** Modal for creating a new project */
 const NewProjectModal: React.FC<{
@@ -96,7 +97,8 @@ export const ProjectWorkspace: React.FC = () => {
 
   const { data: routes } = useRoutesQuery(projectId ?? '');
   const { data: upstreams } = useUpstreamsQuery(projectId ?? '');
-  const { data: apiKeys } = useApiKeysQuery(projectId ?? '');
+  const { data: apiKeysData } = useApiKeysQuery(projectId ?? '');
+  const apiKeys = apiKeysData?.keys;
 
   const projects = projectsData?.items ?? [];
   const currentProject = projects.find((p) => p.id === projectId);
@@ -113,6 +115,7 @@ export const ProjectWorkspace: React.FC = () => {
   const [activeView, setActiveView] = useState<'list' | 'summary'>('summary');
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [createError, setCreateError] = useState('');
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // Sync form when project changes
   useEffect(() => {
@@ -165,12 +168,17 @@ export const ProjectWorkspace: React.FC = () => {
   };
 
   const handleDelete = () => {
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
     if (!projectId || !currentProject) return;
-    if (window.confirm(`Delete "${currentProject.name}"? This permanently removes all routes, upstreams, and credentials.`)) {
-      deleteProject.mutate(projectId, {
-        onSuccess: () => setActiveProjectId(null),
-      });
-    }
+    deleteProject.mutate(projectId, {
+      onSuccess: () => {
+        setIsDeleteOpen(false);
+        setActiveProjectId(null);
+      },
+    });
   };
 
   const handleCopyId = () => {
@@ -241,8 +249,8 @@ export const ProjectWorkspace: React.FC = () => {
           </div>
         </div>
 
-        {/* Projects table */}
-        <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+        {/* text-left table */}
+        <div className="bg-white border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="bg-surface-container-low border-b border-outline-variant text-xs font-semibold text-on-surface-variant uppercase tracking-wide">
               <tr>
@@ -369,7 +377,7 @@ export const ProjectWorkspace: React.FC = () => {
                 <span className="material-symbols-outlined text-[18px] text-[#587c94]">info</span>
                 <h3 className="font-semibold text-sm text-on-surface">General Information</h3>
               </div>
-              <div className="grid grid-cols-2 gap-md mb-md">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md mb-md">
                 <div>
                   <label className="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest mb-1.5">Project Name</label>
                   <input
@@ -436,7 +444,7 @@ export const ProjectWorkspace: React.FC = () => {
                   Live Data
                 </span>
               </div>
-              <div className="grid grid-cols-4 gap-md">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
                 <div>
                   <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">Total Requests</p>
                   <p className="text-xl font-bold text-on-surface">—</p>
@@ -458,7 +466,7 @@ export const ProjectWorkspace: React.FC = () => {
                   <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wide mb-1">API Credentials</p>
                   <p className="text-xl font-bold text-on-surface">{apiKeys?.length ?? '—'}</p>
                   <p className="text-[11px] text-on-surface-variant font-semibold mt-0.5">
-                    {apiKeys ? `${apiKeys.filter(k => k.status === 'active').length} Active` : 'Loading…'}
+                    {apiKeys ? `${apiKeys.filter(k => k.status?.toLowerCase() === 'active').length} Active` : 'Loading…'}
                   </p>
                 </div>
               </div>
@@ -582,6 +590,25 @@ export const ProjectWorkspace: React.FC = () => {
           error={createError}
         />
       )}
+
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        title="Delete Project"
+        isDanger
+        message={
+          <span>
+            Are you sure you want to delete <span className="font-bold">"{currentProject?.name}"</span>?
+          </span>
+        }
+        description="This action is permanent and irreversible. It will immediately remove all routes, upstreams, and credentials linked to this project."
+        confirmLabel="Delete Permanently"
+        cancelLabel="Cancel"
+        onConfirm={handleDeleteConfirm}
+        onClose={() => setIsDeleteOpen(false)}
+        isPending={deleteProject.isPending}
+      />
     </div>
   );
 };
+
+export default ProjectWorkspace;

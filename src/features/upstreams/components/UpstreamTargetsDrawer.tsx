@@ -38,7 +38,7 @@ export const UpstreamTargetsDrawer: React.FC<UpstreamTargetsDrawerProps> = ({
   const addError = addTarget.error ? toApiError(addTarget.error) : null;
 
   return (
-    <div className="flex flex-col h-full w-[450px] bg-white text-left p-lg justify-between border-l border-outline-variant shadow-2xl">
+    <div className="flex flex-col h-full w-screen sm:w-[450px] max-w-full bg-white text-left p-lg justify-between border-l border-outline-variant shadow-2xl">
       <div className="flex flex-col gap-lg overflow-y-auto flex-1">
         {/* Header */}
         <div className="flex justify-between items-start border-b border-outline-variant pb-md">
@@ -55,18 +55,18 @@ export const UpstreamTargetsDrawer: React.FC<UpstreamTargetsDrawerProps> = ({
         <form onSubmit={handleSubmit} className="bg-surface-container-low border border-outline-variant rounded-lg p-md flex flex-col gap-md">
           <h4 className="font-semibold text-xs text-on-surface uppercase tracking-wider">Add Load Balancer Target</h4>
           
-          <div className="flex gap-md">
-            <label className="flex flex-col gap-xs text-xs flex-1">
+          <div className="flex flex-col sm:flex-row gap-md">
+            <label className="flex flex-col gap-xs text-xs flex-1 min-w-0">
               Target URL / Host:Port
               <input
                 required
                 placeholder="10.0.0.1:8080"
                 value={form.target_url}
                 onChange={(e) => setForm((f) => ({ ...f, target_url: e.target.value }))}
-                className="border border-outline-variant bg-white rounded px-2.5 py-1.5 font-mono text-sm focus:border-[#587c94] outline-none"
+                className="w-full border border-outline-variant bg-white rounded px-2.5 py-1.5 font-mono text-sm focus:border-[#587c94] outline-none"
               />
             </label>
-            <label className="flex flex-col gap-xs text-xs w-[80px]">
+            <label className="flex flex-col gap-xs text-xs w-full sm:w-[80px]">
               Weight
               <input
                 type="number"
@@ -105,7 +105,7 @@ export const UpstreamTargetsDrawer: React.FC<UpstreamTargetsDrawerProps> = ({
           )}
 
           {!isLoading && !apiError && (targets ?? []).length > 0 && (
-            <div className="border border-outline-variant rounded-lg overflow-hidden">
+            <div className="border border-outline-variant rounded-lg overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-surface-container-low font-semibold text-on-surface-variant border-b border-outline-variant">
                   <tr>

@@ -9,6 +9,7 @@ import {
 } from '../../members/hooks/useMembers';
 import { lookupMemberByEmail, UserLookupResult } from '../../members/api/membersApi';
 import { ProjectMember } from '../../members/api/membersApi';
+import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 
 export const MembersOverview: React.FC = () => {
   const { projectId } = useActiveProject();
@@ -28,6 +29,7 @@ export const MembersOverview: React.FC = () => {
 
   const [editingMember, setEditingMember] = useState<ProjectMember | null>(null);
   const [editRoleForm, setEditRoleForm] = useState('viewer');
+  const [memberToRemove, setMemberToRemove] = useState<ProjectMember | null>(null);
 
   const handleLookup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,9 +63,16 @@ export const MembersOverview: React.FC = () => {
   };
 
   const handleRemove = (m: ProjectMember) => {
-    if (window.confirm(`Are you sure you want to remove member ${m.email} from this project?`)) {
-      removeMember.mutate(m.admin_user_id);
-    }
+    setMemberToRemove(m);
+  };
+
+  const handleRemoveConfirm = () => {
+    if (!memberToRemove) return;
+    removeMember.mutate(memberToRemove.admin_user_id, {
+      onSuccess: () => {
+        setMemberToRemove(null);
+      },
+    });
   };
 
   const handleRoleChangeSubmit = (e: React.FormEvent) => {
@@ -281,6 +290,23 @@ export const MembersOverview: React.FC = () => {
           </form>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={memberToRemove !== null}
+        title="Remove Team Member"
+        isDanger
+        message={
+          <span>
+            Are you sure you want to remove <span className="font-bold">{memberToRemove?.email}</span> from this project?
+          </span>
+        }
+        description="Removing this user will immediately revoke their access to this project. They will no longer be able to view or edit gateway configuration settings."
+        confirmLabel="Remove Access"
+        cancelLabel="Cancel"
+        onConfirm={handleRemoveConfirm}
+        onClose={() => setMemberToRemove(null)}
+        isPending={removeMember.isPending}
+      />
     </div>
   );
 };

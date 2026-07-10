@@ -35,11 +35,6 @@ export const SIDEBAR_NAV_ITEMS: readonly SidebarNavItem[] = [
     icon: 'monitoring'
   },
   {
-    label: 'Settings',
-    path: '/settings',
-    icon: 'settings'
-  },
-  {
     label: 'Logs',
     path: '/logs',
     icon: 'history'

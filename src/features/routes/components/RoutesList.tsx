@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useRoles } from '../../../shared/hooks/useRoles';
 import { useRoutesQuery, useDeleteRouteMutation, useDisableRouteMutation } from '../hooks/useRoutes';
 import {
@@ -15,6 +16,7 @@ import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 export const RoutesList: React.FC = () => {
   const { projectId } = useActiveProject();
   const { can } = useRoles();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [routeSearchQuery, setRouteSearchQuery] = useState('');
   const [routeMethodFilter, setRouteMethodFilter] = useState('Method: All');
 
@@ -23,6 +25,15 @@ export const RoutesList: React.FC = () => {
     mode: 'create' | 'edit';
     route?: RouteRecord;
   }>({ isOpen: false, mode: 'create' });
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'create-route') {
+      setDrawerState({ isOpen: true, mode: 'create' });
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('action');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const { data: routes, isLoading, error } = useRoutesQuery(projectId);
   const { data: policies } = usePoliciesQuery(projectId);
@@ -82,7 +93,7 @@ export const RoutesList: React.FC = () => {
       </div>
 
       <div className="bg-white border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-outline-variant flex gap-4 items-center bg-white">
+        <div className="p-4 border-b border-outline-variant flex flex-wrap gap-4 items-center bg-white">
           <div className="relative flex-1 max-w-md">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
             <input
