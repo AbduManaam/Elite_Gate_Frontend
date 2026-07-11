@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
 import { useApiKeysQuery } from '../hooks/useApiKeys';
@@ -24,7 +24,7 @@ import RevokeApiKeyDialog from './RevokeApiKeyDialog';
 export const ApiCredentialsPage: React.FC = () => {
     const { projectId } = useActiveProject();
     const { can } = useRoles();
-    const [searchParams, setSearchParams] = useSearchParams();
+
 
     // Subtab state matching Mockup
     const [activeTab, setActiveTab] = useState<'API Keys' | 'Usage & Policies'>('API Keys');
@@ -78,15 +78,7 @@ export const ApiCredentialsPage: React.FC = () => {
         }
     }, [toastMessage]);
 
-    // Handle Action Triggered from External URL Action (e.g. workspace setups)
-    useEffect(() => {
-        if (searchParams.get('action') === 'create-apikey') {
-            setIsCreateOpen(true);
-            const newParams = new URLSearchParams(searchParams);
-            newParams.delete('action');
-            setSearchParams(newParams, { replace: true });
-        }
-    }, [searchParams, setSearchParams]);
+
 
     // Actions
     const handleCreateSubmit = (input: CreateApiKeyInput) => {

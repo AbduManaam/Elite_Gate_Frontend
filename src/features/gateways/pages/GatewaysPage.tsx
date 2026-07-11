@@ -67,14 +67,7 @@ export const GatewaysPage: React.FC = () => {
     <div className="flex flex-col w-full text-left">
       {/* Page Header Section */}
       <div className="bg-white border-b border-outline-variant pt-lg px-margin-mobile lg:px-margin-desktop -mx-margin-mobile lg:-mx-margin-desktop -mt-margin-mobile lg:-mt-margin-desktop mb-margin-mobile lg:mb-margin-desktop">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-xs font-label-md text-label-md text-on-surface-variant mb-md">
-          <a className="hover:text-[#587c94] transition-colors cursor-pointer">API Gateway</a>
-          <span className="material-symbols-outlined text-[14px] leading-none translate-y-[2px]">chevron_right</span>
-          <a className="hover:text-[#587c94] transition-colors cursor-pointer">Control planes</a>
-          <span className="material-symbols-outlined text-[14px] leading-none translate-y-[2px]">chevron_right</span>
-          <span className="text-on-surface font-semibold">{currentProject ? currentProject.name : 'serverless-default'}</span>
-        </nav>
+
         
         {/* Title & Actions */}
         <div className="flex justify-between items-center mb-lg">
