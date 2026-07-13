@@ -12,7 +12,7 @@ interface ListProjectsResponse {
 // caller's own role — this is the primary source for activeProjectRole
 // when the user picks a project from a selector.
 export async function listProjects(): Promise<ProjectRecord[]> {
-    const { data } = await apiClient.get<ListProjectsResponse>('/projects');
+    const { data } = await apiClient.get<ListProjectsResponse>('/v1/projects');
     return data.items;
 }
 
@@ -20,6 +20,6 @@ export async function listProjects(): Promise<ProjectRecord[]> {
 // project's dashboard directly (e.g. deep link / page refresh), where
 // there's no list response in hand to read role off of.
 export async function getProjectSummary(projectId: string): Promise<ProjectSummary> {
-    const { data } = await apiClient.get<ProjectSummary>(`/projects/${projectId}/summary`);
+    const { data } = await apiClient.get<ProjectSummary>(`/v1/projects/${projectId}/summary`);
     return data;
 }

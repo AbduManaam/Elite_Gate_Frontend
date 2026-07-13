@@ -1,8 +1,9 @@
-﻿import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   getDashboardSummary,
   queryMetricRange,
   queryMetricInstant,
+  querySystemRange,
   MetricName,
 } from '../api/metricsApi';
 
@@ -61,3 +62,17 @@ export function useMetricInstantQuery(projectId: string | null, metric: MetricNa
     refetchInterval: 15_000,
   });
 }
+
+/**
+ * Fetches platform system level range metrics (CPU/Memory) scoped to a project.
+ */
+export function useSystemRangeQuery(projectId: string | null, service: string, metric: 'cpu' | 'memory', range = '1h', step = '60s') {
+  return useQuery({
+    queryKey: ['metrics', 'system', projectId, service, metric, range, step],
+    queryFn: () => querySystemRange(projectId as string, service, metric, range, step),
+    enabled: !!projectId,
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+}
+

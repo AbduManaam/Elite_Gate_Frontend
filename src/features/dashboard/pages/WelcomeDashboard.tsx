@@ -101,7 +101,14 @@ export const WelcomeDashboard: React.FC<WelcomeDashboardProps> = ({ className = 
     apiKeyCount === 0;
 
   if (hasNoResources) {
-    return <DashboardEmptyState />;
+    return (
+      <DashboardEmptyState
+        routeCount={routeCount}
+        upstreamCount={upstreamCount}
+        policyCount={policyCount}
+        apiKeyCount={apiKeyCount}
+      />
+    );
   }
 
 

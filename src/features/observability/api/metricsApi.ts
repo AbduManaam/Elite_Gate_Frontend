@@ -60,6 +60,7 @@ export interface DashboardSummary {
   top_upstreams: MetricSeries[];
   upstream_health: UpstreamHealthStatus[];
   active_requests_sparkline: TimeSeriesPoint[];
+  latency_avg_trend?: TimeSeriesPoint[];
 }
 
 /**
@@ -71,7 +72,7 @@ export interface DashboardSummary {
  */
 export async function getDashboardSummary(projectId: string): Promise<DashboardSummary> {
   const { data } = await apiClient.get<DashboardSummary>(
-    `/projects/${projectId}/metrics/summary`
+    `/v1/projects/${projectId}/metrics/summary`
   );
   return data;
 }
@@ -93,7 +94,7 @@ export async function queryMetricRange(
   step = '60s'
 ): Promise<TimeSeriesPoint[]> {
   const { data } = await apiClient.get<{ points: TimeSeriesPoint[] }>(
-    `/projects/${projectId}/metrics/query-range`,
+    `/v1/projects/${projectId}/metrics/query-range`,
     { params: { metric, range, step } }
   );
   return data.points;
@@ -112,8 +113,27 @@ export async function queryMetricInstant(
   metric: MetricName
 ): Promise<number> {
   const { data } = await apiClient.get<{ value: number }>(
-    `/projects/${projectId}/metrics/query`,
+    `/v1/projects/${projectId}/metrics/query`,
     { params: { metric } }
   );
   return data.value;
 }
+
+/**
+ * Fetches platform system level range metrics (CPU/Memory) scoped to a project.
+ * Corresponds to GET /admin/v1/projects/:projectId/metrics/system/range.
+ */
+export async function querySystemRange(
+  projectId: string,
+  service: string,
+  metric: 'cpu' | 'memory',
+  range = '1h',
+  step = '60s'
+): Promise<TimeSeriesPoint[]> {
+  const { data } = await apiClient.get<{ points: TimeSeriesPoint[] }>(
+    `/v1/projects/${projectId}/metrics/system/range`,
+    { params: { service, metric, range, step } }
+  );
+  return data.points;
+}
+
