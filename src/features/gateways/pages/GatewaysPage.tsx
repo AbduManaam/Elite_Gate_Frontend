@@ -6,8 +6,6 @@ import { GatewaysOverview } from '../components/GatewaysOverview';
 import { PoliciesOverview } from '../components/PoliciesOverview';
 import { ApiCredentialsPage } from '../../apiKeys/components/ApiCredentialsPage';
 import { MembersOverview } from '../../members/components/MembersOverview';
-import { LetsGetStartedBanner } from '../components/LetsGetStartedBanner';
-import { ConfigureApiModal } from '../components/ConfigureApiModal';
 import { ProjectWorkspace } from '../../projects/components/ProjectWorkspace';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useProjectsQuery } from '../../../shared/hooks/useProjects';
@@ -34,10 +32,9 @@ export const GatewaysPage: React.FC = () => {
   const provisionGateway = useProvisionGatewayMutation(projectId ?? '');
   const reloadConfig = useReloadConfigMutation(projectId ?? '');
 
-  const [isConfigureApiOpen, setIsConfigureApiOpen] = useState(false);
   const [isAllGatewaysOpen, setIsAllGatewaysOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeSubTab = searchParams.get('tab') || 'Overview';
+  const activeSubTab = searchParams.get('tab') || 'Projects';
   const setActiveSubTab = (tab: string) => {
     setSearchParams({ tab });
   };
@@ -53,7 +50,6 @@ export const GatewaysPage: React.FC = () => {
   };
 
   const subTabs = [
-    'Overview',
     'Projects',
     'Gateway services',
     'Routes',
@@ -142,12 +138,6 @@ export const GatewaysPage: React.FC = () => {
 
       {/* Render sub-tab content */}
       <div className="w-full">
-        {activeSubTab === 'Overview' && (
-          <LetsGetStartedBanner
-            onAddServiceRoute={() => setIsConfigureApiOpen(true)}
-          />
-        )}
-
         {activeSubTab === 'Projects' && (
           <ProjectWorkspace />
         )}
@@ -179,14 +169,6 @@ export const GatewaysPage: React.FC = () => {
           <MembersOverview />
         )}
       </div>
-
-      {/* Configure New API Modal Wizard */}
-      {isConfigureApiOpen && (
-        <ConfigureApiModal
-          projectId={projectId ?? ''}
-          onClose={() => setIsConfigureApiOpen(false)}
-        />
-      )}
 
       {/* All Gateways Modal */}
       <AllGatewaysModal

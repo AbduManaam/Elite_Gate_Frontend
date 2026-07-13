@@ -8,7 +8,7 @@ import { AppRouter } from './AppRouter';
 import { RequireAuth } from './AuthGate';
 import { LoginPage } from '../../features/auth';
 import { WelcomeDashboard } from '../../features/dashboard';
-import { ObservabilitySummaryPage, ObservabilityExplorerPage } from '../../features/observability';
+import { ObservabilitySummaryPage } from '../../features/observability';
 import { GatewaysPage } from '../../features/gateways';
 import { ProjectSettings } from '../../features/projects';
 import { AuditLogsPage } from '../../features/auditLogs';
@@ -34,7 +34,6 @@ export const router = createBrowserRouter([
             { index: true, element: <WelcomeDashboard /> },
             { path: 'connectivity', element: <GatewaysPage /> },
             { path: 'analytics', element: <ObservabilitySummaryPage /> },
-            { path: 'analytics/explorer', element: <ObservabilityExplorerPage /> },
             { path: 'settings', element: <ProjectSettings /> },
             { path: 'logs', element: <AuditLogsPage /> },
         ],

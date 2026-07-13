@@ -8,6 +8,8 @@ import Sidebar from '../../shared/layouts/Sidebar/Sidebar';
 import { useAuthGate } from './AuthGate';
 import { useProjectSummaryQuery } from '../../shared/hooks/useProjectSummary';
 import { useUIStore } from '../../store/uiStore';
+import { useAuthStore } from '../../store/authStore';
+import { useActiveProject } from '../../shared/hooks/useActiveProject';
 
 interface SearchItem {
   category: string;
@@ -23,6 +25,20 @@ export const AppRouter: React.FC = () => {
   const { logout } = useAuthGate();
   const isSidebarCollapsed = useUIStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const user = useAuthStore((s) => s.user);
+  const { projectRole } = useActiveProject();
+
+  const displayName = user?.username
+    ? user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
+    : 'Abdu Manaam';
+
+  const initials = displayName
+    ? displayName.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()
+    : 'AM';
+
+  const displayRole = projectRole
+    ? projectRole.charAt(0).toUpperCase() + projectRole.slice(1)
+    : 'System Administrator';
 
   useEffect(() => {
     const handleResize = () => {
@@ -44,17 +60,13 @@ export const AppRouter: React.FC = () => {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const isAnalytics = location.pathname.startsWith('/analytics');
-
   const searchItems: SearchItem[] = [
     { category: 'Pages', title: 'Welcome Dashboard', path: '/', icon: 'dashboard' },
     { category: 'Pages', title: 'Connectivity Workspace', path: '/connectivity', icon: 'settings_ethernet' },
     { category: 'Pages', title: 'Analytics Summary', path: '/analytics', icon: 'monitoring' },
-    { category: 'Pages', title: 'Analytics Explorer', path: '/analytics/explorer', icon: 'explore' },
     { category: 'Pages', title: 'Audit Logs', path: '/logs', icon: 'receipt_long' },
     { category: 'Pages', title: 'Profile Settings', path: '/settings', icon: 'settings' },
 
-    { category: 'Workspace Tabs', title: 'Overview tab', path: '/connectivity?tab=Overview', icon: 'rocket_launch' },
     { category: 'Workspace Tabs', title: 'Projects tab', path: '/connectivity?tab=Projects', icon: 'folder' },
     { category: 'Workspace Tabs', title: 'Gateway services tab', path: '/connectivity?tab=Gateway services', icon: 'dns' },
     { category: 'Workspace Tabs', title: 'Routes tab', path: '/connectivity?tab=Routes', icon: 'route' },
@@ -138,54 +150,26 @@ export const AppRouter: React.FC = () => {
             >
               <span className="material-symbols-outlined text-[24px]">menu</span>
             </button>
-            {isAnalytics ? (
-              <nav className="flex gap-md border-b-2 border-transparent h-full items-center">
-                <NavLink
-                  to="/analytics"
-                  end
-                  className={({ isActive }) =>
-                    `font-semibold text-sm px-sm py-1 rounded transition-colors cursor-pointer ${isActive
-                      ? 'text-[#113346] bg-[#113346]/10'
-                      : 'text-on-surface-variant hover:text-[#113346]'
-                    }`
-                  }
-                >
-                  Summary
-                </NavLink>
-                <NavLink
-                  to="/analytics/explorer"
-                  className={({ isActive }) =>
-                    `font-semibold text-sm px-sm py-1 rounded transition-colors cursor-pointer ${isActive
-                      ? 'text-[#113346] bg-[#113346]/10'
-                      : 'text-on-surface-variant hover:text-[#113346]'
-                    }`
-                  }
-                >
-                  Explorer
-                </NavLink>
-              </nav>
-            ) : (
-              <div className="relative w-80 md:w-96 flex-shrink-0">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">
-                  search
-                </span>
-                <input
-                  readOnly
-                  onClick={() => setIsSearchOpen(true)}
-                  className="w-full h-8 pl-9 pr-16 text-sm bg-surface-container-low border border-outline-variant rounded focus:border-[#587c94] focus:ring-1 focus:ring-[#587c94] outline-none transition-all placeholder:text-outline text-on-surface cursor-pointer"
-                  placeholder="Search..."
-                  type="text"
-                />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 select-none">
-                  <kbd className="text-[9px] text-outline font-mono bg-white px-1.5 py-0.5 rounded border border-outline-variant/60 shadow-sm">
-                    Ctrl
-                  </kbd>
-                  <kbd className="text-[9px] text-outline font-mono bg-white px-1.5 py-0.5 rounded border border-outline-variant/60 shadow-sm">
-                    K
-                  </kbd>
-                </div>
+            <div className="relative w-80 md:w-96 flex-shrink-0">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">
+                search
+              </span>
+              <input
+                readOnly
+                onClick={() => setIsSearchOpen(true)}
+                className="w-full h-8 pl-9 pr-16 text-sm bg-surface-container-low border border-outline-variant rounded focus:border-[#587c94] focus:ring-1 focus:ring-[#587c94] outline-none transition-all placeholder:text-outline text-on-surface cursor-pointer"
+                placeholder="Search..."
+                type="text"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 select-none">
+                <kbd className="text-[9px] text-outline font-mono bg-white px-1.5 py-0.5 rounded border border-outline-variant/60 shadow-sm">
+                  Ctrl
+                </kbd>
+                <kbd className="text-[9px] text-outline font-mono bg-white px-1.5 py-0.5 rounded border border-outline-variant/60 shadow-sm">
+                  K
+                </kbd>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Right Controls: Notifications, Profile */}
@@ -198,14 +182,14 @@ export const AppRouter: React.FC = () => {
                   className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs cursor-pointer border border-outline-variant hover:brightness-95 transition-all outline-none"
                   type="button"
                 >
-                  AM
+                  {initials}
                 </button>
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-lg shadow-lg py-1 z-30">
                     <div className="px-4 py-2 border-b border-outline-variant">
-                      <p className="text-sm font-semibold text-on-surface">Abdu Manaam</p>
-                      <p className="text-xs text-on-surface-variant">System Administrator</p>
+                      <p className="text-sm font-semibold text-on-surface">{displayName}</p>
+                      <p className="text-xs text-on-surface-variant">{displayRole}</p>
                     </div>
                     <button
                       onClick={() => {

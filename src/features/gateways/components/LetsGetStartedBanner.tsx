@@ -193,13 +193,13 @@ export const LetsGetStartedBanner: React.FC<LetsGetStartedBannerProps> = ({
         <div className="flex flex-col gap-md text-left font-sans">
           <h4 className="font-bold text-sm text-[#113346]">Explore analytics and monitor traffic</h4>
           <p className="text-xs text-on-surface-variant leading-relaxed">
-            Analyze request distributions, gateway latency metrics, and error rates using the built-in observability explorer.
+            Analyze request distributions, gateway latency metrics, and error rates using the built-in observability summary dashboard.
           </p>
           <div className="flex items-center gap-md p-md border border-outline-variant bg-slate-50/50 rounded-xl">
             <span className="material-symbols-outlined text-[#587c94] text-[36px]">insights</span>
             <div className="flex flex-col gap-0.5">
-              <span className="font-bold text-xs text-[#113346]">Observability Explorer</span>
-              <span className="text-[10px] text-on-surface-variant">View traffic status, detailed request traces, and upstream connectivity graphs.</span>
+              <span className="font-bold text-xs text-[#113346]">Observability Summary</span>
+              <span className="text-[10px] text-on-surface-variant">View traffic rates, latencies, status code distribution, and upstream health status.</span>
             </div>
           </div>
         </div>
