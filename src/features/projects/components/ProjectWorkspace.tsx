@@ -606,6 +606,7 @@ export const ProjectWorkspace: React.FC = () => {
         onConfirm={handleDeleteConfirm}
         onClose={() => setIsDeleteOpen(false)}
         isPending={deleteProject.isPending}
+        requireConfirmText="delete"
       />
     </div>
   );

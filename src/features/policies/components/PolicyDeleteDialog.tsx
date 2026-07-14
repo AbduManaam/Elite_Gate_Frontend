@@ -33,6 +33,7 @@ export const PolicyDeleteDialog: React.FC<PolicyDeleteDialogProps> = ({
       onConfirm={onConfirm}
       onClose={onClose}
       isPending={isDeleting}
+      requireConfirmText="delete"
     />
   );
 };

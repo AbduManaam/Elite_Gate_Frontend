@@ -31,6 +31,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
   const [companyName, setCompanyName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState('');
   const signupMutation = useSignupMutation();
 
@@ -41,7 +42,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
     setFormError('');
 
     if (!companyName.trim() || !username.trim() || !password.trim()) {
-      setFormError('Please initialize all onboarding fields.');
+      setFormError('Please enter all the onboarding fields.');
       return;
     }
 
@@ -49,15 +50,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
       { company: companyName.trim(), username: username.trim(), password },
       {
         onSuccess: (data) => {
-          console.log('[SignupForm] Onboarding successful! Backend returned tokens:', data);
+          console.log('[SignupForm] Onboarding successful!', data);
           onSignupSuccess();
         },
         onError: (error) => {
           console.error('[SignupForm] Onboarding failed:', error);
-          if (isAxiosError(error)) {
-            console.error('[SignupForm] Backend error response status:', error.response?.status);
-            console.error('[SignupForm] Backend error response data:', error.response?.data);
-          }
           setFormError(describeSignupError(error));
         },
       }
@@ -65,33 +62,29 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
   };
 
   return (
-    <div className="bg-surface-container-low border border-outline-variant/30 rounded-xl p-xl shadow-2xl relative overflow-hidden animate-fade-in-up stagger-2">
-      {/* Subtle Form Glow */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 blur-[100px] rounded-full"></div>
-
-      <div className="mb-lg relative z-10 text-left">
-        <h2 className="font-headline-md text-headline-md text-on-surface mb-xs tracking-tight">Onboarding Terminal</h2>
-        <p className="font-body-md text-sm text-on-surface-variant">Provision a new tenant and admin workspace.</p>
+    <div className="w-full flex flex-col justify-center px-8 md:px-16 py-10 text-left select-none animate-fade-in-up stagger-2">
+      
+      {/* Title Header */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-[#171c1f] mb-1 tracking-tight">Onboarding</h2>
+        <p className="text-sm text-gray-500">Provision a new tenant and admin workspace</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-md relative z-10 text-left">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {formError && (
-          <div className="text-error font-body-sm text-sm border border-error/20 bg-error/5 p-sm rounded animate-reveal-sequential">
+          <div className="text-[#C03E48] text-xs font-semibold border border-[#C03E48]/20 bg-[#C03E48]/5 px-4 py-3 rounded-2xl">
             {formError}
           </div>
         )}
 
         {/* Company Name Input */}
-        <div className="flex flex-col gap-xs animate-reveal-sequential stagger-3">
-          <label className="font-label-mono text-[11px] uppercase tracking-widest text-[#94A39E]" htmlFor="company">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-gray-700" htmlFor="company">
             Company Name
           </label>
-          <div className="relative group input-glow">
-            <span className="material-symbols-outlined absolute left-sm top-1/2 transform -translate-y-1/2 text-[#94A39E] transition-colors duration-300 group-focus-within:text-primary">
-              domain
-            </span>
+          <div className="relative">
             <input
-              className="w-full bg-[#00120b] border border-[#0F4032] text-on-surface font-body-md text-sm rounded pl-xl py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all duration-300 placeholder:text-[#3C4A46]"
+              className="w-full bg-[#f6f8fa] border border-gray-200 text-[#171c1f] text-sm rounded-2xl pl-4 pr-12 py-3.5 focus:border-[#0a1821] focus:ring-1 focus:ring-[#0a1821]/20 focus:outline-none transition-all duration-300 placeholder:text-gray-300"
               id="company"
               placeholder="e.g. Acme Corp"
               type="text"
@@ -102,22 +95,22 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
                 setFormError('');
               }}
             />
+            <span className="material-symbols-outlined absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-[20px] pointer-events-none select-none">
+              domain
+            </span>
           </div>
         </div>
 
         {/* User Name Input */}
-        <div className="flex flex-col gap-xs animate-reveal-sequential stagger-4">
-          <label className="font-label-mono text-[11px] uppercase tracking-widest text-[#94A39E]" htmlFor="email">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-gray-700" htmlFor="username">
             User Name
           </label>
-          <div className="relative group input-glow">
-            <span className="material-symbols-outlined absolute left-sm top-1/2 transform -translate-y-1/2 text-[#94A39E] transition-colors duration-300 group-focus-within:text-primary">
-              terminal
-            </span>
+          <div className="relative">
             <input
-              className="w-full bg-[#00120b] border border-[#0F4032] text-on-surface font-label-mono text-sm rounded pl-xl py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all duration-300 placeholder:text-[#3C4A46]"
-              id="email"
-              placeholder="User Name"
+              className="w-full bg-[#f6f8fa] border border-gray-200 text-[#171c1f] text-sm rounded-2xl pl-4 pr-12 py-3.5 focus:border-[#0a1821] focus:ring-1 focus:ring-[#0a1821]/20 focus:outline-none transition-all duration-300 placeholder:text-gray-300"
+              id="username"
+              placeholder="e.g. admin"
               type="text"
               value={username}
               disabled={isSubmitting}
@@ -126,23 +119,23 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
                 setFormError('');
               }}
             />
+            <span className="material-symbols-outlined absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-[20px] pointer-events-none select-none">
+              person
+            </span>
           </div>
         </div>
 
         {/* Password Input */}
-        <div className="flex flex-col gap-xs animate-reveal-sequential stagger-5">
-          <label className="font-label-mono text-[11px] uppercase tracking-widest text-[#94A39E]" htmlFor="password">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-gray-700" htmlFor="password">
             Password
           </label>
-          <div className="relative group input-glow">
-            <span className="material-symbols-outlined absolute left-sm top-1/2 transform -translate-y-1/2 text-[#94A39E] transition-colors duration-300 group-focus-within:text-primary">
-              key
-            </span>
+          <div className="relative">
             <input
-              className="w-full bg-[#00120b] border border-[#0F4032] text-on-surface font-body-md text-sm rounded pl-xl py-3 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all duration-300 placeholder:text-[#3C4A46]"
+              className="w-full bg-[#f6f8fa] border border-gray-200 text-[#171c1f] text-sm rounded-2xl pl-4 pr-12 py-3.5 focus:border-[#0a1821] focus:ring-1 focus:ring-[#0a1821]/20 focus:outline-none transition-all duration-300 placeholder:text-gray-300"
               id="password"
-              placeholder="Password"
-              type="password"
+              placeholder="••••••••"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               disabled={isSubmitting}
               onChange={(e) => {
@@ -150,27 +143,36 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
                 setFormError('');
               }}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px] select-none">
+                {showPassword ? 'visibility' : 'visibility_off'}
+              </span>
+            </button>
           </div>
         </div>
 
-        {/* Primary Action */}
+        {/* Primary Action Button */}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full mt-sm bg-primary text-[#00120b] font-bold text-sm py-3 rounded-lg hover:brightness-110 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(195,255,146,0.4)] transition-all duration-300 animate-reveal-sequential stagger-5 flex justify-center items-center gap-sm active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+          className="w-full bg-[#0a1821] text-white font-bold text-sm py-4 rounded-full hover:bg-[#123749] hover:shadow-[0_8px_20px_rgba(10,24,33,0.25)] transition-all duration-300 flex justify-center items-center gap-2 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
         >
-          {isSubmitting ? 'PROVISIONING…' : 'PROVISION WORKSPACE'}
-          <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
+          {isSubmitting ? 'Provisioning...' : 'Provision Workspace'}
         </button>
 
-        <div className="text-center mt-md animate-reveal-sequential stagger-5">
-          <span className="font-body-sm text-[11px] text-[#94A39E] mr-xs">Already have an account?</span>
+        {/* Footer text */}
+        <div className="text-center mt-4">
+          <span className="text-xs text-gray-500 mr-1.5">Already have an account?</span>
           <button
             type="button"
             onClick={onToggleLogin}
-            className="font-label-mono text-[11px] text-primary hover:text-primary-fixed-dim transition-colors duration-300 cursor-pointer bg-transparent border-none uppercase tracking-widest outline-none"
+            className="text-xs font-semibold text-[#C03E48] hover:underline cursor-pointer bg-transparent border-none outline-none"
           >
-            Access Terminal
+            Sign In
           </button>
         </div>
       </form>

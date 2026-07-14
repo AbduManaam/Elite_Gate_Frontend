@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
+import loginBanner from '../../../assets/login_gateway_banner.png';
+import logoImg from '../../../assets/logo.png';
 
 export interface LoginPageProps {
   readonly onLoginSuccess: () => void;
@@ -11,57 +13,50 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className 
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
 
   return (
-    <div className={`bg-[#001710] text-[#cbe9dc] min-h-screen font-body-md relative w-full flex flex-col justify-center select-none ${className}`}>
-      {/* Ambient Motion: Scanning Line in isolated non-overflowing container */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="scanning-line animate-scan-line"></div>
-      </div>
+    <div className={`bg-[#f3f5f8] text-[#171c1f] min-h-screen font-body-md w-full flex items-center justify-center p-4 md:p-8 select-none ${className}`}>
+      {/* Outer rounded card */}
+      <div className="w-full max-w-[1020px] bg-white rounded-[32px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.06)] flex flex-col md:flex-row min-h-[620px] items-stretch">
+        
+        {/* Left Side: Brand Banner */}
+        <div 
+          className="hidden md:flex md:w-1/2 flex-col justify-between px-12 pb-12 pt-6 relative bg-center select-none"
+          style={{ 
+            backgroundImage: `url(${loginBanner})`,
+            backgroundSize: '115% 100%'
+          }}
+        >
+          {/* Top Brand Logo */}
+          <div className="flex items-center gap-2">
+            <img src={logoImg} alt="Elite Gateway Logo" className="w-16 h-16 object-contain" />
+            <span 
+              className="font-semibold tracking-[0.25em] text-white text-base"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              ELITE <span className="text-[#E5835C]">GATEWAY</span>
+            </span>
+          </div>
 
-      {/* Background Grid */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none z-0">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid-bg" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#0F4032" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid-bg)" />
-        </svg>
-      </div>
-
-      {/* Main Content */}
-      <main className="relative z-10 min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop">
-        <div className="w-full max-w-[1100px] flex flex-col md:flex-row items-center gap-xl md:gap-[120px]">
-
-          {/* Left Side: Branding & Messaging */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center text-left">
-            {/* Entrance Animation: Logo fade and scale */}
-            <div className="flex items-center gap-sm mb-lg animate-fade-in-scale">
-              <div className="relative w-48 h-48 mb-sm">
-                {/* Ambient Motion: Pulse Glow on Logo */}
-                <img
-                  alt="Elite Gate Logo"
-                  className="w-full h-full object-contain animate-pulse-glow"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOdQwzvRONWSkcJhvu1gd7GmDu44-9zIHA_YY1tkebqZIEuX-_ksC_NVhzj3TMy5Tqt7qgFqEZZy-PP7s9ySur-0X4BruW4iD0aci8Kuzu_omp3QwMeKWWme4b-CVoewGDEl7GN_V_gWGiNYR9CSnSXGvSCR6nrxrR24ejKn-XeZg7fI-nDRMnSDnoeu7kxP948dv9yoPG6BbgMqYBBFg_QXb5Dz2SaxYQPwp2ceclL10cMOWffknoF1JOMjFksjubpDfAAgnRfKOr"
-                />
-              </div>
-            </div>
-            {/* Entrance Animation: Delayed reveal. Text is colored white/green for readability on dark background */}
-            <h1 className="font-display-lg text-display-lg text-[#cbe9dc] mb-xl leading-[1.1] tracking-tight animate-fade-in-up stagger-1">
-              Next-gen API Gateway for <span className="text-white italic font-semibold">hybrid-cloud</span> architectures.
+          {/* Bottom Headline */}
+          <div className="text-left mt-auto">
+            <h1 
+              className="text-3xl font-semibold leading-[1.15] text-[#ECA384] tracking-tight"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              Secure Your Digital<br />Ecosystem
             </h1>
           </div>
-
-          {/* Right Side: Form wrapper (login/signup toggled dynamically) */}
-          <div className="w-full md:w-auto md:min-w-[420px] relative z-10">
-            {authMode === 'login' ? (
-              <LoginForm onLoginSuccess={onLoginSuccess} onToggleSignup={() => setAuthMode('signup')} />
-            ) : (
-              <SignupForm onSignupSuccess={onLoginSuccess} onToggleLogin={() => setAuthMode('login')} />
-            )}
-          </div>
         </div>
-      </main>
+
+        {/* Right Side: Authentication Forms */}
+        <div className="w-full md:w-1/2 bg-white flex flex-col justify-center">
+          {authMode === 'login' ? (
+            <LoginForm onLoginSuccess={onLoginSuccess} onToggleSignup={() => setAuthMode('signup')} />
+          ) : (
+            <SignupForm onSignupSuccess={onLoginSuccess} onToggleLogin={() => setAuthMode('login')} />
+          )}
+        </div>
+
+      </div>
     </div>
   );
 };

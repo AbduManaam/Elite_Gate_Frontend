@@ -555,6 +555,7 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
         onConfirm={handleDeleteProjectConfirm}
         onClose={() => setIsDeleteProjectOpen(false)}
         isPending={deleteProject.isPending}
+        requireConfirmText="delete"
       />
 
       <ConfirmModal
@@ -568,6 +569,7 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
         onConfirm={handleDecommissionGatewayConfirm}
         onClose={() => setIsDecommissionGatewayOpen(false)}
         isPending={decommissionGateway.isPending}
+        requireConfirmText="delete"
       />
     </div>
   );

@@ -10,6 +10,7 @@ import {
 import { RouteRecord } from '../api/routesApi';
 import { usePoliciesQuery } from '../../policies/hooks/usePolicies';
 import { RouteFormDrawer } from './RouteFormDrawer';
+import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 import { toApiError } from '../../../shared/api/apiError';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 
@@ -25,6 +26,8 @@ export const RoutesList: React.FC = () => {
     mode: 'create' | 'edit';
     route?: RouteRecord;
   }>({ isOpen: false, mode: 'create' });
+
+  const [routeToDelete, setRouteToDelete] = useState<RouteRecord | null>(null);
 
   useEffect(() => {
     if (searchParams.get('action') === 'create-route') {
@@ -215,7 +218,7 @@ export const RoutesList: React.FC = () => {
                     {canManageRoutes && (
                       <td className="py-4 px-md text-right" onClick={(e) => e.stopPropagation()}>
                         <button
-                          onClick={() => deleteRoute.mutate(route.id)}
+                          onClick={() => setRouteToDelete(route)}
                           disabled={deleteRoute.isPending}
                           className="text-outline hover:text-error opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-40"
                         >
@@ -247,6 +250,30 @@ export const RoutesList: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={routeToDelete !== null}
+        title="Delete Route"
+        isDanger
+        message={
+          <span>
+            Are you sure you want to delete route <span className="font-bold">"{routeToDelete?.path}"</span>?
+          </span>
+        }
+        description="Deleting this route will immediately stop routing API traffic to its upstream target. This action cannot be undone."
+        confirmLabel="Delete Route"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          if (routeToDelete) {
+            deleteRoute.mutate(routeToDelete.id, {
+              onSuccess: () => setRouteToDelete(null),
+            });
+          }
+        }}
+        onClose={() => setRouteToDelete(null)}
+        isPending={deleteRoute.isPending}
+        requireConfirmText="delete"
+      />
     </div>
   );
 };
