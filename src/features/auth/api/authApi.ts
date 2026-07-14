@@ -31,3 +31,18 @@ export async function logout(): Promise<void> {
     const refreshToken = tokenStore.getRefreshToken() || '';
     await apiClient.post('/logout', { refresh_token: refreshToken });
 }
+
+export interface MeResponse {
+    user_id: string;
+    username: string;
+    is_super_admin: boolean;
+}
+
+export async function getMe(): Promise<MeResponse> {
+    const { data } = await apiClient.get<MeResponse>('/v1/me');
+    return data;
+}
+
+export async function addTeamMemberAdmin(username: string, password: string): Promise<void> {
+    await apiClient.post('/v1/admins', { username, password });
+}

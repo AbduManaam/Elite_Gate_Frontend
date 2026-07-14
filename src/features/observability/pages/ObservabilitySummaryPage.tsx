@@ -82,8 +82,8 @@ export const ObservabilitySummaryPage: React.FC<ObservabilitySummaryProps> = ({ 
   const [isOpenFilterDropdown, setIsOpenFilterDropdown] = useState(false);
 
   const { data: summary, isLoading, error } = useDashboardSummaryQuery(projectId);
-  const { data: cpuTrend } = useSystemRangeQuery(projectId, selectedService, 'cpu', timeRange.value, timeRange.step);
-  const { data: memTrend } = useSystemRangeQuery(projectId, selectedService, 'memory', timeRange.value, timeRange.step);
+  const { data: cpuTrend } = useSystemRangeQuery(selectedService, 'cpu', timeRange.value, timeRange.step);
+  const { data: memTrend } = useSystemRangeQuery(selectedService, 'memory', timeRange.value, timeRange.step);
 
   /** KPI card definitions derived from the live summary payload. */
   const kpiCards = summary

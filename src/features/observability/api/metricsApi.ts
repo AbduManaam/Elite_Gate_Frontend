@@ -120,20 +120,29 @@ export async function queryMetricInstant(
 }
 
 /**
- * Fetches platform system level range metrics (CPU/Memory) scoped to a project.
- * Corresponds to GET /admin/v1/projects/:projectId/metrics/system/range.
+ * Fetches platform system level range metrics (CPU/Memory).
+ * Corresponds to GET /admin/v1/platform/metrics/system/range.
  */
 export async function querySystemRange(
-  projectId: string,
   service: string,
   metric: 'cpu' | 'memory',
   range = '1h',
   step = '60s'
 ): Promise<TimeSeriesPoint[]> {
   const { data } = await apiClient.get<{ points: TimeSeriesPoint[] }>(
-    `/v1/projects/${projectId}/metrics/system/range`,
+    `/v1/platform/metrics/system/range`,
     { params: { service, metric, range, step } }
   );
   return data.points;
+}
+
+export async function getPlatformHealth() {
+    const { data } = await apiClient.get('/v1/platform/health');
+    return data;
+}
+
+export async function getPlatformMetrics() {
+    const { data } = await apiClient.get('/v1/platform/metrics');
+    return data;
 }
 

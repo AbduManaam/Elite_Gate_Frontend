@@ -98,3 +98,27 @@ export async function updateProject(projectId: string, input: UpdateProjectInput
     if ('project' in data && data.project) return data.project;
     return data as Project;
 }
+
+export interface TenantSummary {
+    id: string;
+    name: string;
+    status: string;
+    created_at: string;
+}
+
+export async function listAllTenants(limit = 50, offset = 0): Promise<{ projects: TenantSummary[]; total: number }> {
+    const { data } = await apiClient.get(`/v1/platform/projects`, { params: { limit, offset } });
+    return data;
+}
+
+export async function deleteTenant(projectId: string): Promise<void> {
+    await apiClient.delete(`/v1/platform/projects/${projectId}`);
+}
+
+export async function suspendTenant(projectId: string): Promise<void> {
+    await apiClient.patch(`/v1/platform/projects/${projectId}/suspend`);
+}
+
+export async function reactivateTenant(projectId: string): Promise<void> {
+    await apiClient.patch(`/v1/platform/projects/${projectId}/reactivate`);
+}

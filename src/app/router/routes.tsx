@@ -1,16 +1,31 @@
-// This file manages the application's navigation. It defines all routes, maps each URL to its 
-// corresponding page, and ensures that unauthenticated users are redirected to the login page before accessing protected pages.
-
-
 import React from 'react';
 import { createBrowserRouter, useNavigate } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
 import { RequireAuth } from './AuthGate';
-import { LoginPage } from '../../features/auth';
+import { RequireRole } from './RequireRole';
+import {
+    LoginPage,
+    PlatformAdminsPage,
+    RolesPermissionsPage,
+    UnauthorizedPage,
+} from '../../features/auth';
 import { WelcomeDashboard } from '../../features/dashboard';
-import { ObservabilitySummaryPage } from '../../features/observability';
-import { GatewaysPage } from '../../features/gateways';
-import { ProjectSettings } from '../../features/projects';
+import {
+    ObservabilitySummaryPage,
+    PlatformHealthPage,
+    PlatformMetricsPage,
+} from '../../features/observability';
+import {
+    GatewaysPage,
+    PlatformGatewaysPage,
+    GatewayStatusPage,
+    GatewayMonitoringPage,
+} from '../../features/gateways';
+import {
+    ProjectSettings,
+    TenantManagementPage,
+    AllProjectsPage,
+} from '../../features/projects';
 import { AuditLogsPage } from '../../features/auditLogs';
 
 const LoginRoute: React.FC = () => {
@@ -24,6 +39,10 @@ export const router = createBrowserRouter([
         element: <LoginRoute />,
     },
     {
+        path: '/unauthorized',
+        element: <UnauthorizedPage />,
+    },
+    {
         path: '/',
         element: (
             <RequireAuth>
@@ -32,10 +51,88 @@ export const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <WelcomeDashboard /> },
+            
+            // Project Admin & standard routes
             { path: 'connectivity', element: <GatewaysPage /> },
             { path: 'analytics', element: <ObservabilitySummaryPage /> },
             { path: 'settings', element: <ProjectSettings /> },
             { path: 'logs', element: <AuditLogsPage /> },
+            
+            // Team Member Operations
+            {
+                path: 'gateway/status',
+                element: (
+                    <RequireRole minProjectRole="viewer">
+                        <GatewayStatusPage />
+                    </RequireRole>
+                ),
+            },
+            {
+                path: 'gateway/monitoring',
+                element: (
+                    <RequireRole minProjectRole="viewer">
+                        <GatewayMonitoringPage />
+                    </RequireRole>
+                ),
+            },
+
+            // Super Admin Only platform routes
+            {
+                path: 'platform/health',
+                element: (
+                    <RequireRole superAdminOnly>
+                        <PlatformHealthPage />
+                    </RequireRole>
+                ),
+            },
+            {
+                path: 'platform/metrics',
+                element: (
+                    <RequireRole superAdminOnly>
+                        <PlatformMetricsPage />
+                    </RequireRole>
+                ),
+            },
+            {
+                path: 'platform/tenants',
+                element: (
+                    <RequireRole superAdminOnly>
+                        <TenantManagementPage />
+                    </RequireRole>
+                ),
+            },
+            {
+                path: 'projects',
+                element: (
+                    <RequireRole superAdminOnly>
+                        <AllProjectsPage />
+                    </RequireRole>
+                ),
+            },
+            {
+                path: 'platform/gateways',
+                element: (
+                    <RequireRole superAdminOnly>
+                        <PlatformGatewaysPage />
+                    </RequireRole>
+                ),
+            },
+            {
+                path: 'administration/members',
+                element: (
+                    <RequireRole superAdminOnly>
+                        <PlatformAdminsPage />
+                    </RequireRole>
+                ),
+            },
+            {
+                path: 'administration/roles',
+                element: (
+                    <RequireRole superAdminOnly>
+                        <RolesPermissionsPage />
+                    </RequireRole>
+                ),
+            },
         ],
     },
 ]);

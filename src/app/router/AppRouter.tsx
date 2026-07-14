@@ -10,6 +10,7 @@ import { useProjectSummaryQuery } from '../../shared/hooks/useProjectSummary';
 import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
 import { useActiveProject } from '../../shared/hooks/useActiveProject';
+import { useResolveSession } from '../../shared/hooks/useResolveSession';
 
 interface SearchItem {
   category: string;
@@ -19,6 +20,7 @@ interface SearchItem {
 }
 
 export const AppRouter: React.FC = () => {
+  useResolveSession();
   useProjectSummaryQuery();
   const location = useLocation();
   const navigate = useNavigate();

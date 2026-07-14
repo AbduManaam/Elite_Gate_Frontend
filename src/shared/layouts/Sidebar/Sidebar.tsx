@@ -5,6 +5,7 @@ import { useProjectsQuery, useCreateProjectMutation } from '../../hooks/useProje
 import { Project } from '../../api/projectsApi';
 import { useAuthStore } from '../../../store/authStore';
 import { useUIStore } from '../../../store/uiStore';
+import { useRoles } from '../../hooks/useRoles';
 import {
   SIDEBAR_NAV_ITEMS,
   ELITE_GATE_LOGO_URL
@@ -93,6 +94,76 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
     setIsProjectDropdownOpen(false);
   };
 
+  const { isSuperAdmin, role: activeProjectRole } = useRoles();
+
+  // Define sections based on role
+  const sections: { title?: string; items: { label: string; path: string; icon: string }[] }[] = [];
+
+  if (isSuperAdmin) {
+    sections.push(
+      {
+        items: [{ label: 'Dashboard', path: '/', icon: 'dashboard' }],
+      },
+      {
+        title: 'Platform',
+        items: [
+          { label: 'Platform Health', path: '/platform/health', icon: 'health_and_safety' },
+          { label: 'Platform Metrics', path: '/platform/metrics', icon: 'monitoring' },
+          { label: 'Tenant Management', path: '/platform/tenants', icon: 'corporate_fare' },
+        ],
+      },
+      {
+        title: 'Projects',
+        items: [
+          { label: 'All Projects', path: '/projects', icon: 'folder_open' },
+          { label: 'Gateway Management', path: '/platform/gateways', icon: 'dns' },
+        ],
+      },
+      {
+        title: 'Administration',
+        items: [
+          { label: 'Team Members', path: '/administration/members', icon: 'group' },
+          { label: 'Roles & Permissions', path: '/administration/roles', icon: 'rule' },
+        ],
+      }
+    );
+  } else if (activeProjectRole === 'owner' || activeProjectRole === 'editor') {
+    sections.push(
+      {
+        items: [{ label: 'Dashboard', path: '/', icon: 'dashboard' }],
+      },
+      {
+        title: 'Projects',
+        items: [
+          { label: 'My Project', path: '/connectivity', icon: 'folder' },
+          { label: 'Gateway Management', path: '/connectivity?tab=Gateway services', icon: 'dns' },
+          { label: 'Project Users', path: '/connectivity?tab=Team Collaboration', icon: 'group' },
+        ],
+      },
+      {
+        title: 'Settings',
+        items: [
+          { label: 'Project Settings', path: '/settings', icon: 'settings' },
+        ],
+      }
+    );
+  } else {
+    // Team Member / Operator / Viewer
+    sections.push(
+      {
+        items: [{ label: 'Dashboard', path: '/', icon: 'dashboard' }],
+      },
+      {
+        title: 'Gateway',
+        items: [
+          { label: 'Status', path: '/gateway/status', icon: 'dns' },
+          { label: 'Monitoring', path: '/gateway/monitoring', icon: 'monitoring' },
+          { label: 'Logs', path: '/logs', icon: 'history' },
+        ],
+      }
+    );
+  }
+
   return (
     <>
       {!isSidebarCollapsed && (
@@ -167,58 +238,59 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
           )}
         </div>
 
-        {/* Navigation Links — real routing via NavLink, no more onItemClick/activeTab state */}
-        <nav className="flex-1 overflow-y-auto px-sm">
-          <ul className="space-y-1">
-            {SIDEBAR_NAV_ITEMS.map((item) => (
-              <li key={item.label}>
-                <NavLink
-                  to={item.path}
-                  end={item.path === '/'}
-                  onClick={() => {
-                    if (window.innerWidth < 1024) {
-                      toggleSidebar();
-                    }
-                  }}
-                  className={({ isActive }) =>
-                    `flex items-center gap-md px-md py-sm rounded-lg transition-colors duration-200 ${isActive
-                      ? 'text-white font-bold'
-                      : 'text-white/70 hover:text-white hover:bg-brand-hover'
-                    }`
-                  }
-                  style={({ isActive }) =>
-                    isActive
-                      ? {
-                        borderLeft: '4px solid #587c94',
-                        color: '#ffffff',
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)'
+        {/* Navigation Links — dynamically built from computed sections */}
+        <nav className="flex-1 overflow-y-auto px-sm flex flex-col gap-5">
+          {sections.map((section, sIdx) => (
+            <div key={sIdx} className="flex flex-col gap-1">
+              {section.title && (
+                <span className="px-md text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 select-none">
+                  {section.title}
+                </span>
+              )}
+              <ul className="space-y-1">
+                {section.items.map((item) => (
+                  <li key={item.label}>
+                    <NavLink
+                      to={item.path}
+                      end={item.path === '/' || item.path.includes('?')}
+                      onClick={() => {
+                        if (window.innerWidth < 1024) {
+                          toggleSidebar();
+                        }
+                      }}
+                      className={({ isActive }) =>
+                        `flex items-center gap-md px-md py-sm rounded-lg transition-colors duration-200 ${isActive
+                          ? 'text-white font-bold'
+                          : 'text-white/70 hover:text-white hover:bg-brand-hover'
+                        }`
                       }
-                      : undefined
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      {item.isImage && item.imageUrl ? (
-                        <img
-                          src={item.imageUrl}
-                          alt=""
-                          className="w-5 h-5 object-contain"
-                        />
-                      ) : (
-                        <span
-                          className="material-symbols-outlined text-[20px]"
-                          style={{ fontVariationSettings: isActive ? '"FILL" 1' : '"FILL" 0' }}
-                        >
-                          {item.icon}
-                        </span>
+                      style={({ isActive }) =>
+                        isActive
+                          ? {
+                            borderLeft: '4px solid #587c94',
+                            color: '#ffffff',
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)'
+                          }
+                          : undefined
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <span
+                            className="material-symbols-outlined text-[20px]"
+                            style={{ fontVariationSettings: isActive ? '"FILL" 1' : '"FILL" 0' }}
+                          >
+                            {item.icon}
+                          </span>
+                          <span>{item.label}</span>
+                        </>
                       )}
-                      <span>{item.label}</span>
-                    </>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </nav>
       </aside>
     </>

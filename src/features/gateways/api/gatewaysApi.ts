@@ -63,3 +63,11 @@ export async function restartGateway(gatewayId: string): Promise<void> {
     await apiClient.post(`/v1/platform/gateways/${gatewayId}/restart`);
 }
 
+export async function reloadAllGateways(): Promise<void> {
+    await apiClient.post('/v1/reload');
+}
+
+export async function forceDecommissionGateway(gatewayId: string): Promise<void> {
+    await apiClient.post(`/v1/platform/gateways/${gatewayId}/force-decommission`);
+}
+

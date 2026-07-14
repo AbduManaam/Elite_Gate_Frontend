@@ -66,11 +66,10 @@ export function useMetricInstantQuery(projectId: string | null, metric: MetricNa
 /**
  * Fetches platform system level range metrics (CPU/Memory) scoped to a project.
  */
-export function useSystemRangeQuery(projectId: string | null, service: string, metric: 'cpu' | 'memory', range = '1h', step = '60s') {
+export function useSystemRangeQuery(service: string, metric: 'cpu' | 'memory', range = '1h', step = '60s') {
   return useQuery({
-    queryKey: ['metrics', 'system', projectId, service, metric, range, step],
-    queryFn: () => querySystemRange(projectId as string, service, metric, range, step),
-    enabled: !!projectId,
+    queryKey: ['metrics', 'system', service, metric, range, step],
+    queryFn: () => querySystemRange(service, metric, range, step),
     staleTime: 15_000,
     refetchInterval: 30_000,
   });
