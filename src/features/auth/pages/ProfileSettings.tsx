@@ -5,6 +5,7 @@ import { useProjectsQuery } from '../../../shared/hooks/useProjects';
 
 export const ProfileSettings: React.FC = () => {
   const user = useAuthStore((s) => s.user);
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
   const { projectId, projectRole } = useActiveProject();
   const { data: projectsData } = useProjectsQuery();
 
@@ -12,14 +13,18 @@ export const ProfileSettings: React.FC = () => {
   const selectedProject = projects.find((p) => p.id === projectId) ?? null;
 
   const defaultName = user?.username
-    ? user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
+    ? user.username.toLowerCase() === 'abdumanam@gmail.com'
+      ? 'Abdu Manaam'
+      : user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
     : 'Abdu Manaam';
 
   const [profileName, setProfileName] = useState(defaultName);
 
   useEffect(() => {
     if (user?.username) {
-      const name = user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase());
+      const name = user.username.toLowerCase() === 'abdumanam@gmail.com'
+        ? 'Abdu Manaam'
+        : user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase());
       setProfileName(name);
     }
   }, [user]);
@@ -29,7 +34,9 @@ export const ProfileSettings: React.FC = () => {
       ? user.username
       : `${user.username}@elitegate.local`
     : 'admin@elitegate.io';
-  const roleName = projectRole
+  const roleName = isSuperAdmin
+    ? 'Super Admin'
+    : projectRole
     ? projectRole.charAt(0).toUpperCase() + projectRole.slice(1)
     : 'Owner';
 
@@ -70,9 +77,15 @@ export const ProfileSettings: React.FC = () => {
             <h3 className="font-headline-md text-headline-md text-on-surface">{profileName}</h3>
             <p className="text-sm text-on-surface-variant mt-xs">{emailAddress}</p>
             <div className="mt-sm flex flex-wrap gap-xs justify-center sm:justify-start">
-              <span className="inline-flex items-center gap-xs px-2.5 py-1 rounded bg-[#587c94]/10 text-[#587c94] font-semibold text-xs border border-[#587c94]/20">
-                <span className="material-symbols-outlined text-[14px]">shield_person</span> {roleName}
-              </span>
+              {isSuperAdmin ? (
+                <span className="inline-flex items-center gap-xs px-2.5 py-1 rounded bg-amber-500/10 text-amber-600 font-semibold text-xs border border-amber-500/20 shadow-sm">
+                  <span className="material-symbols-outlined text-[14px]">shield_person</span> Super Admin
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-xs px-2.5 py-1 rounded bg-[#587c94]/10 text-[#587c94] font-semibold text-xs border border-[#587c94]/20">
+                  <span className="material-symbols-outlined text-[14px]">shield_person</span> {roleName}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -119,7 +132,8 @@ export const ProfileSettings: React.FC = () => {
             <div className="flex flex-col gap-1">
               <span className="text-xs text-on-surface-variant">Membership Role</span>
               <span className="font-semibold text-on-surface flex items-center gap-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-success"></span> {roleName}
+                <span className={`w-1.5 h-1.5 rounded-full ${isSuperAdmin ? 'bg-amber-500 animate-pulse' : 'bg-success'}`}></span>{' '}
+                {isSuperAdmin ? 'Super Admin (Owner Bypass)' : roleName}
               </span>
             </div>
           </div>

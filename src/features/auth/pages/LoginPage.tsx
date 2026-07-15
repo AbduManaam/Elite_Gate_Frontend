@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
 import loginBanner from '../../../assets/login_gateway_banner.png';
-import logoImg from '../../../assets/logo.png';
 
 export interface LoginPageProps {
   readonly onLoginSuccess: () => void;
@@ -15,7 +14,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className 
   return (
     <div className={`bg-[#f3f5f8] text-[#171c1f] min-h-screen font-body-md w-full flex items-center justify-center p-4 md:p-8 select-none ${className}`}>
       {/* Outer rounded card */}
-      <div className="w-full max-w-[1020px] bg-white rounded-[32px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.06)] flex flex-col md:flex-row min-h-[620px] items-stretch">
+      <div className="w-full max-w-[1200px] bg-white rounded-[32px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.06)] flex flex-col md:flex-row min-h-[620px] items-stretch">
         
         {/* Left Side: Brand Banner */}
         <div 
@@ -26,8 +25,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className 
           }}
         >
           {/* Top Brand Logo */}
-          <div className="flex items-center gap-2">
-            <img src={logoImg} alt="Elite Gateway Logo" className="w-16 h-16 object-contain" />
+          <div className="flex items-center">
             <span 
               className="font-semibold tracking-[0.25em] text-white text-base"
               style={{ fontFamily: "'Outfit', sans-serif" }}

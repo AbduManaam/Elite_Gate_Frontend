@@ -28,17 +28,22 @@ export const AppRouter: React.FC = () => {
   const isSidebarCollapsed = useUIStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const user = useAuthStore((s) => s.user);
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
   const { projectRole } = useActiveProject();
 
   const displayName = user?.username
-    ? user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
+    ? user.username.toLowerCase() === 'abdumanam@gmail.com'
+      ? 'Abdu Manaam'
+      : user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
     : 'Abdu Manaam';
 
   const initials = displayName
     ? displayName.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()
     : 'AM';
 
-  const displayRole = projectRole
+  const displayRole = isSuperAdmin
+    ? 'Super Admin'
+    : projectRole
     ? projectRole.charAt(0).toUpperCase() + projectRole.slice(1)
     : 'System Administrator';
 
