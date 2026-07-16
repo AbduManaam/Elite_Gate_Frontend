@@ -8,7 +8,9 @@ import {
 import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 
 export const TenantManagementPage: React.FC = () => {
-  const { data: tenantsData, isLoading, refetch } = useTenantsQuery();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const { data: tenantsData, isLoading, error, refetch } = useTenantsQuery(page, limit);
   const suspendTenant = useSuspendTenantMutation();
   const reactivateTenant = useReactivateTenantMutation();
   const deleteTenant = useDeleteTenantMutation();
@@ -16,12 +18,8 @@ export const TenantManagementPage: React.FC = () => {
   const [selectedTenant, setSelectedTenant] = useState<any | null>(null);
   const [confirmAction, setConfirmAction] = useState<'suspend' | 'reactivate' | 'delete' | null>(null);
 
-  // Fallback mock data if the backend returns empty or isn't running
-  const tenants = tenantsData?.projects || [
-    { id: '11111111-1111-1111-1111-111111111111', name: 'Alpha Ingress Org', status: 'active', created_at: '2026-06-01T12:00:00Z' },
-    { id: '22222222-2222-2222-2222-222222222222', name: 'Beta Payments LLC', status: 'active', created_at: '2026-06-15T15:30:00Z' },
-    { id: '33333333-3333-3333-3333-333333333333', name: 'Gamma Corp Testing', status: 'suspended', created_at: '2026-07-02T09:15:00Z' },
-  ];
+  const tenants = tenantsData?.items ?? [];
+  const totalPages = tenantsData?.pagination?.total_pages ?? 1;
 
   const handleActionClick = (tenant: any, action: 'suspend' | 'reactivate' | 'delete') => {
     setSelectedTenant(tenant);
@@ -78,16 +76,16 @@ export const TenantManagementPage: React.FC = () => {
                 <td className="py-4 px-lg text-xs text-on-surface-variant">{formatDate(t.created_at)}</td>
                 <td className="py-4 px-lg">
                   <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full border ${
-                    t.status === 'active'
+                    t.is_active
                       ? 'bg-green-50 text-green-700 border-green-200'
                       : 'bg-red-50 text-red-700 border-red-200'
                   }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${t.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
-                    {t.status === 'active' ? 'Active' : 'Suspended'}
+                    <span className={`w-1.5 h-1.5 rounded-full ${t.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+                    {t.is_active ? 'Active' : 'Suspended'}
                   </span>
                 </td>
                 <td className="py-4 px-lg text-right flex justify-end gap-2">
-                  {t.status === 'active' ? (
+                  {t.is_active ? (
                     <button
                       onClick={() => handleActionClick(t, 'suspend')}
                       className="px-3 py-1.5 border border-outline-variant text-xs font-semibold rounded-lg hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors cursor-pointer"
@@ -113,6 +111,27 @@ export const TenantManagementPage: React.FC = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex justify-between items-center mt-md bg-white border border-outline-variant rounded-xl p-md shadow-xs">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          className="px-3 py-1.5 border border-outline-variant rounded-lg text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 cursor-pointer transition-colors"
+        >
+          Previous
+        </button>
+        <span className="text-xs text-on-surface-variant font-semibold">
+          Page {page} of {totalPages}
+        </span>
+        <button
+          disabled={page >= totalPages}
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          className="px-3 py-1.5 border border-outline-variant rounded-lg text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 cursor-pointer transition-colors"
+        >
+          Next
+        </button>
       </div>
 
       {/* Confirmation Modals */}

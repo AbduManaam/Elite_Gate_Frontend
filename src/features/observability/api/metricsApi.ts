@@ -136,13 +136,28 @@ export async function querySystemRange(
   return data.points;
 }
 
-export async function getPlatformHealth() {
-    const { data } = await apiClient.get('/v1/platform/health');
+export interface PlatformHealthResponse {
+  projects: { active: number; suspended: number; total: number };
+  gateways: { active: number; provisioning: number; decommissioned: number; total: number };
+  gateway_health: { gateway_id: string; status: 'healthy' | 'unreachable' }[];
+}
+
+export interface PlatformMetricsResponse {
+  total_tenants: number;
+  total_routes: number;
+  total_upstreams: number;
+  active_api_keys: number;
+  revoked_api_keys: number;
+  total_admin_users: number;
+}
+
+export async function getPlatformHealth(): Promise<PlatformHealthResponse> {
+    const { data } = await apiClient.get<PlatformHealthResponse>('/v1/platform/health');
     return data;
 }
 
-export async function getPlatformMetrics() {
-    const { data } = await apiClient.get('/v1/platform/metrics');
+export async function getPlatformMetrics(): Promise<PlatformMetricsResponse> {
+    const { data } = await apiClient.get<PlatformMetricsResponse>('/v1/platform/metrics');
     return data;
 }
 

@@ -27,7 +27,7 @@ export async function listProjectGateways(projectId: string): Promise<GatewayRec
 }
 
 export async function listAllGateways(): Promise<GatewayRecord[]> {
-    const { data } = await apiClient.get<ListGatewaysResponse>('/v1/gateways');
+    const { data } = await apiClient.get<ListGatewaysResponse>('/v1/gateways', { params: { limit: 200 } });
     return data.gateways ?? data.items ?? [];
 }
 

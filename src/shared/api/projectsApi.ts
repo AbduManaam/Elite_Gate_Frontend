@@ -99,15 +99,34 @@ export async function updateProject(projectId: string, input: UpdateProjectInput
     return data as Project;
 }
 
-export interface TenantSummary {
-    id: string;
-    name: string;
-    status: string;
-    created_at: string;
+export interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
 }
 
-export async function listAllTenants(limit = 50, offset = 0): Promise<{ projects: TenantSummary[]; total: number }> {
-    const { data } = await apiClient.get(`/v1/platform/projects`, { params: { limit, offset } });
+export interface PaginatedResponse<T> {
+    items: T[];
+    pagination: Pagination;
+}
+
+export interface TenantSummary {
+    readonly id: string;
+    readonly name: string;
+    readonly slug: string;
+    readonly description: string;
+    readonly owner_id: string;
+    readonly is_active: boolean;
+    readonly plan: string;
+    readonly created_at: string;
+    readonly updated_at: string;
+}
+
+export async function listAllTenants(page = 1, limit = 10): Promise<PaginatedResponse<TenantSummary>> {
+    const { data } = await apiClient.get<PaginatedResponse<TenantSummary>>('/v1/platform/projects', {
+        params: { page, limit },
+    });
     return data;
 }
 

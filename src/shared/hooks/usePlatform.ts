@@ -12,8 +12,8 @@ export function usePlatformMetricsQuery() {
     return useQuery({ queryKey: ['platform', 'metrics'], queryFn: getPlatformMetrics, refetchInterval: 30_000 });
 }
 
-export function useTenantsQuery(limit = 50, offset = 0) {
-    return useQuery({ queryKey: ['platform', 'tenants', limit, offset], queryFn: () => listAllTenants(limit, offset) });
+export function useTenantsQuery(page = 1, limit = 10) {
+    return useQuery({ queryKey: ['platform', 'tenants', page, limit], queryFn: () => listAllTenants(page, limit) });
 }
 
 function useTenantMutation(fn: (id: string) => Promise<void>) {
