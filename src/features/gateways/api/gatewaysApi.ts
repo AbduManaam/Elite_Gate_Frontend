@@ -6,6 +6,8 @@ export interface GatewayRecord {
     readonly external_id: string;
     readonly endpoint_ip: string;
     readonly gateway_port: string;
+    readonly public_host: string;
+    readonly public_port: string;
     readonly plan: string;
     readonly status: string;
 }
@@ -37,6 +39,8 @@ export async function provisionGateway(projectId: string, plan: string): Promise
         readonly status: string;
         readonly endpoint_ip: string;
         readonly gateway_port: string;
+        readonly public_host: string;
+        readonly public_port: string;
     }>(`/v1/projects/${projectId}/gateways`, {
         project_id: projectId,
         plan,
@@ -47,6 +51,8 @@ export async function provisionGateway(projectId: string, plan: string): Promise
         external_id: data.gateway_id,
         endpoint_ip: data.endpoint_ip,
         gateway_port: data.gateway_port,
+        public_host: data.public_host,
+        public_port: data.public_port,
         plan,
         status: data.status,
     };

@@ -4,6 +4,9 @@ import { useCreateRouteMutation } from '../../routes/hooks/useRouteMutations';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useProjectsQuery, useCreateProjectMutation } from '../../../shared/hooks/useProjects';
 import { toApiError } from '../../../shared/api/apiError';
+import { useGatewaysQuery, useProvisionGatewayMutation } from '../hooks/useGateways';
+import { buildRouteUrl } from '../utils/gatewayUrl';
+import { CopyableUrl } from '../../../shared/components/ui/CopyableUrl';
 
 interface ConfigureApiModalProps {
     projectId: string;
@@ -27,6 +30,12 @@ export const ConfigureApiModal: React.FC<ConfigureApiModalProps> = ({ projectId,
     const [routePath, setRoutePath] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [createdRoutePath, setCreatedRoutePath] = useState<string | null>(null);
+
+    const { data: gateways } = useGatewaysQuery(resolvedProjectId || '');
+    const activeGateway = gateways?.find((gw) => gw.status !== 'decommissioned');
+    const provisionGateway = useProvisionGatewayMutation(resolvedProjectId || '');
+    const finalUrl = createdRoutePath ? buildRouteUrl(activeGateway, createdRoutePath) : null;
 
     const [newProjectName, setNewProjectName] = useState('');
     const [projectError, setProjectError] = useState('');
@@ -77,7 +86,7 @@ export const ConfigureApiModal: React.FC<ConfigureApiModalProps> = ({ projectId,
                 enabled: true,
             });
 
-            onClose();
+            setCreatedRoutePath(routePath);
         } catch (err: any) {
             const apiErr = toApiError(err);
             setErrorMsg(apiErr.message || 'Failed to configure new API.');
@@ -119,8 +128,55 @@ services:
                 {/* Modal Body */}
                 <div className="flex flex-1 overflow-hidden">
                     {/* Left Form (60%) */}
-                    <div className="w-3/5 p-lg overflow-y-auto flex flex-col gap-lg border-r border-outline-variant">
-                        {!resolvedProjectId ? (
+                    <div className={`${createdRoutePath ? 'w-full' : 'w-3/5 border-r border-outline-variant'} p-lg overflow-y-auto flex flex-col gap-lg`}>
+                        {createdRoutePath ? (
+                            <div className="w-full flex flex-col gap-lg items-start animate-scale-up">
+                                <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                                    <span className="material-symbols-outlined text-[28px]">check_circle</span>
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-on-surface">API configured</h3>
+                                    <p className="text-xs text-on-surface-variant mt-1">
+                                        Your route is live. Call it at the URL below.
+                                    </p>
+                                </div>
+
+                                {!activeGateway ? (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-md flex flex-col gap-sm w-full">
+                                        <p className="text-xs text-amber-800">
+                                            This project doesn't have a dedicated gateway yet, so there's no
+                                            live port to call this route on.
+                                        </p>
+                                        <button
+                                            onClick={() => provisionGateway.mutate('dedicated')}
+                                            disabled={provisionGateway.isPending}
+                                            className="self-start bg-[#113346] text-white px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 cursor-pointer"
+                                        >
+                                            {provisionGateway.isPending ? 'Provisioning...' : 'Provision Dedicated Gateway'}
+                                        </button>
+                                    </div>
+                                ) : finalUrl ? (
+                                    <div className="bg-slate-50 border border-outline-variant rounded-lg p-md w-full">
+                                        <CopyableUrl url={finalUrl} className="text-sm" />
+                                        <p className="text-[11px] text-on-surface-variant mt-2">
+                                            Try it: <code>curl {finalUrl}</code>
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-amber-700 font-medium">
+                                        Gateway is still provisioning — the port will be assigned shortly.
+                                        You can find it later under Gateway services → Endpoint.
+                                    </p>
+                                )}
+
+                                <button
+                                    onClick={onClose}
+                                    className="bg-[#113346] text-white px-4 py-2 rounded text-sm font-semibold mt-sm cursor-pointer hover:bg-[#123749] transition-colors"
+                                >
+                                    Done
+                                </button>
+                            </div>
+                        ) : !resolvedProjectId ? (
                             <div className="flex flex-col gap-lg">
                                 <div>
                                     <h3 className="text-sm font-semibold text-on-surface">Active Workspace Required</h3>
@@ -287,62 +343,66 @@ services:
                     </div>
 
                     {/* Right YAML Preview (40%) */}
-                    <div className="w-2/5 p-lg bg-slate-50 overflow-y-auto flex flex-col gap-md select-text">
-                        <div className="flex justify-between items-center">
-                            <span className="font-semibold text-xs text-[#113346] flex items-center gap-1">
-                                <span className="material-symbols-outlined text-[16px] text-green-600">terminal</span>
-                                decK <span className="text-outline font-normal text-[10px] lowercase">Kong's official CLI</span>
+                    {!createdRoutePath && (
+                        <div className="w-2/5 p-lg bg-slate-50 overflow-y-auto flex flex-col gap-md select-text">
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold text-xs text-[#113346] flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[16px] text-green-600">terminal</span>
+                                    decK <span className="text-outline font-normal text-[10px] lowercase">Kong's official CLI</span>
+                                </span>
+                                <span className="material-symbols-outlined text-outline text-[16px] cursor-pointer hover:text-on-surface" title="Show CLI guide">chevron_right</span>
+                            </div>
+                            <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                                You can also manage your gateway configuration declaratively using decK, enabling easy syncing with source control.
+                            </p>
+
+                            {/* YAML Code Container */}
+                            <div className="bg-[#0b1928] text-white rounded-lg p-md font-mono text-[11px] shadow-inner overflow-x-auto flex-1 flex">
+                                {/* Line numbers */}
+                                <div className="text-slate-500 pr-3 border-r border-slate-700/50 text-right select-none w-8">
+                                    {yamlLines.map((_, i) => (
+                                        <div key={i}>{i + 1}</div>
+                                    ))}
+                                </div>
+                                {/* YAML text */}
+                                <div className="pl-3 text-slate-200 whitespace-pre">
+                                    {yamlLines.map((line, i) => (
+                                        <div key={i} className="hover:bg-slate-800/30 px-1 rounded transition-colors">
+                                            {line}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <span className="text-[10px] text-primary hover:underline cursor-pointer font-semibold">
+                                Want to manage gateways with decK? Learn more
                             </span>
-                            <span className="material-symbols-outlined text-outline text-[16px] cursor-pointer hover:text-on-surface" title="Show CLI guide">chevron_right</span>
                         </div>
-                        <p className="text-[11px] text-on-surface-variant leading-relaxed">
-                            You can also manage your gateway configuration declaratively using decK, enabling easy syncing with source control.
-                        </p>
-
-                        {/* YAML Code Container */}
-                        <div className="bg-[#0b1928] text-white rounded-lg p-md font-mono text-[11px] shadow-inner overflow-x-auto flex-1 flex">
-                            {/* Line numbers */}
-                            <div className="text-slate-500 pr-3 border-r border-slate-700/50 text-right select-none w-8">
-                                {yamlLines.map((_, i) => (
-                                    <div key={i}>{i + 1}</div>
-                                ))}
-                            </div>
-                            {/* YAML text */}
-                            <div className="pl-3 text-slate-200 whitespace-pre">
-                                {yamlLines.map((line, i) => (
-                                    <div key={i} className="hover:bg-slate-800/30 px-1 rounded transition-colors">
-                                        {line}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <span className="text-[10px] text-primary hover:underline cursor-pointer font-semibold">
-                            Want to manage gateways with decK? Learn more
-                        </span>
-                    </div>
+                    )}
                 </div>
 
                 {/* Modal Footer */}
-                <div className="p-lg border-t border-outline-variant flex justify-end gap-sm bg-white select-none">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        disabled={isSaving}
-                        className="px-4 py-2 text-sm font-semibold text-on-surface-variant hover:bg-slate-50 rounded transition-colors cursor-pointer disabled:opacity-50"
-                    >
-                        Cancel
-                    </button>
-                    {resolvedProjectId && (
+                {!createdRoutePath && (
+                    <div className="p-lg border-t border-outline-variant flex justify-end gap-sm bg-white select-none">
                         <button
-                            onClick={handleSave}
+                            type="button"
+                            onClick={onClose}
                             disabled={isSaving}
-                            className="bg-[#113346] text-white px-5 py-2 rounded text-sm font-semibold hover:bg-[#123749] transition-colors cursor-pointer flex items-center gap-xs disabled:opacity-50"
+                            className="px-4 py-2 text-sm font-semibold text-on-surface-variant hover:bg-slate-50 rounded transition-colors cursor-pointer disabled:opacity-50"
                         >
-                            {isSaving ? 'Configuring...' : 'Save'}
+                            Cancel
                         </button>
-                    )}
-                </div>
+                        {resolvedProjectId && (
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="bg-[#113346] text-white px-5 py-2 rounded text-sm font-semibold hover:bg-[#123749] transition-colors cursor-pointer flex items-center gap-xs disabled:opacity-50"
+                            >
+                                {isSaving ? 'Configuring...' : 'Save'}
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

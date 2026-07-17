@@ -4,6 +4,7 @@ import {
   queryMetricRange,
   queryMetricInstant,
   querySystemRange,
+  queryProjectSystemRange,
   MetricName,
 } from '../api/metricsApi';
 
@@ -19,8 +20,8 @@ export function useDashboardSummaryQuery(projectId: string | null) {
     queryKey: ['metrics', projectId, 'summary'],
     queryFn: () => getDashboardSummary(projectId as string),
     enabled: !!projectId,
-    staleTime: 15_000,
-    refetchInterval: 30_000,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
   });
 }
 
@@ -41,8 +42,8 @@ export function useMetricRangeQuery(
     queryKey: ['metrics', projectId, metric, 'range', range],
     queryFn: () => queryMetricRange(projectId as string, metric, range),
     enabled: !!projectId,
-    staleTime: 15_000,
-    refetchInterval: 30_000,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
   });
 }
 
@@ -58,20 +59,52 @@ export function useMetricInstantQuery(projectId: string | null, metric: MetricNa
     queryKey: ['metrics', projectId, metric, 'instant'],
     queryFn: () => queryMetricInstant(projectId as string, metric),
     enabled: !!projectId,
-    staleTime: 10_000,
+    staleTime: 5_000,
     refetchInterval: 15_000,
   });
 }
 
 /**
  * Fetches platform system level range metrics (CPU/Memory) scoped to a project.
+ * Only fires when the current user is a super admin — regular users don't have
+ * access to the /platform/metrics/system/range endpoint (403 otherwise).
  */
-export function useSystemRangeQuery(service: string, metric: 'cpu' | 'memory', range = '1h', step = '60s') {
+export function useSystemRangeQuery(
+  service: string,
+  metric: 'cpu' | 'memory',
+  range = '1h',
+  step = '60s',
+  isSuperAdmin?: boolean | null
+) {
   return useQuery({
     queryKey: ['metrics', 'system', service, metric, range, step],
     queryFn: () => querySystemRange(service, metric, range, step),
-    staleTime: 15_000,
-    refetchInterval: 30_000,
+    enabled: !!isSuperAdmin,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
   });
 }
+
+/**
+ * Fetches project-scoped system metrics (CPU/Memory) for the active project's gateway.
+ * Requires Owner or Editor role — Viewers cannot access system-level metrics.
+ */
+export function useProjectSystemRangeQuery(
+  projectId: string | null,
+  service: string,
+  metric: 'cpu' | 'memory',
+  range = '1h',
+  step = '60s',
+  role?: string | null
+) {
+  const canAccess = role === 'owner' || role === 'editor';
+  return useQuery({
+    queryKey: ['metrics', 'project-system', projectId, service, metric, range, step],
+    queryFn: () => queryProjectSystemRange(projectId as string, service, metric, range, step),
+    enabled: !!projectId && canAccess,
+    staleTime: 5_000,
+    refetchInterval: 15_000,
+  });
+}
+
 

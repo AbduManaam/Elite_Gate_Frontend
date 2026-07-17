@@ -136,6 +136,25 @@ export async function querySystemRange(
   return data.points;
 }
 
+/**
+ * Fetches project-scoped system metrics (CPU/Memory) for the active project's gateway.
+ * Corresponds to GET /admin/v1/projects/:projectId/metrics/system/range.
+ * Requires Owner or Editor role.
+ */
+export async function queryProjectSystemRange(
+  projectId: string,
+  service: string,
+  metric: 'cpu' | 'memory',
+  range = '1h',
+  step = '60s'
+): Promise<TimeSeriesPoint[]> {
+  const { data } = await apiClient.get<{ points: TimeSeriesPoint[] }>(
+    `/v1/projects/${projectId}/metrics/system/range`,
+    { params: { service, metric, range, step } }
+  );
+  return data.points;
+}
+
 export interface PlatformHealthResponse {
   projects: { active: number; suspended: number; total: number };
   gateways: { active: number; provisioning: number; decommissioned: number; total: number };

@@ -13,6 +13,9 @@ import { RouteFormDrawer } from './RouteFormDrawer';
 import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 import { toApiError } from '../../../shared/api/apiError';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
+import { useGatewaysQuery } from '../../gateways/hooks/useGateways';
+import { buildRouteUrl } from '../../gateways/utils/gatewayUrl';
+import { CopyableUrl } from '../../../shared/components/ui/CopyableUrl';
 
 export const RoutesList: React.FC = () => {
   const { projectId } = useActiveProject();
@@ -40,6 +43,8 @@ export const RoutesList: React.FC = () => {
 
   const { data: routes, isLoading, error } = useRoutesQuery(projectId);
   const { data: policies } = usePoliciesQuery(projectId);
+  const { data: gateways } = useGatewaysQuery(projectId ?? '');
+  const activeGateway = gateways?.find((gw) => gw.status !== 'decommissioned');
 
   const deleteRoute = useDeleteRouteMutation(projectId ?? '');
   const disableRoute = useDisableRouteMutation(projectId ?? '');
@@ -150,6 +155,7 @@ export const RoutesList: React.FC = () => {
               <thead className="bg-surface-container-low font-semibold text-xs text-on-surface-variant sticky top-0 z-10 border-b border-outline-variant">
                 <tr>
                   <th className="py-3 px-md font-medium">Path</th>
+                  <th className="py-3 px-md font-medium">Callable URL</th>
                   <th className="py-3 px-md font-medium">Upstream</th>
                   <th className="py-3 px-md font-medium">Methods</th>
                   <th className="py-3 px-md font-medium">Protocol</th>
@@ -166,6 +172,16 @@ export const RoutesList: React.FC = () => {
                     className={`transition-colors group ${canManageRoutes ? 'hover:bg-surface-container-low cursor-pointer' : ''}`}
                   >
                     <td className="py-4 px-md font-medium text-[#587c94]">{route.path}</td>
+                    <td className="py-4 px-md" onClick={(e) => e.stopPropagation()}>
+                      {(() => {
+                        const url = buildRouteUrl(activeGateway, route.path);
+                        return url ? (
+                          <CopyableUrl url={url} />
+                        ) : (
+                          <span className="text-outline text-[11px] italic">No active gateway</span>
+                        );
+                      })()}
+                    </td>
                     <td className="py-4 px-md text-on-surface-variant">{route.upstream_url || '—'}</td>
                     <td className="py-4 px-md">
                       <div className="flex gap-1 flex-wrap">

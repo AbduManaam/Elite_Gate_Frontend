@@ -10,6 +10,8 @@ import {
   useRestartGatewayMutation
 } from '../hooks/useGateways';
 import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
+import { buildGatewayBaseUrl } from '../utils/gatewayUrl';
+import { CopyableUrl } from '../../../shared/components/ui/CopyableUrl';
 
 interface GatewaysOverviewProps {
   readonly showOnlyProject?: boolean;
@@ -57,6 +59,7 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
 
   // Find the active/running dedicated gateway for the project
   const activeGateway = gateways?.find((gw) => gw.status !== 'decommissioned');
+  const gatewayBaseUrl = buildGatewayBaseUrl(activeGateway);
 
   useEffect(() => {
     const interval = setInterval(() => setTick((t) => t + 1), 10000);
@@ -386,6 +389,20 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
                           }`} />
                           <span className="capitalize">{activeGateway.status === 'active' ? 'Running' : activeGateway.status}</span>
                         </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40 gap-md">
+                        <span className="text-on-surface-variant flex items-center gap-1 shrink-0">
+                          <span className="material-symbols-outlined text-[14px]">link</span>
+                          Endpoint
+                        </span>
+                        {gatewayBaseUrl ? (
+                          <CopyableUrl url={gatewayBaseUrl} />
+                        ) : (
+                          <span className="text-outline text-[11px] italic">
+                            {activeGateway.status === 'provisioning' ? 'Assigning port...' : 'Unavailable'}
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center justify-between text-xs py-1 border-b border-outline-variant/40">

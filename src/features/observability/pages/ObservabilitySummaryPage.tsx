@@ -16,7 +16,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
-import { useDashboardSummaryQuery, useSystemRangeQuery } from '../hooks/useMetrics';
+import { useDashboardSummaryQuery, useProjectSystemRangeQuery } from '../hooks/useMetrics';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 
 export interface ObservabilitySummaryProps {
@@ -75,15 +75,15 @@ const RANGE_OPTIONS = [
 const SERVICES = ['elitegate-gateway', 'user-service', 'order-service'];
 
 export const ObservabilitySummaryPage: React.FC<ObservabilitySummaryProps> = ({ className = '' }) => {
-  const { projectId } = useActiveProject();
+  const { projectId, projectRole } = useActiveProject();
   const [timeRange, setTimeRange] = useState(RANGE_OPTIONS.find(opt => opt.value === '1h') || RANGE_OPTIONS[0]);
   const [isOpenRangeDropdown, setIsOpenRangeDropdown] = useState(false);
   const [selectedService, setSelectedService] = useState(SERVICES[0]);
   const [isOpenFilterDropdown, setIsOpenFilterDropdown] = useState(false);
 
   const { data: summary, isLoading, error } = useDashboardSummaryQuery(projectId);
-  const { data: cpuTrend } = useSystemRangeQuery(selectedService, 'cpu', timeRange.value, timeRange.step);
-  const { data: memTrend } = useSystemRangeQuery(selectedService, 'memory', timeRange.value, timeRange.step);
+  const { data: cpuTrend } = useProjectSystemRangeQuery(projectId, selectedService, 'cpu', timeRange.value, timeRange.step, projectRole);
+  const { data: memTrend } = useProjectSystemRangeQuery(projectId, selectedService, 'memory', timeRange.value, timeRange.step, projectRole);
 
   /** KPI card definitions derived from the live summary payload. */
   const kpiCards = summary
