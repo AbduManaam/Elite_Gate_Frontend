@@ -5,6 +5,7 @@ import { RequireAuth } from './AuthGate';
 import { RequireRole } from './RequireRole';
 import {
     LoginPage,
+    OAuthCallbackPage,
     PlatformAdminsPage,
     RolesPermissionsPage,
     UnauthorizedPage,
@@ -39,6 +40,10 @@ export const router = createBrowserRouter([
         element: <LoginRoute />,
     },
     {
+        path: '/oauth/callback',
+        element: <OAuthCallbackPage />,
+    },
+    {
         path: '/unauthorized',
         element: <UnauthorizedPage />,
     },
@@ -51,13 +56,13 @@ export const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <WelcomeDashboard /> },
-            
+
             // Project Admin & standard routes
             { path: 'connectivity', element: <GatewaysPage /> },
             { path: 'analytics', element: <ObservabilitySummaryPage /> },
             { path: 'settings', element: <ProjectSettings /> },
             { path: 'logs', element: <AuditLogsPage /> },
-            
+
             // Team Member Operations
             {
                 path: 'gateway/status',

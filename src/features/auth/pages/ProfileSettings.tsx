@@ -12,28 +12,34 @@ export const ProfileSettings: React.FC = () => {
   const projects = projectsData?.items ?? [];
   const selectedProject = projects.find((p) => p.id === projectId) ?? null;
 
-  const defaultName = user?.username
-    ? user.username.toLowerCase() === 'abdumanam@gmail.com'
-      ? 'Abdu Manaam'
-      : user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
-    : 'Abdu Manaam';
+  if (!user) {
+    return (
+      <div className="flex h-[400px] w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-sm">
+          <div className="w-8 h-8 border-4 border-[#587c94]/20 border-t-[#587c94] rounded-full animate-spin" />
+          <span className="text-on-surface-variant text-xs font-semibold">Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const defaultName = user.username.toLowerCase() === 'abdumanam@gmail.com' || user.username.toLowerCase() === 'abdumanam'
+    ? 'Abdu Manaam'
+    : user.username.split('@')[0].split('_')[0].split('.')[0].replace(/^\w/, (c) => c.toUpperCase());
 
   const [profileName, setProfileName] = useState(defaultName);
 
   useEffect(() => {
-    if (user?.username) {
-      const name = user.username.toLowerCase() === 'abdumanam@gmail.com'
-        ? 'Abdu Manaam'
-        : user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase());
-      setProfileName(name);
-    }
+    const name = user.username.toLowerCase() === 'abdumanam@gmail.com' || user.username.toLowerCase() === 'abdumanam'
+      ? 'Abdu Manaam'
+      : user.username.split('@')[0].split('_')[0].split('.')[0].replace(/^\w/, (c) => c.toUpperCase());
+    setProfileName(name);
   }, [user]);
 
-  const emailAddress = user?.username
-    ? user.username.includes('@')
-      ? user.username
-      : `${user.username}@elitegate.local`
-    : 'admin@elitegate.io';
+  const emailAddress = user.username.includes('@')
+    ? user.username
+    : `${user.username}@elitegate.local`;
+
   const roleName = isSuperAdmin
     ? 'Super Admin'
     : projectRole
@@ -47,7 +53,7 @@ export const ProfileSettings: React.FC = () => {
         .join('')
         .substring(0, 2)
         .toUpperCase()
-    : 'AM';
+    : 'U';
 
   return (
     <div className="w-full max-w-2xl mx-auto text-left flex flex-col gap-stack-lg">

@@ -32,14 +32,14 @@ export const AppRouter: React.FC = () => {
   const { projectRole } = useActiveProject();
 
   const displayName = user?.username
-    ? user.username.toLowerCase() === 'abdumanam@gmail.com'
+    ? user.username.toLowerCase() === 'abdumanam@gmail.com' || user.username.toLowerCase() === 'abdumanam'
       ? 'Abdu Manaam'
-      : user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
-    : 'Abdu Manaam';
+      : user.username.split('@')[0].split('_')[0].split('.')[0].replace(/^\w/, (c) => c.toUpperCase())
+    : '';
 
   const initials = displayName
     ? displayName.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()
-    : 'AM';
+    : 'U';
 
   const displayRole = isSuperAdmin
     ? 'Super Admin'

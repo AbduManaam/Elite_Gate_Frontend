@@ -3,4 +3,4 @@ export { default as ProfileSettings } from './pages/ProfileSettings';
 export { default as PlatformAdminsPage } from './pages/PlatformAdminsPage';
 export { default as RolesPermissionsPage } from './pages/RolesPermissionsPage';
 export { default as UnauthorizedPage } from './pages/UnauthorizedPage';
-
+export { default as OAuthCallbackPage } from './pages/OAuthCallbackPage';

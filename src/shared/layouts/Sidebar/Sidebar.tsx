@@ -135,15 +135,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       {
         title: 'Projects',
         items: [
-          { label: 'My Project', path: '/connectivity', icon: 'folder' },
-          { label: 'Gateway Management', path: '/connectivity?tab=Gateway services', icon: 'dns' },
-          { label: 'Project Users', path: '/connectivity?tab=Team Collaboration', icon: 'group' },
-        ],
-      },
-      {
-        title: 'Settings',
-        items: [
-          { label: 'Project Settings', path: '/settings', icon: 'settings' },
+          { label: 'Configuration', path: '/connectivity', icon: 'settings' },
+          { label: 'Analytics', path: '/analytics', icon: 'monitoring' },
+          { label: 'Audit log', path: '/logs', icon: 'history' },
         ],
       }
     );

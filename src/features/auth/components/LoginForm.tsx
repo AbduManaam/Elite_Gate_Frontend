@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { isAxiosError } from 'axios';
 import { useLoginMutation } from '../hooks/useLoginMutation';
 
@@ -34,6 +34,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
   const [formError, setFormError] = useState('');
   const loginMutation = useLoginMutation();
 
+  useEffect(() => {
+    const err = new URLSearchParams(window.location.search).get("oauth_error");
+
+    if (err) {
+      setFormError(decodeURIComponent(err));
+    }
+  }, []);
+
   const isSubmitting = loginMutation.isPending;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -62,7 +70,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
 
   return (
     <div className="w-full flex flex-col justify-center px-8 md:px-16 py-10 text-left select-none animate-fade-in-up stagger-2">
-      
+
       {/* Title Header */}
       <div className="mb-6">
         <h2 className="text-3xl font-bold text-[#171c1f] mb-1 tracking-tight">Sign In</h2>
@@ -161,7 +169,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
         {/* Google Login Button */}
         <button
           type="button"
-          onClick={() => alert('Google Authentication is not configured for this tenant.')}
+          onClick={() => {
+            window.location.href = `${import.meta.env.VITE_API_BASE_URL}/admin/google/login`;
+          }}
           className="w-full bg-white border border-gray-200 text-gray-700 font-semibold text-sm py-3.5 rounded-full flex justify-center items-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -182,7 +192,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          Login with Google
+          Continue with Google
         </button>
 
         {/* Footer text */}
