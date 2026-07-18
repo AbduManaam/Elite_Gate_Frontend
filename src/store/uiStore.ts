@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { lastProjectStorage } from '../shared/lib/projectStorage';
 
 export type ProjectRole = 'viewer' | 'editor' | 'owner';
 
@@ -17,7 +18,7 @@ interface UIState {
 
 export const useUIStore = create<UIState>((set) => ({
     isSidebarCollapsed: false,
-    activeProjectId: null,
+    activeProjectId: lastProjectStorage.get(),
     activeProjectRole: null,
     toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
     // Switching projects always clears the old role — never let a stale

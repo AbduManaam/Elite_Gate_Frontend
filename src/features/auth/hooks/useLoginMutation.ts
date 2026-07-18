@@ -9,7 +9,7 @@ export function useLoginMutation() {
         mutationFn: ({ username, password }: { username: string; password: string }) =>
             login(username, password),
         onSuccess: (data) => {
-            setSession({ accessToken: data.access_token, refreshToken: data.refresh_token });
+            setSession(data.access_token);
         },
     });
 }

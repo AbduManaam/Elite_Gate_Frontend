@@ -1,9 +1,7 @@
 import { apiClient } from '../../../lib/api/client';
-import { tokenStore } from '../../../lib/api/tokenStore';
 
 export interface TokenResponse {
     access_token: string;
-    refresh_token: string;
     expires_in: number;
     token_type: string;
 }
@@ -22,14 +20,13 @@ export async function signup(username: string, password: string, company: string
     return data;
 }
 
-export async function refresh(refreshToken: string): Promise<TokenResponse> {
-    const { data } = await apiClient.post<TokenResponse>('/refresh', { refresh_token: refreshToken });
+export async function refresh(): Promise<TokenResponse> {
+    const { data } = await apiClient.post<TokenResponse>('/refresh', {});
     return data;
 }
 
 export async function logout(): Promise<void> {
-    const refreshToken = tokenStore.getRefreshToken() || '';
-    await apiClient.post('/logout', { refresh_token: refreshToken });
+    await apiClient.post('/logout', {});
 }
 
 export interface MeResponse {

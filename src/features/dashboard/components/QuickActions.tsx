@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useWorkspacePath } from '../../../shared/hooks/useWorkspacePath';
 
 interface QuickActionItem {
   title: string;
@@ -13,6 +14,7 @@ interface QuickActionItem {
 
 export const QuickActions: React.FC = () => {
   const navigate = useNavigate();
+  const getPath = useWorkspacePath();
 
   const actions: QuickActionItem[] = [
     {
@@ -22,7 +24,7 @@ export const QuickActions: React.FC = () => {
       iconBg: 'bg-[#e3f2fd]',
       iconColor: 'text-[#0d47a1]',
       btnText: 'Create Route',
-      path: '/connectivity?tab=Routes&action=create-route',
+      path: getPath('/connectivity?tab=Routes&action=create-route'),
     },
     {
       title: 'Create Upstream',
@@ -31,7 +33,7 @@ export const QuickActions: React.FC = () => {
       iconBg: 'bg-[#e8f5e9]',
       iconColor: 'text-[#1b5e20]',
       btnText: 'Create Upstream',
-      path: '/connectivity?tab=Upstreams&action=create-upstream',
+      path: getPath('/connectivity?tab=Upstreams&action=create-upstream'),
     },
     {
       title: 'Create Policy',
@@ -40,7 +42,7 @@ export const QuickActions: React.FC = () => {
       iconBg: 'bg-[#f3e5f5]',
       iconColor: 'text-[#4a148c]',
       btnText: 'Create Policy',
-      path: '/connectivity?tab=Policies&action=create-policy',
+      path: getPath('/connectivity?tab=Policies&action=create-policy'),
     },
     {
       title: 'Generate API Key',
@@ -49,7 +51,7 @@ export const QuickActions: React.FC = () => {
       iconBg: 'bg-[#fff3e0]',
       iconColor: 'text-[#e65100]',
       btnText: 'Generate Key',
-      path: '/connectivity?tab=API Credentials&action=create-apikey',
+      path: getPath('/connectivity?tab=API Credentials&action=create-apikey'),
     },
   ];
 

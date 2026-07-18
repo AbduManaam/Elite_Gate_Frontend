@@ -13,17 +13,16 @@ export const OAuthCallbackPage: React.FC = () => {
 
         const params = new URLSearchParams(window.location.hash.slice(1));
         const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
 
         // Clear the fragment immediately so tokens never sit in browser history.
         window.history.replaceState(null, '', window.location.pathname);
 
-        if (!accessToken || !refreshToken) {
+        if (!accessToken) {
             navigate('/login?oauth_error=missing_tokens', { replace: true });
             return;
         }
 
-        setSession({ accessToken, refreshToken });
+        setSession(accessToken);
         navigate('/', { replace: true });
     }, [navigate, setSession]);
 

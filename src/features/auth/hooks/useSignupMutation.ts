@@ -9,7 +9,7 @@ export function useSignupMutation() {
         mutationFn: ({ username, password, company }: { username: string; password: string; company: string }) =>
             signup(username, password, company),
         onSuccess: (data) => {
-            setSession({ accessToken: data.access_token, refreshToken: data.refresh_token });
+            setSession(data.access_token);
         },
     });
 }

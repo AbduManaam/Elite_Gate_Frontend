@@ -1,19 +1,15 @@
 import React from 'react';
 import { useProjectsQuery } from '../../../shared/hooks/useProjects';
-import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useNavigate } from 'react-router-dom';
 
 export const AllProjectsPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: projectsData } = useProjectsQuery();
-  const { setActiveProjectId, setActiveProjectRole } = useActiveProject();
 
   const projects = projectsData?.items || [];
 
-  const handleOpenProject = (id: string, role?: string) => {
-    setActiveProjectId(id);
-    setActiveProjectRole(role || 'owner');
-    navigate('/connectivity');
+  const handleOpenProject = (id: string) => {
+    navigate(`/projects/${id}/connectivity`);
   };
 
   return (

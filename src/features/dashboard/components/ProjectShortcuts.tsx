@@ -1,7 +1,10 @@
 import React from 'react';
 import { ShortcutCard } from './ShortcutCard';
+import { useWorkspacePath } from '../../../shared/hooks/useWorkspacePath';
 
 export const ProjectShortcuts: React.FC = () => {
+  const getPath = useWorkspacePath();
+
   return (
     <div className="bg-white border border-outline-variant rounded-xl p-lg flex flex-col gap-md shadow-xs text-left h-full">
       <div className="flex items-center gap-xs border-b border-outline-variant pb-xs">
@@ -20,7 +23,7 @@ export const ProjectShortcuts: React.FC = () => {
           icon="hub"
           iconBg="bg-[#e8eaf6]"
           iconColor="text-[#3f51b5]"
-          path="/connectivity"
+          path={getPath('/connectivity')}
         />
         <ShortcutCard
           label="Analytics"
@@ -28,7 +31,7 @@ export const ProjectShortcuts: React.FC = () => {
           icon="monitoring"
           iconBg="bg-[#e8f5e9]"
           iconColor="text-[#2e7d32]"
-          path="/analytics"
+          path={getPath('/analytics')}
         />
         <ShortcutCard
           label="Logs"
@@ -36,7 +39,7 @@ export const ProjectShortcuts: React.FC = () => {
           icon="history"
           iconBg="bg-[#f3e5f5]"
           iconColor="text-[#7b1fa2]"
-          path="/logs"
+          path={getPath('/logs')}
         />
         <ShortcutCard
           label="Settings"
@@ -44,7 +47,7 @@ export const ProjectShortcuts: React.FC = () => {
           icon="settings"
           iconBg="bg-[#eceff1]"
           iconColor="text-[#455a64]"
-          path="/settings"
+          path={getPath('/settings')}
         />
       </div>
     </div>

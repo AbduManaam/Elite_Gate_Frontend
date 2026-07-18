@@ -1,13 +1,9 @@
 import { create } from 'zustand';
 import { tokenStore } from '../lib/api/tokenStore';
+import { sessionFlag } from '../lib/api/sessionFlag';
 
 export interface AdminSessionUser {
     readonly username: string;
-}
-
-interface TokenPair {
-    readonly accessToken: string;
-    readonly refreshToken: string;
 }
 
 interface AuthState {
@@ -15,7 +11,7 @@ interface AuthState {
     readonly isSuperAdmin: boolean | null; // null = not yet resolved
     readonly isAuthenticated: boolean;
     readonly isRehydrating: boolean;
-    readonly setSession: (tokens: TokenPair) => void;
+    readonly setSession: (accessToken: string) => void;
     readonly setSuperAdminStatus: (isSuperAdmin: boolean, username: string) => void;
     readonly clearSession: () => void;
     readonly finishRehydrating: () => void;
@@ -25,10 +21,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     isSuperAdmin: null,
     isAuthenticated: false,
-    isRehydrating: !!tokenStore.getRefreshToken(),
+    isRehydrating: sessionFlag.isSet(),
 
-    setSession: ({ accessToken, refreshToken }) => {
-        tokenStore.setTokens(accessToken, refreshToken);
+    setSession: (accessToken) => {
+        tokenStore.setAccessToken(accessToken);
+        sessionFlag.set();
         // isAuthenticated becomes true after login.
         // isSuperAdmin remains null until /me resolves, so RequireRole treats it as loading.
         set({ isAuthenticated: true, isRehydrating: false });
@@ -40,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     clearSession: () => {
         tokenStore.clear();
+        sessionFlag.clear();
         set({ user: null, isSuperAdmin: null, isAuthenticated: false, isRehydrating: false });
     },
 

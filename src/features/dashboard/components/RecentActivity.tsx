@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ActivityItem } from './ActivityItem';
 import { AuditLogData } from '../../../shared/mocks/logsMock';
+import { useWorkspacePath } from '../../../shared/hooks/useWorkspacePath';
 
 interface RecentActivityProps {
   readonly logs?: AuditLogData[];
@@ -52,6 +53,7 @@ const FALLBACK_ACTIVITIES = [
 
 export const RecentActivity: React.FC<RecentActivityProps> = ({ logs = [] }) => {
   const navigate = useNavigate();
+  const getPath = useWorkspacePath();
 
   // Helper to format timestamps to relative/readable time
   const formatTime = (ts: string) => {
@@ -128,7 +130,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({ logs = [] }) => 
           Recent Activity
         </h3>
         <button
-          onClick={() => navigate('/logs')}
+          onClick={() => navigate(getPath('/logs'))}
           className="text-xs font-semibold text-[#587c94] hover:text-[#113346] flex items-center gap-0.5 transition-colors cursor-pointer"
           type="button"
         >

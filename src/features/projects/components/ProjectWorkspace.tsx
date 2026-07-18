@@ -7,7 +7,6 @@ import {
   useUpdateProjectMutation,
   useDeleteProjectMutation,
 } from '../../../shared/hooks/useProjects';
-import { useRoutesQuery } from '../../routes/hooks/useRoutes';
 import { useUpstreamsQuery } from '../../upstreams/hooks/useUpstreams';
 import { useApiKeysQuery } from '../../apiKeys/hooks/useApiKeys';
 import { toApiError } from '../../../shared/api/apiError';
@@ -94,8 +93,6 @@ export const ProjectWorkspace: React.FC = () => {
   const updateProject = useUpdateProjectMutation();
   const createProject = useCreateProjectMutation();
   const deleteProject = useDeleteProjectMutation();
-
-  const { data: routes } = useRoutesQuery(projectId ?? '');
   const { data: upstreams } = useUpstreamsQuery(projectId ?? '');
   const { data: apiKeysData } = useApiKeysQuery(projectId ?? '');
   const apiKeys = apiKeysData?.keys;
@@ -537,48 +534,8 @@ export const ProjectWorkspace: React.FC = () => {
                   <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest mb-1">Last Updated</p>
                   <p className="text-xs text-on-surface">{formatDate(currentProject.updated_at)}</p>
                 </div>
-
-                {/* Integrations promo block */}
-                <div className="mt-1 bg-[#587c94]/5 border border-[#587c94]/15 rounded-lg p-sm relative overflow-hidden">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#587c94] mb-1">Integrations</p>
-                  <p className="text-xs text-on-surface-variant leading-relaxed">
-                    Connect with Datadog or Prometheus for advanced monitoring.
-                  </p>
-                  <button className="mt-2 text-[11px] font-bold text-[#587c94] hover:underline flex items-center gap-0.5 cursor-pointer">
-                    Setup Now
-                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                  </button>
-                  <span className="material-symbols-outlined absolute bottom-2 right-2 text-[36px] text-[#587c94]/10">integration_instructions</span>
-                </div>
               </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
-              <div className="flex items-center justify-between mb-md">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Recent Activity</p>
-                <button className="text-[11px] font-semibold text-[#587c94] hover:underline cursor-pointer">View All</button>
-              </div>
-              <div className="flex flex-col gap-3">
-                {[
-                  { icon: 'edit', text: 'Project updated', detail: `Slug changed to ${currentProject.slug}`, time: 'Just now' },
-                  { icon: 'add_circle', text: `${routes?.length ?? 0} routes configured`, detail: 'Routing rules updated', time: '2h ago' },
-                  { icon: 'link', text: `${upstreams?.length ?? 0} upstreams active`, detail: 'Service backends registered', time: '3h ago' },
-                ].map((a, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#587c94]/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="material-symbols-outlined text-[13px] text-[#587c94]">{a.icon}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-on-surface">{a.text}</p>
-                      <p className="text-[11px] text-on-surface-variant truncate">{a.detail}</p>
-                      <p className="text-[10px] text-outline mt-0.5">{a.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            </div>          </div>
         </div>
       )}
 

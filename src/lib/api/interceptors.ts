@@ -8,7 +8,6 @@ interface RetriableRequestConfig extends InternalAxiosRequestConfig {
 
 interface RefreshResponseBody {
     access_token: string;
-    refresh_token: string;
     expires_in: number;
     token_type: string;
 }
@@ -30,15 +29,13 @@ apiClient.interceptors.request.use((config) => {
 let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshAccessToken(): Promise<string | null> {
-    const refreshToken = tokenStore.getRefreshToken();
-    if (!refreshToken) return null;
-
     try {
         const { data } = await axios.post<RefreshResponseBody>(
             `${import.meta.env.VITE_API_BASE_URL}/refresh`,
-            { refresh_token: refreshToken }
+            {},
+            { withCredentials: true }
         );
-        tokenStore.setTokens(data.access_token, data.refresh_token);
+        tokenStore.setAccessToken(data.access_token);
         return data.access_token;
     } catch {
         return null;

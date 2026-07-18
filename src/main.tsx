@@ -6,7 +6,7 @@ import App from './App'
 import { registerSessionExpiredHandler } from './lib/api/interceptors'
 import { useAuthStore } from './store/authStore'
 
-import { tokenStore } from './lib/api/tokenStore'
+import { sessionFlag } from './lib/api/sessionFlag'
 import { refresh } from './features/auth/api/authApi'
 
 registerSessionExpiredHandler(() => {
@@ -14,21 +14,20 @@ registerSessionExpiredHandler(() => {
   window.location.assign('/login');
 });
 
-// Run startup authentication check to recover in-memory access token
+// On boot, the refresh token itself is invisible to JS (HttpOnly cookie).
+// sessionFlag is just "were we logged in last time" — if set, attempt a
+// silent refresh; the server decides if the cookie is actually still valid.
 const initAuth = async () => {
-  const hasRefreshToken = !!tokenStore.getRefreshToken();
-  if (hasRefreshToken) {
-    try {
-      const tokens = await refresh(tokenStore.getRefreshToken()!);
-      useAuthStore.getState().setSession({
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token
-      });
-    } catch {
-      useAuthStore.getState().clearSession();
-    }
-  } else {
+  if (!sessionFlag.isSet()) {
     useAuthStore.getState().finishRehydrating();
+    return;
+  }
+
+  try {
+    const tokens = await refresh();
+    useAuthStore.getState().setSession(tokens.access_token);
+  } catch {
+    useAuthStore.getState().clearSession();
   }
 };
 

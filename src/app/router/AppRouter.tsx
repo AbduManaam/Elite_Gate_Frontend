@@ -11,6 +11,7 @@ import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
 import { useActiveProject } from '../../shared/hooks/useActiveProject';
 import { useResolveSession } from '../../shared/hooks/useResolveSession';
+import { useWorkspacePath } from '../../shared/hooks/useWorkspacePath';
 
 interface SearchItem {
   category: string;
@@ -30,6 +31,7 @@ export const AppRouter: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
   const { projectRole } = useActiveProject();
+  const getPath = useWorkspacePath();
 
   const displayName = user?.username
     ? user.username.toLowerCase() === 'abdumanam@gmail.com' || user.username.toLowerCase() === 'abdumanam'
@@ -68,19 +70,19 @@ export const AppRouter: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const searchItems: SearchItem[] = [
-    { category: 'Pages', title: 'Welcome Dashboard', path: '/', icon: 'dashboard' },
-    { category: 'Pages', title: 'Connectivity Workspace', path: '/connectivity', icon: 'settings_ethernet' },
-    { category: 'Pages', title: 'Analytics Summary', path: '/analytics', icon: 'monitoring' },
-    { category: 'Pages', title: 'Audit Logs', path: '/logs', icon: 'receipt_long' },
-    { category: 'Pages', title: 'Profile Settings', path: '/settings', icon: 'settings' },
+    { category: 'Pages', title: 'Welcome Dashboard', path: getPath('/'), icon: 'dashboard' },
+    { category: 'Pages', title: 'Connectivity Workspace', path: getPath('/connectivity'), icon: 'settings_ethernet' },
+    { category: 'Pages', title: 'Analytics Summary', path: getPath('/analytics'), icon: 'monitoring' },
+    { category: 'Pages', title: 'Audit Logs', path: getPath('/logs'), icon: 'receipt_long' },
+    { category: 'Pages', title: 'Profile Settings', path: getPath('/settings'), icon: 'settings' },
 
-    { category: 'Workspace Tabs', title: 'Projects tab', path: '/connectivity?tab=Projects', icon: 'folder' },
-    { category: 'Workspace Tabs', title: 'Gateway services tab', path: '/connectivity?tab=Gateway services', icon: 'dns' },
-    { category: 'Workspace Tabs', title: 'Routes tab', path: '/connectivity?tab=Routes', icon: 'route' },
-    { category: 'Workspace Tabs', title: 'Upstreams tab', path: '/connectivity?tab=Upstreams', icon: 'link' },
-    { category: 'Workspace Tabs', title: 'Policies tab', path: '/connectivity?tab=Policies', icon: 'security' },
-    { category: 'Workspace Tabs', title: 'API Credentials tab', path: '/connectivity?tab=API Credentials', icon: 'key' },
-    { category: 'Workspace Tabs', title: 'Team Collaboration tab', path: '/connectivity?tab=Team Collaboration', icon: 'group' },
+    { category: 'Workspace Tabs', title: 'Projects tab', path: getPath('/connectivity?tab=Projects'), icon: 'folder' },
+    { category: 'Workspace Tabs', title: 'Gateway services tab', path: getPath('/connectivity?tab=Gateway services'), icon: 'dns' },
+    { category: 'Workspace Tabs', title: 'Routes tab', path: getPath('/connectivity?tab=Routes'), icon: 'route' },
+    { category: 'Workspace Tabs', title: 'Upstreams tab', path: getPath('/connectivity?tab=Upstreams'), icon: 'link' },
+    { category: 'Workspace Tabs', title: 'Policies tab', path: getPath('/connectivity?tab=Policies'), icon: 'security' },
+    { category: 'Workspace Tabs', title: 'API Credentials tab', path: getPath('/connectivity?tab=API Credentials'), icon: 'key' },
+    { category: 'Workspace Tabs', title: 'Team Collaboration tab', path: getPath('/connectivity?tab=Team Collaboration'), icon: 'group' },
   ];
 
   const filteredItems = searchItems.filter(
@@ -200,7 +202,7 @@ export const AppRouter: React.FC = () => {
                     </div>
                     <button
                       onClick={() => {
-                        navigate('/settings');
+                        navigate(getPath('/settings'));
                         setIsUserMenuOpen(false);
                       }}
                       className="w-full text-left px-4 py-2 text-sm text-on-surface hover:bg-surface-container flex items-center gap-sm transition-colors cursor-pointer"
