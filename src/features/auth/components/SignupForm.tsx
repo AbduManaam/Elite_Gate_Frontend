@@ -49,8 +49,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
     signupMutation.mutate(
       { company: companyName.trim(), username: username.trim(), password },
       {
-        onSuccess: (data) => {
-          console.log('[SignupForm] Onboarding successful!', data);
+        onSuccess: () => {
           onSignupSuccess();
         },
         onError: (error) => {

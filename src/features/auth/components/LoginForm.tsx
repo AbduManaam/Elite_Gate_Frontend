@@ -57,7 +57,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
       { username: username.trim(), password },
       {
         onSuccess: () => {
-          console.log('[LoginForm] Login successful!');
           onLoginSuccess();
         },
         onError: (error) => {

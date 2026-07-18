@@ -14,7 +14,6 @@ import ApiKeyFilters from './ApiKeyFilters';
 import ApiKeyTable from './ApiKeyTable';
 import ApiKeySkeleton from './ApiKeySkeleton';
 import ApiKeyEmptyState from './ApiKeyEmptyState';
-import UsagePoliciesView from './UsagePoliciesView';
 
 import CreateApiKeyDialog from './CreateApiKeyDialog';
 import ApiKeyGeneratedDialog from './ApiKeyGeneratedDialog';
@@ -25,10 +24,6 @@ import RevokeApiKeyDialog from './RevokeApiKeyDialog';
 export const ApiCredentialsPage: React.FC = () => {
     const { projectId } = useActiveProject();
     const { can } = useRoles();
-
-
-    // Subtab state matching Mockup
-    const [activeTab, setActiveTab] = useState<'API Keys' | 'Usage & Policies'>('API Keys');
 
     // Pagination & Search Filters State
     const [page, setPage] = useState(1);
@@ -79,14 +74,11 @@ export const ApiCredentialsPage: React.FC = () => {
         }
     }, [toastMessage]);
 
-
-
     // Actions
     const handleCreateSubmit = (input: CreateApiKeyInput) => {
         createKey.mutate(input, {
             onSuccess: (res) => {
                 setIsCreateOpen(false);
-                // Display raw key in success modal exactly once.
                 setGeneratedKeyInfo({ name: res.name, key: res.api_key || res.raw_key || '' });
                 showToast('✓ API Key Created Successfully');
             },
@@ -97,7 +89,6 @@ export const ApiCredentialsPage: React.FC = () => {
         if (!keyToRotate) return;
         rotateKey.mutate(keyToRotate.id, {
             onSuccess: (res) => {
-                // Display new raw key in success modal exactly once.
                 setRotatedKeyInfo({ name: res.name, key: res.api_key || res.raw_key || '' });
                 setKeyToRotate(null);
                 showToast('✓ API Key Rotated Successfully');
@@ -119,7 +110,6 @@ export const ApiCredentialsPage: React.FC = () => {
     const apiKeys = data?.keys ?? [];
     const pagination = data?.pagination;
 
-    // Pagination navigation helper
     const totalPages = pagination?.total_pages ?? 1;
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -137,13 +127,13 @@ export const ApiCredentialsPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Header section matching Routes / Upstreams */}
+            {/* Header */}
             <PageHeaderActions
                 title="API Credentials"
                 description="Manage secure client keys, API key rotation, and access scopes."
                 className="select-none"
                 actions={
-                    hasPermission && projectId && activeTab === 'API Keys' && (
+                    hasPermission && projectId && (
                         <button
                             type="button"
                             onClick={() => setIsCreateOpen(true)}
@@ -156,78 +146,57 @@ export const ApiCredentialsPage: React.FC = () => {
                 }
             />
 
-            {/* Sub-nav Tab Switcher */}
-            <div className="border-b border-outline-variant flex gap-stack-lg select-none">
-                {(['API Keys', 'Usage & Policies'] as const).map((tab) => (
-                    <button
-                        key={tab}
-                        type="button"
-                        onClick={() => setActiveTab(tab)}
-                        className={`font-semibold text-sm pb-2 border-b-2 transition-all cursor-pointer ${
-                            activeTab === tab
-                                ? 'text-[#113346] border-[#113346]'
-                                : 'text-on-surface-variant border-transparent hover:text-[#113346]'
-                        }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
-            </div>
+            {/* Table Container Card */}
+            <div className="bg-white border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-sm">
+                {/* Toolbar */}
+                <ApiKeyToolbar
+                    onFiltersToggle={() => setShowFilters(!showFilters)}
+                    showFilters={showFilters}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                />
 
-            {activeTab === 'Usage & Policies' ? (
-                <UsagePoliciesView />
-            ) : (
-                /* Table Container Card */
-                <div className="bg-white border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-sm">
-                    {/* Toolbar */}
-                    <ApiKeyToolbar
-                        onFiltersToggle={() => setShowFilters(!showFilters)}
-                        showFilters={showFilters}
-                        searchQuery={searchQuery}
-                        onSearchChange={setSearchQuery}
+                {/* Filters */}
+                {showFilters && <ApiKeyFilters />}
+
+                {/* Main State Handler */}
+                {isLoading ? (
+                    <ApiKeySkeleton />
+                ) : error ? (
+                    <div className="p-xl text-center flex flex-col items-center justify-center gap-md">
+                        <span className="material-symbols-outlined text-[40px] text-error">error_outline</span>
+                        <p className="text-sm text-error font-semibold">
+                            Failed to load API keys: {error.message || 'Unknown network error'}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => refetch()}
+                            className="px-4 py-2 border border-outline-variant rounded text-xs font-semibold hover:bg-slate-50 cursor-pointer"
+                        >
+                            Retry Connection
+                        </button>
+                    </div>
+                ) : apiKeys.length === 0 ? (
+                    <ApiKeyEmptyState
+                        onCreateClick={() => setIsCreateOpen(true)}
+                        hasPermission={hasPermission}
                     />
-
-                    {/* Filters placeholder */}
-                    {showFilters && <ApiKeyFilters />}
-
-                    {/* Main State Handler */}
-                    {isLoading ? (
-                        <ApiKeySkeleton />
-                    ) : error ? (
-                        <div className="p-xl text-center flex flex-col items-center justify-center gap-md">
-                            <span className="material-symbols-outlined text-[40px] text-error">error_outline</span>
-                            <p className="text-sm text-error font-semibold">
-                                Failed to load API keys: {error.message || 'Unknown network error'}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={() => refetch()}
-                                className="px-4 py-2 border border-outline-variant rounded text-xs font-semibold hover:bg-slate-50 cursor-pointer"
-                            >
-                                Retry Connection
-                            </button>
-                        </div>
-                    ) : apiKeys.length === 0 ? (
-                        <ApiKeyEmptyState
-                            onCreateClick={() => setIsCreateOpen(true)}
+                ) : (
+                    <>
+                        {/* Table */}
+                        <ApiKeyTable
+                            apiKeys={apiKeys}
+                            onRotateClick={(key) => setKeyToRotate(key)}
+                            onRevokeClick={(key) => setKeyToRevoke(key)}
                             hasPermission={hasPermission}
                         />
-                    ) : (
-                        <>
-                            {/* Table */}
-                            <ApiKeyTable
-                                apiKeys={apiKeys}
-                                onRotateClick={(key) => setKeyToRotate(key)}
-                                onRevokeClick={(key) => setKeyToRevoke(key)}
-                                hasPermission={hasPermission}
-                            />
 
-                            {/* Pagination Controls */}
-                            {totalPages > 1 && (
-                                <div className="p-4 border-t border-outline-variant bg-white rounded-b-xl flex justify-between items-center text-on-surface-variant text-xs select-none">
-                                    <span>
-                                        Showing page {page} of {totalPages} ({pagination?.total ?? apiKeys.length} total keys)
-                                    </span>
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="p-4 border-t border-outline-variant bg-white rounded-b-xl flex justify-between items-center text-on-surface-variant text-xs select-none">
+                                <span>
+                                    Showing page {page} of {totalPages} ({pagination?.total ?? apiKeys.length} total keys)
+                                </span>
                                 <div className="flex items-center gap-1">
                                     <button
                                         type="button"
@@ -269,9 +238,8 @@ export const ApiCredentialsPage: React.FC = () => {
                     </>
                 )}
             </div>
-            )}
 
-            {/* dialogs */}
+            {/* Dialogs */}
             {isCreateOpen && (
                 <CreateApiKeyDialog
                     onClose={() => setIsCreateOpen(false)}
