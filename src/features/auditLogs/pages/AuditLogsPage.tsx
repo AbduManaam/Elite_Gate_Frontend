@@ -72,8 +72,10 @@ export const AuditLogsPage: React.FC = () => {
       </div>
 
       {/* Filter Bar Card */}
-      <div className="bg-white border border-outline-variant rounded p-stack-md flex flex-col md:flex-row gap-stack-md items-end shadow-sm">
-        <div className="w-full md:w-1/4">
+      <div className="bg-white border border-outline-variant rounded p-stack-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-stack-md items-end shadow-sm">
+
+        {/* Actor (Username) */}
+        <div className="sm:col-span-2 lg:col-span-3 min-w-0">
           <label className="block text-xs font-semibold text-on-surface-variant mb-stack-xs">Actor (Username)</label>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">
@@ -92,7 +94,8 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="w-full md:w-1/4">
+        {/* Action Type */}
+        <div className="sm:col-span-2 lg:col-span-3 min-w-0">
           <label className="block text-xs font-semibold text-on-surface-variant mb-stack-xs">Action Type</label>
           <div className="relative">
             <select
@@ -136,46 +139,47 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="w-full md:w-2/4 flex gap-stack-md">
-          <div className="flex-1">
-            <label className="block text-xs font-semibold text-on-surface-variant mb-stack-xs">Date Range</label>
-            <div className="flex items-center gap-stack-sm">
-              <div className="relative flex-1">
-                <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">
-                  calendar_today
-                </span>
-                <input
-                  className="w-full pl-9 pr-3 py-1.5 bg-white border border-outline-variant rounded text-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-on-surface-variant outline-none"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    setPageIndex(0);
-                  }}
-                />
-              </div>
-              <span className="text-on-surface-variant text-sm">-</span>
-              <div className="relative flex-1">
-                <input
-                  className="w-full px-3 py-1.5 bg-white border border-outline-variant rounded text-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-on-surface-variant outline-none"
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    setPageIndex(0);
-                  }}
-                />
-              </div>
-            </div>
+        {/* Start Date */}
+        <div className="sm:col-span-1 lg:col-span-2 min-w-0">
+          <label className="block text-xs font-semibold text-on-surface-variant mb-stack-xs">Start Date</label>
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">
+              calendar_today
+            </span>
+            <input
+              className="w-full pl-9 pr-3 py-1.5 bg-white border border-outline-variant rounded text-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-on-surface-variant outline-none"
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                setPageIndex(0);
+              }}
+            />
           </div>
-          <div className="flex items-end">
-            <button
-              onClick={handleClearFilters}
-              className="px-stack-md py-1.5 bg-surface-container-low border border-outline-variant rounded text-on-surface hover:bg-surface-variant transition-colors h-[38px] flex items-center justify-center whitespace-nowrap text-xs cursor-pointer font-semibold"
-            >
-              Clear Filters
-            </button>
-          </div>
+        </div>
+
+        {/* End Date */}
+        <div className="sm:col-span-1 lg:col-span-2 min-w-0">
+          <label className="block text-xs font-semibold text-on-surface-variant mb-stack-xs">End Date</label>
+          <input
+            className="w-full px-3 py-1.5 bg-white border border-outline-variant rounded text-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all text-on-surface-variant outline-none"
+            type="date"
+            value={endDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setPageIndex(0);
+            }}
+          />
+        </div>
+
+        {/* Clear Filters */}
+        <div className="sm:col-span-2 lg:col-span-2">
+          <button
+            onClick={handleClearFilters}
+            className="w-full px-stack-md py-1.5 bg-surface-container-low border border-outline-variant rounded text-on-surface hover:bg-surface-variant transition-colors h-[38px] flex items-center justify-center whitespace-nowrap text-xs cursor-pointer font-semibold"
+          >
+            Clear Filters
+          </button>
         </div>
       </div>
 
@@ -236,7 +240,7 @@ export const AuditLogsPage: React.FC = () => {
                     <td className="px-stack-md py-4 text-right">
                       <button
                         onClick={() => setSelectedLogDetails(log)}
-                        className="text-[#587c94] hover:text-[#113346] font-sans font-semibold flex items-center justify-end gap-stack-xs ml-auto opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs"
+                        className="text-[#587c94] hover:text-[#113346] font-sans font-semibold flex items-center justify-end gap-stack-xs ml-auto opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-pointer text-xs"
                       >
                         <span className="material-symbols-outlined text-[16px]">data_object</span>
                         View JSON

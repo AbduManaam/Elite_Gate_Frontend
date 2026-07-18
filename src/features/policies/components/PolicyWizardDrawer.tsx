@@ -24,6 +24,8 @@ export const PolicyWizardDrawer: React.FC<PolicyWizardDrawerProps> = ({ projectI
     allowed_origins: [],
     allowed_roles: [],
     allowed_scopes: [],
+    ip_allowlist: [],
+    ip_blocklist: [],
   });
 
   const [enableRateLimiting, setEnableRateLimiting] = useState(false);
@@ -173,6 +175,8 @@ export const PolicyWizardDrawer: React.FC<PolicyWizardDrawerProps> = ({ projectI
               allowed_origins={form.allowed_origins}
               allowed_roles={form.allowed_roles}
               allowed_scopes={form.allowed_scopes}
+              ip_allowlist={form.ip_allowlist}
+              ip_blocklist={form.ip_blocklist}
               onChange={handleFieldChange}
             />
           )}

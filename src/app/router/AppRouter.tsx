@@ -144,7 +144,7 @@ export const AppRouter: React.FC = () => {
       <Sidebar />
 
       {/* Main Content Area Wrapper */}
-      <div className={`flex-1 flex flex-col min-h-screen relative transition-all duration-300 ${isSidebarCollapsed ? 'ml-0' : 'ml-0 lg:ml-[240px]'}`}>
+      <div className={`flex-1 flex flex-col min-h-screen relative transition-all duration-300 min-w-0 ${isSidebarCollapsed ? 'ml-0' : 'ml-0 lg:ml-[240px]'}`}>
 
         {/* TopNavBar matching the layout height */}
         <header className={`bg-white fixed top-0 right-0 h-[56px] border-b border-outline-variant flex justify-between items-center px-lg z-10 text-left transition-all duration-300 ${isSidebarCollapsed ? 'w-full' : 'w-full lg:w-[calc(100%-240px)]'}`}>
@@ -227,7 +227,7 @@ export const AppRouter: React.FC = () => {
         </header>
 
         {/* Main Content Canvas — routed pages render here */}
-        <main className="flex-1 overflow-y-auto mt-[56px] p-margin-mobile lg:p-margin-desktop bg-[#fefefe]">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto mt-[56px] p-margin-mobile lg:p-margin-desktop bg-[#fefefe] min-w-0">
           <div className="max-w-[1600px] mx-auto pb-xl">
             <Outlet />
           </div>

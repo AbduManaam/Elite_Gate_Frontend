@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
+import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
 import {
     useUpstreamsQuery,
     useDeleteUpstreamMutation,
@@ -116,23 +117,22 @@ export const UpstreamsList: React.FC = () => {
     return (
         <div className="flex flex-col gap-lg text-left">
             {/* Header section */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-md">
-                <div>
-                    <h2 className="font-display-lg text-display-lg text-on-surface">Upstreams</h2>
-                    <p className="font-body-md text-body-md text-[#587c94] mt-1">
-                        Manage backend routing destinations and load balancing configurations.
-                    </p>
-                </div>
-                {canManage && !hasNoUpstreams && (
-                    <button
-                        onClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
-                        className="bg-[#113346] text-white font-bold px-md py-sm rounded-lg hover:bg-[#123749] transition-colors flex items-center justify-center gap-sm h-[36px] cursor-pointer whitespace-nowrap shadow-sm"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">add</span>
-                        New Upstream
-                    </button>
-                )}
-            </div>
+            <PageHeaderActions
+                title="Upstreams"
+                description="Manage backend routing destinations and load balancing configurations."
+                titleScale="display"
+                actions={
+                    canManage && !hasNoUpstreams && (
+                        <button
+                            onClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
+                            className="bg-[#113346] text-white font-bold px-md py-sm rounded-lg hover:bg-[#123749] transition-colors flex items-center justify-center gap-sm h-[36px] cursor-pointer whitespace-nowrap shadow-sm"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">add</span>
+                            New Upstream
+                        </button>
+                    )
+                }
+            />
 
             {/* Error state */}
             {apiError && (

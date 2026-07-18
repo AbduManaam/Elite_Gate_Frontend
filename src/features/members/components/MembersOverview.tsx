@@ -90,10 +90,10 @@ export const MembersOverview: React.FC = () => {
 
   return (
     <div className="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden text-left">
-      <div className="p-lg border-b border-outline-variant flex justify-between items-center bg-white">
-        <div>
+      <div className="p-lg border-b border-outline-variant flex flex-col items-start sm:flex-row sm:justify-between sm:items-center gap-md bg-white">
+        <div className="min-w-0">
           <h3 className="font-headline-md text-headline-md text-on-surface">Team Collaboration</h3>
-          <p className="text-xs text-on-surface-variant mt-1">Manage project members, lookup active users, and assign access roles.</p>
+          <p className="text-xs text-[#587c94] mt-1">Manage project members, lookup active users, and assign access roles.</p>
         </div>
         {can('owner') && projectId && (
           <button
@@ -103,7 +103,7 @@ export const MembersOverview: React.FC = () => {
               setLookupError('');
               setEmailQuery('');
             }}
-            className="px-3 py-1.5 bg-[#113346] text-white font-semibold text-xs rounded hover:bg-[#123749] transition-colors cursor-pointer"
+            className="px-3 py-1.5 bg-[#113346] text-white font-semibold text-xs rounded hover:bg-[#123749] transition-colors cursor-pointer w-full sm:w-auto shrink-0 whitespace-nowrap text-center"
           >
             Invite Member
           </button>

@@ -82,7 +82,7 @@ export const MembersList: React.FC = () => {
                   </div>
                 </td>
                 <td className="py-3 px-md text-right">
-                  <button className="text-on-surface-variant hover:text-on-surface opacity-0 group-hover:opacity-100 transition-opacity p-xs rounded hover:bg-surface-variant cursor-pointer">
+                  <button className="text-on-surface-variant hover:text-on-surface opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-xs rounded hover:bg-surface-variant cursor-pointer">
                     <span className="material-symbols-outlined text-[20px]">more_vert</span>
                   </button>
                 </td>

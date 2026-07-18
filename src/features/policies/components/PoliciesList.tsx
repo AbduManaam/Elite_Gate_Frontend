@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
+import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
 import {
   usePoliciesQuery,
   useDeletePolicyMutation,
@@ -129,24 +130,22 @@ export const PoliciesList: React.FC = () => {
       )}
 
       {/* Header section */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-md">
-        <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-xs">Policies</h2>
-          <p className="font-body-md text-body-md text-[#587c94]">
-            Configure rate limits, authentication, and access control templates.
-          </p>
-        </div>
-        {canManage && !hasNoPolicies && (
-          <button
-            type="button"
-            onClick={() => setDrawerMode('create')}
-            className="bg-[#113346] text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            Create Policy
-          </button>
-        )}
-      </div>
+      <PageHeaderActions
+        title="Policies"
+        description="Configure rate limits, authentication, and access control templates."
+        actions={
+          canManage && !hasNoPolicies && (
+            <button
+              type="button"
+              onClick={() => setDrawerMode('create')}
+              className="bg-[#113346] text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Create Policy
+            </button>
+          )
+        }
+      />
 
       {/* API Error state */}
       {apiError && (

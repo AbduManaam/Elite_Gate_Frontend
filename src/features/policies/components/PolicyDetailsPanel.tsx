@@ -80,6 +80,16 @@ export const PolicyDetailsPanel: React.FC<PolicyDetailsPanelProps> = ({
         </div>
 
         <div>
+          <span className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5">IP Allowlist</span>
+          {renderChipList(policy.ip_allowlist, 'No allowlist configured (all IPs allowed)')}
+        </div>
+
+        <div>
+          <span className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5">IP Blocklist</span>
+          {renderChipList(policy.ip_blocklist, 'No blocked IPs')}
+        </div>
+
+        <div>
           <span className="block text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5">Allowed Roles</span>
           {renderChipList(policy.allowed_roles, 'No roles restriction (all authenticated users allowed)')}
         </div>

@@ -11,6 +11,8 @@ export interface PolicyInput {
     allowed_origins: string[];
     allowed_roles: string[];
     allowed_scopes: string[];
+    ip_allowlist: string[];
+    ip_blocklist: string[];
 }
 
 interface ListPoliciesResponse {

@@ -97,7 +97,7 @@ export const ApiKeysList: React.FC = () => {
                         {key.status === 'Active' && (
                           <button
                             onClick={() => handleCopy(key.id, key.prefix)}
-                            className="text-outline hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                            className="text-outline hover:text-primary opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[16px] text-[#587c94]">
                               {copiedKeyId === key.id ? 'check' : 'content_copy'}

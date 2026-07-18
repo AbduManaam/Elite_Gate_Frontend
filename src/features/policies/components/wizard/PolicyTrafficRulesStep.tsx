@@ -8,6 +8,8 @@ interface PolicyTrafficRulesStepProps {
   readonly allowed_origins: string[];
   readonly allowed_roles: string[];
   readonly allowed_scopes: string[];
+  readonly ip_allowlist: string[];
+  readonly ip_blocklist: string[];
   readonly onChange: (fields: Partial<PolicyInput>) => void;
 }
 
@@ -17,6 +19,8 @@ export const PolicyTrafficRulesStep: React.FC<PolicyTrafficRulesStepProps> = ({
   allowed_origins,
   allowed_roles,
   allowed_scopes,
+  ip_allowlist,
+  ip_blocklist,
   onChange,
 }) => {
   const handleAddOrigin = (origin: string) => {
@@ -43,6 +47,22 @@ export const PolicyTrafficRulesStep: React.FC<PolicyTrafficRulesStepProps> = ({
     onChange({ allowed_scopes: allowed_scopes.filter((s) => s !== scope) });
   };
 
+  const handleAddAllowedIP = (ip: string) => {
+    onChange({ ip_allowlist: [...ip_allowlist, ip] });
+  };
+
+  const handleRemoveAllowedIP = (ip: string) => {
+    onChange({ ip_allowlist: ip_allowlist.filter((x) => x !== ip) });
+  };
+
+  const handleAddBlockedIP = (ip: string) => {
+    onChange({ ip_blocklist: [...ip_blocklist, ip] });
+  };
+
+  const handleRemoveBlockedIP = (ip: string) => {
+    onChange({ ip_blocklist: ip_blocklist.filter((x) => x !== ip) });
+  };
+
   // Validator for allowed origin (supporting wildcards, protocols, hosts, etc.)
   const validateOrigin = (val: string): string | null => {
     if (val === '*') return null;
@@ -54,13 +74,25 @@ export const PolicyTrafficRulesStep: React.FC<PolicyTrafficRulesStepProps> = ({
     }
   };
 
+  // Mirrors validateOrigin below it exactly — reuses ipfilter's own
+  // acceptance rules conceptually (single IP or CIDR), giving instant
+  // feedback instead of waiting for the backend's 400 response.
+  const validateIPOrCIDR = (val: string): string | null => {
+    const cidrOrIpPattern =
+      /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$|^([0-9a-fA-F:]+)(\/\d{1,3})?$/;
+    if (!cidrOrIpPattern.test(val)) {
+      return 'Must be a valid IP address or CIDR range (e.g. 192.168.1.50 or 10.0.0.0/24).';
+    }
+    return null;
+  };
+
   return (
     <div className="flex flex-col gap-lg text-left">
       <div className="mb-md">
         <span className="text-[10px] font-bold text-[#587c94] uppercase tracking-wider">Step 2 of 3</span>
         <h3 className="font-headline-sm text-headline-sm text-on-surface mt-0.5">Traffic Rules</h3>
         <p className="text-xs text-on-surface-variant mt-1">
-          Configure rate limits, CORS origins, authorized roles, and scopes.
+          Configure rate limits, CORS origins, authorized roles, scopes, and IP restrictions.
         </p>
       </div>
 
@@ -86,6 +118,24 @@ export const PolicyTrafficRulesStep: React.FC<PolicyTrafficRulesStepProps> = ({
         onAdd={handleAddOrigin}
         onRemove={handleRemoveOrigin}
         validation={validateOrigin}
+      />
+
+      <ChipInput
+        label="IP Allowlist"
+        placeholder="e.g. 192.168.1.50 or 10.0.0.0/24"
+        chips={ip_allowlist}
+        onAdd={handleAddAllowedIP}
+        onRemove={handleRemoveAllowedIP}
+        validation={validateIPOrCIDR}
+      />
+
+      <ChipInput
+        label="IP Blocklist"
+        placeholder="e.g. 203.0.113.1"
+        chips={ip_blocklist}
+        onAdd={handleAddBlockedIP}
+        onRemove={handleRemoveBlockedIP}
+        validation={validateIPOrCIDR}
       />
 
       <ChipInput

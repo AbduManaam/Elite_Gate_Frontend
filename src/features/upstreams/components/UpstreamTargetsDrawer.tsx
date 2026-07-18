@@ -130,7 +130,7 @@ export const UpstreamTargetsDrawer: React.FC<UpstreamTargetsDrawerProps> = ({
                         <button
                           onClick={() => removeTarget.mutate(t.id)}
                           disabled={removeTarget.isPending}
-                          className="text-outline hover:text-error opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer p-0.5"
+                          className="text-outline hover:text-error opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-pointer p-0.5"
                           title="Remove target"
                         >
                           <span className="material-symbols-outlined text-[16px]">close</span>

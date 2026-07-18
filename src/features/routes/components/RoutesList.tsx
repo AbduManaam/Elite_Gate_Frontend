@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useRoles } from '../../../shared/hooks/useRoles';
+import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
 import { useRoutesQuery, useDeleteRouteMutation, useDisableRouteMutation } from '../hooks/useRoutes';
 import {
   useEnableRouteMutation,
@@ -84,21 +85,22 @@ export const RoutesList: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-lg text-left">
-      <div className="flex justify-between items-end">
-        <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-xs">Routes</h2>
-          <p className="font-body-md text-body-md text-[#587c94]">Manage API ingress routing rules and policies.</p>
-        </div>
-        {canManageRoutes && (
-          <button
-            onClick={() => setDrawerState({ isOpen: true, mode: 'create' })}
-            className="bg-[#113346] text-white px-4 py-2 rounded font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            New Route
-          </button>
-        )}
-      </div>
+      <PageHeaderActions
+        title="Routes"
+        description="Manage API ingress routing rules and policies."
+        actions={
+          canManageRoutes && (
+            <button
+              onClick={() => setDrawerState({ isOpen: true, mode: 'create' })}
+              className="bg-[#113346] text-white px-4 py-2 rounded font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              New Route
+            </button>
+          )
+        }
+      />
 
       <div className="bg-white border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-sm">
         <div className="p-4 border-b border-outline-variant flex flex-wrap gap-4 items-center bg-white">
@@ -236,7 +238,7 @@ export const RoutesList: React.FC = () => {
                         <button
                           onClick={() => setRouteToDelete(route)}
                           disabled={deleteRoute.isPending}
-                          className="text-outline hover:text-error opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-40"
+                          className="text-outline hover:text-error opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity disabled:opacity-40"
                         >
                           <span className="material-symbols-outlined text-[18px]">delete</span>
                         </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
+import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
 import {
   useProjectsQuery,
   useCreateProjectMutation,
@@ -214,37 +215,40 @@ export const ProjectWorkspace: React.FC = () => {
     return (
       <div className="flex flex-col gap-md text-left">
         {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="font-headline-lg text-headline-lg text-on-surface">Project Workspace</h2>
-            <p className="text-sm text-on-surface-variant mt-0.5">Configure active gateway tenant workspace.</p>
-          </div>
-          <div className="flex items-center gap-sm">
-            <div className="flex border border-outline-variant rounded-lg overflow-hidden text-xs font-semibold">
+        <PageHeaderActions
+          title="Project Workspace"
+          description="Configure active gateway tenant workspace."
+          actions={
+            <>
+              <div className="flex border border-outline-variant rounded-lg overflow-hidden text-xs font-semibold bg-white">
+                <button
+                  onClick={() => setActiveView('list')}
+                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#113346] text-white cursor-pointer transition-colors"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[14px]">list</span>
+                  Projects List
+                </button>
+                <button
+                  onClick={() => setActiveView('summary')}
+                  className="flex items-center justify-center gap-1 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container cursor-pointer transition-colors"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[14px]">summarize</span>
+                  Project Summary
+                </button>
+              </div>
               <button
-                onClick={() => setActiveView('list')}
-                className="flex items-center gap-1 px-3 py-1.5 bg-[#113346] text-white cursor-pointer transition-colors"
+                onClick={() => setIsNewProjectOpen(true)}
+                className="flex items-center justify-center gap-1 px-4 py-1.5 bg-[#113346] text-white text-xs font-semibold rounded-lg hover:bg-[#123749] transition-colors cursor-pointer shadow-sm"
+                type="button"
               >
-                <span className="material-symbols-outlined text-[14px]">list</span>
-                Projects List
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                New Project
               </button>
-              <button
-                onClick={() => setActiveView('summary')}
-                className="flex items-center gap-1 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container cursor-pointer transition-colors"
-              >
-                <span className="material-symbols-outlined text-[14px]">summarize</span>
-                Project Summary
-              </button>
-            </div>
-            <button
-              onClick={() => setIsNewProjectOpen(true)}
-              className="flex items-center gap-1 px-4 py-1.5 bg-[#113346] text-white text-xs font-semibold rounded-lg hover:bg-[#123749] transition-colors cursor-pointer shadow-sm"
-            >
-              <span className="material-symbols-outlined text-[16px]">add</span>
-              New Project
-            </button>
-          </div>
-        </div>
+            </>
+          }
+        />
 
         {/* text-left table */}
         <div className="bg-white border border-outline-variant rounded-xl overflow-x-auto shadow-sm">
@@ -325,37 +329,40 @@ export const ProjectWorkspace: React.FC = () => {
   return (
     <div className="flex flex-col gap-md text-left">
       {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface">Project Workspace</h2>
-          <p className="text-sm text-on-surface-variant mt-0.5">Configure active gateway tenant workspace.</p>
-        </div>
-        <div className="flex items-center gap-sm">
-          <div className="flex border border-outline-variant rounded-lg overflow-hidden text-xs font-semibold">
+      <PageHeaderActions
+        title="Project Workspace"
+        description="Configure active gateway tenant workspace."
+        actions={
+          <>
+            <div className="flex border border-outline-variant rounded-lg overflow-hidden text-xs font-semibold bg-white">
+              <button
+                onClick={() => setActiveView('list')}
+                className="flex items-center justify-center gap-1 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container cursor-pointer transition-colors"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[14px]">list</span>
+                Projects List
+              </button>
+              <button
+                onClick={() => setActiveView('summary')}
+                className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#113346] text-white cursor-pointer transition-colors"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[14px]">summarize</span>
+                Project Summary
+              </button>
+            </div>
             <button
-              onClick={() => setActiveView('list')}
-              className="flex items-center gap-1 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container cursor-pointer transition-colors"
+              onClick={() => setIsNewProjectOpen(true)}
+              className="flex items-center justify-center gap-1 px-4 py-1.5 bg-[#113346] text-white text-xs font-semibold rounded-lg hover:bg-[#123749] transition-colors cursor-pointer shadow-sm"
+              type="button"
             >
-              <span className="material-symbols-outlined text-[14px]">list</span>
-              Projects List
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              New Project
             </button>
-            <button
-              onClick={() => setActiveView('summary')}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#113346] text-white cursor-pointer transition-colors"
-            >
-              <span className="material-symbols-outlined text-[14px]">summarize</span>
-              Project Summary
-            </button>
-          </div>
-          <button
-            onClick={() => setIsNewProjectOpen(true)}
-            className="flex items-center gap-1 px-4 py-1.5 bg-[#113346] text-white text-xs font-semibold rounded-lg hover:bg-[#123749] transition-colors cursor-pointer shadow-sm"
-          >
-            <span className="material-symbols-outlined text-[16px]">add</span>
-            New Project
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* No project fallback */}
       {!currentProject && (

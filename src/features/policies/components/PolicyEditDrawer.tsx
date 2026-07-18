@@ -22,6 +22,8 @@ export const PolicyEditDrawer: React.FC<PolicyEditDrawerProps> = ({ projectId, p
     allowed_origins: policy.allowed_origins || [],
     allowed_roles: policy.allowed_roles || [],
     allowed_scopes: policy.allowed_scopes || [],
+    ip_allowlist: policy.ip_allowlist || [],
+    ip_blocklist: policy.ip_blocklist || [],
   });
 
   const [enableRateLimiting, setEnableRateLimiting] = useState(policy.rate_limit_rpm > 0);
@@ -76,6 +78,16 @@ export const PolicyEditDrawer: React.FC<PolicyEditDrawerProps> = ({ projectId, p
     } catch (_) {
       return 'Must be "*" or a valid absolute URL (e.g. https://admin.example.com).';
     }
+  };
+
+  // Validator for IP addresses and CIDR ranges
+  const validateIPOrCIDR = (val: string): string | null => {
+    const cidrOrIpPattern =
+      /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$|^([0-9a-fA-F:]+)(\/\d{1,3})?$/;
+    if (!cidrOrIpPattern.test(val)) {
+      return 'Must be a valid IP address or CIDR range (e.g. 192.168.1.50 or 10.0.0.0/24).';
+    }
+    return null;
   };
 
   return (
@@ -165,6 +177,24 @@ export const PolicyEditDrawer: React.FC<PolicyEditDrawerProps> = ({ projectId, p
             onAdd={(o) => handleFieldChange({ allowed_origins: [...form.allowed_origins, o] })}
             onRemove={(o) => handleFieldChange({ allowed_origins: form.allowed_origins.filter((x) => x !== o) })}
             validation={validateOrigin}
+          />
+
+          <ChipInput
+            label="IP Allowlist"
+            placeholder="e.g. 192.168.1.50 or 10.0.0.0/24"
+            chips={form.ip_allowlist}
+            onAdd={(ip) => handleFieldChange({ ip_allowlist: [...form.ip_allowlist, ip] })}
+            onRemove={(ip) => handleFieldChange({ ip_allowlist: form.ip_allowlist.filter((x) => x !== ip) })}
+            validation={validateIPOrCIDR}
+          />
+
+          <ChipInput
+            label="IP Blocklist"
+            placeholder="e.g. 203.0.113.1"
+            chips={form.ip_blocklist}
+            onAdd={(ip) => handleFieldChange({ ip_blocklist: [...form.ip_blocklist, ip] })}
+            onRemove={(ip) => handleFieldChange({ ip_blocklist: form.ip_blocklist.filter((x) => x !== ip) })}
+            validation={validateIPOrCIDR}
           />
 
           <ChipInput

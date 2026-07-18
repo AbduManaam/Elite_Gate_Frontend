@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
+import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
 import { useApiKeysQuery } from '../hooks/useApiKeys';
 import { useCreateApiKeyMutation } from '../hooks/useCreateApiKey';
 import { useRotateApiKeyMutation } from '../hooks/useRotateApiKey';
@@ -137,24 +138,23 @@ export const ApiCredentialsPage: React.FC = () => {
             )}
 
             {/* Header section matching Routes / Upstreams */}
-            <div className="flex justify-between items-end select-none">
-                <div>
-                    <h2 className="font-headline-lg text-headline-lg text-on-surface mb-stack-xs">API Credentials</h2>
-                    <p className="font-body-md text-body-md text-[#587c94]">
-                        Manage secure client keys, API key rotation, and access scopes.
-                    </p>
-                </div>
-                {hasPermission && projectId && activeTab === 'API Keys' && (
-                    <button
-                        type="button"
-                        onClick={() => setIsCreateOpen(true)}
-                        className="bg-[#113346] text-white px-4 py-2 rounded font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center gap-1 shadow-sm cursor-pointer"
-                    >
-                        <span className="material-symbols-outlined text-[18px] leading-none">add</span>
-                        Create API Key
-                    </button>
-                )}
-            </div>
+            <PageHeaderActions
+                title="API Credentials"
+                description="Manage secure client keys, API key rotation, and access scopes."
+                className="select-none"
+                actions={
+                    hasPermission && projectId && activeTab === 'API Keys' && (
+                        <button
+                            type="button"
+                            onClick={() => setIsCreateOpen(true)}
+                            className="bg-[#113346] text-white px-4 py-2 rounded font-semibold text-xs hover:bg-[#123749] transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer"
+                        >
+                            <span className="material-symbols-outlined text-[18px] leading-none">add</span>
+                            Create API Key
+                        </button>
+                    )
+                }
+            />
 
             {/* Sub-nav Tab Switcher */}
             <div className="border-b border-outline-variant flex gap-stack-lg select-none">

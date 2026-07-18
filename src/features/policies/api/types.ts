@@ -8,6 +8,8 @@ export interface PolicyRecord {
     allowed_origins: string[];
     allowed_roles: string[];
     allowed_scopes: string[];
+    ip_allowlist: string[];
+    ip_blocklist: string[];
     created_at: string;
     updated_at: string;
 }

@@ -96,7 +96,7 @@ export const UpstreamRow: React.FC<UpstreamRowProps> = ({
 
             {/* Quick Actions Column */}
             <td className="py-4 px-md text-right" onClick={(e) => e.stopPropagation()}>
-                <div className="flex justify-end gap-sm opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity">
+                <div className="flex justify-end gap-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                     {/* Expand Arrow */}
                     <button
                         type="button"
