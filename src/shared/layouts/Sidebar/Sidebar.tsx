@@ -8,7 +8,9 @@ import { useUIStore } from '../../../store/uiStore';
 import { useRoles } from '../../hooks/useRoles';
 import { resolveProjectRole } from '../../lib/projectRole';
 import { PLATFORM, ADMIN, abs } from '../../lib/platformPaths';
-import { ELITE_GATE_LOGO_URL } from '../../mocks/sidebarMock';
+
+const ELITE_GATE_LOGO_URL = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBMNMzsutofipclMtCLx10yT0XijWcwH3yQMT11UYckObcnqyeOYysEx4zjtw9zJQ158vHgc3HSYbK5ifhbqL23KyYFY0E8jgOfjLd-dxrla8yjIHCGdfPjS4OONSGJThGqbujzvytpQlUT_UCkln-dlOicqsVaATzo9K8LAKzLK4enKvtX_zqaRZ2bA7porNygVc6rCZVtkt2Td5QCZNDrY0MlvNokPc7_a07FLSuUa6E9lilI0xciZ5VcX-RAZdRt-0Bxgo9EvTmt';
+
 
 export interface SidebarProps {
   readonly className?: string;
