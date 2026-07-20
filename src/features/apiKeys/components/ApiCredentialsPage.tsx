@@ -74,12 +74,44 @@ export const ApiCredentialsPage: React.FC = () => {
         }
     }, [toastMessage]);
 
+    // Key details extractor helper
+    const extractKeyDetails = (res: any) => {
+        if (!res) return { name: '', key: '' };
+
+        const name = res.name || res.api_key?.name || res.key?.name || 'API Key';
+        let key = '';
+
+        if (typeof res === 'string') {
+            key = res;
+        } else if (typeof res === 'object') {
+            if (typeof res.raw_key === 'string' && res.raw_key) key = res.raw_key;
+            else if (typeof res.api_key === 'string' && res.api_key) key = res.api_key;
+            else if (typeof res.key === 'string' && res.key) key = res.key;
+            else if (typeof res.token === 'string' && res.token) key = res.token;
+            else if (typeof res.secret === 'string' && res.secret) key = res.secret;
+            else if (res.api_key && typeof res.api_key === 'object') {
+                const nested = res.api_key;
+                if (typeof nested.raw_key === 'string' && nested.raw_key) key = nested.raw_key;
+                else if (typeof nested.api_key === 'string' && nested.api_key) key = nested.api_key;
+                else if (typeof nested.key === 'string' && nested.key) key = nested.key;
+            } else if (res.key && typeof res.key === 'object') {
+                const nested = res.key;
+                if (typeof nested.raw_key === 'string' && nested.raw_key) key = nested.raw_key;
+                else if (typeof nested.api_key === 'string' && nested.api_key) key = nested.api_key;
+                else if (typeof nested.key === 'string' && nested.key) key = nested.key;
+            }
+        }
+
+        return { name, key };
+    };
+
     // Actions
     const handleCreateSubmit = (input: CreateApiKeyInput) => {
         createKey.mutate(input, {
             onSuccess: (res) => {
                 setIsCreateOpen(false);
-                setGeneratedKeyInfo({ name: res.name, key: res.api_key || res.raw_key || '' });
+                const { name, key } = extractKeyDetails(res);
+                setGeneratedKeyInfo({ name, key });
                 showToast('✓ API Key Created Successfully');
             },
         });
@@ -89,7 +121,8 @@ export const ApiCredentialsPage: React.FC = () => {
         if (!keyToRotate) return;
         rotateKey.mutate(keyToRotate.id, {
             onSuccess: (res) => {
-                setRotatedKeyInfo({ name: res.name, key: res.api_key || res.raw_key || '' });
+                const { name, key } = extractKeyDetails(res);
+                setRotatedKeyInfo({ name: name || keyToRotate.name, key });
                 setKeyToRotate(null);
                 showToast('✓ API Key Rotated Successfully');
             },

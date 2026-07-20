@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { refresh } from '../api/authApi';
 import { useAuthStore } from '../../../store/authStore';
 
 export const OAuthCallbackPage: React.FC = () => {
@@ -11,19 +12,41 @@ export const OAuthCallbackPage: React.FC = () => {
         if (ranOnce.current) return;
         ranOnce.current = true;
 
-        const params = new URLSearchParams(window.location.hash.slice(1));
-        const accessToken = params.get('access_token');
+        // 1. Check if token was passed in hash fragment (#access_token=...)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const hashAccessToken = hashParams.get('access_token');
 
-        // Clear the fragment immediately so tokens never sit in browser history.
-        window.history.replaceState(null, '', window.location.pathname);
-
-        if (!accessToken) {
-            navigate('/login?oauth_error=missing_tokens', { replace: true });
+        if (hashAccessToken) {
+            window.history.replaceState(null, '', window.location.pathname);
+            setSession(hashAccessToken);
+            navigate('/', { replace: true });
             return;
         }
 
-        setSession(accessToken);
-        navigate('/', { replace: true });
+        // 2. Check search query params (?oauth=success)
+        const searchParams = new URLSearchParams(window.location.search);
+        const oauthSuccess = searchParams.get('oauth') === 'success';
+
+        window.history.replaceState(null, '', window.location.pathname);
+
+        // 3. Try refreshing session via HttpOnly cookie (works for both ?oauth=success and fallback)
+        let cancelled = false;
+
+        refresh()
+            .then((data) => {
+                if (cancelled) return;
+                setSession(data.access_token);
+                navigate('/', { replace: true });
+            })
+            .catch(() => {
+                if (cancelled) return;
+                const errParam = searchParams.get('oauth_error') || (oauthSuccess ? 'session_expired' : 'missing_tokens');
+                navigate(`/login?oauth_error=${encodeURIComponent(errParam)}`, { replace: true });
+            });
+
+        return () => {
+            cancelled = true;
+        };
     }, [navigate, setSession]);
 
     return (
@@ -36,4 +59,4 @@ export const OAuthCallbackPage: React.FC = () => {
     );
 };
 
-export default OAuthCallbackPage;
+export default OAuthCallbackPage;

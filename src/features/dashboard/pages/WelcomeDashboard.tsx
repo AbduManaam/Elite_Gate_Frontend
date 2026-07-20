@@ -1,5 +1,5 @@
 import React from 'react';
-import { useActiveProject } from '../../../shared/hooks/useActiveProject';
+// import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoutesQuery } from '../../routes/hooks/useRoutes';
 import { useUpstreamsQuery } from '../../upstreams/hooks/useUpstreams';
 import { usePoliciesQuery } from '../../policies/hooks/usePolicies';
@@ -15,21 +15,22 @@ import ProjectShortcuts from '../components/ProjectShortcuts';
 import EnvironmentInfo from '../components/EnvironmentInfo';
 import DashboardSkeleton from '../components/DashboardSkeleton';
 import DashboardEmptyState from '../components/DashboardEmptyState';
+import { useParams } from 'react-router-dom';
 
 export interface WelcomeDashboardProps {
   readonly className?: string;
 }
 
 export const WelcomeDashboard: React.FC<WelcomeDashboardProps> = ({ className = '' }) => {
-  const { projectId } = useActiveProject();
+  const { projectId } = useParams<{ projectId: string }>();
 
   // Queries
-  const routesQuery = useRoutesQuery(projectId);
-  const upstreamsQuery = useUpstreamsQuery(projectId);
-  const policiesQuery = usePoliciesQuery(projectId);
+  const routesQuery = useRoutesQuery(projectId ?? '');
+  const upstreamsQuery = useUpstreamsQuery(projectId ?? '');
+  const policiesQuery = usePoliciesQuery(projectId ?? '');
   const apiKeysQuery = useApiKeysQuery(projectId ?? '');
   const gatewaysQuery = useGatewaysQuery(projectId ?? '');
-  const summaryQuery = useProjectSummaryQuery();
+  const summaryQuery = useProjectSummaryQuery(projectId);
 
   const isLoading =
     routesQuery.isLoading ||
@@ -118,10 +119,10 @@ export const WelcomeDashboard: React.FC<WelcomeDashboardProps> = ({ className = 
   const region = summary?.metrics ? 'ap-south-1' : 'us-east-1'; // placeholder or customized
   const createdAtFormatted = summary?.created_at
     ? new Date(summary.created_at).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
     : 'May 10, 2025';
 
   return (

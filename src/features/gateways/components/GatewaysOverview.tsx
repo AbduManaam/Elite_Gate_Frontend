@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
 import { useProjectsQuery, useCreateProjectMutation, useDeleteProjectMutation } from '../../../shared/hooks/useProjects';
@@ -17,12 +17,21 @@ interface GatewaysOverviewProps {
   readonly showOnlyProject?: boolean;
   readonly showOnlyGateways?: boolean;
   readonly onViewAllGateways?: () => void;
+  /** Shared with the page header blue reload button so Last Reload stays in sync. */
+  readonly lastReloadTime?: Date;
+  readonly onReloadConfig?: () => void;
+  readonly reloadPending?: boolean;
+  readonly reloadError?: Error | null;
 }
 
 export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   showOnlyProject = false,
   showOnlyGateways = false,
   onViewAllGateways,
+  lastReloadTime: lastReloadTimeProp,
+  onReloadConfig: onReloadConfigProp,
+  reloadPending: reloadPendingProp,
+  reloadError: reloadErrorProp,
 }) => {
   const showProject = !showOnlyGateways;
   const showGateways = !showOnlyProject;
@@ -39,7 +48,6 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   const provisionGateway = useProvisionGatewayMutation(projectId ?? '');
   const decommissionGateway = useDecommissionGatewayMutation(projectId ?? '');
   const reloadConfig = useReloadConfigMutation(projectId ?? '');
-  const restartGateway = useRestartGatewayMutation(projectId ?? '');
 
   const [isCreateProjOpen, setIsCreateProjOpen] = useState(false);
   const [projForm, setProjForm] = useState({ name: '', slug: '', description: '', plan: '' });
@@ -49,10 +57,24 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   // Clipboard copy state
   const [isCopied, setIsCopied] = useState(false);
 
-  // Time & date trackers
-  const [lastReloadTime, setLastReloadTime] = useState<Date>(() => new Date(Date.now() - 3 * 60 * 1000));
-  const [gatewayCreatedAt, setGatewayCreatedAt] = useState<string>('8 Jul 2026, 10:24 AM');
-  const [tick, setTick] = useState(0);
+  // Local fallback when parent does not own reload state (standalone usage).
+  const [localLastReloadTime, setLocalLastReloadTime] = useState<Date>(
+    () => new Date(Date.now() - 3 * 60 * 1000),
+  );
+  const lastReloadTime = lastReloadTimeProp ?? localLastReloadTime;
+  const reloadPending = reloadPendingProp ?? reloadConfig.isPending;
+  const reloadError = reloadErrorProp !== undefined ? reloadErrorProp : (reloadConfig.error as Error | null);
+
+  const formatGatewayCreatedAt = (dateStr?: string) => {
+    if (!dateStr) return 'Just now';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return (
+      d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
+      ', ' +
+      d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    );
+  };
 
   const projects = projectsData?.items ?? [];
   const currentProject = projects.find((p) => p.id === projectId);
@@ -61,23 +83,24 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   const activeGateway = gateways?.find((gw) => gw.status !== 'decommissioned');
   const gatewayBaseUrl = buildGatewayBaseUrl(activeGateway);
 
-  useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 10000);
-    return () => clearInterval(interval);
-  }, []);
+  const fallbackCreatedAt = useMemo(() => new Date().toISOString(), [activeGateway?.id]);
+
+  const gatewayCreatedAt = useMemo(() => {
+    if (activeGateway?.created_at) {
+      return formatGatewayCreatedAt(activeGateway.created_at);
+    }
+    if (currentProject?.created_at) {
+      return formatGatewayCreatedAt(currentProject.created_at);
+    }
+    return formatGatewayCreatedAt(fallbackCreatedAt);
+  }, [activeGateway?.created_at, activeGateway?.id, currentProject?.created_at, fallbackCreatedAt]);
+
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    if (activeGateway) {
-      if (activeGateway.status === 'provisioning') {
-        const d = new Date();
-        setGatewayCreatedAt(
-          d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
-            ', ' +
-            d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-        );
-      }
-    }
-  }, [activeGateway?.id, activeGateway?.status]);
+    const interval = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCopyId = (id: string) => {
     navigator.clipboard.writeText(id);
@@ -129,20 +152,24 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   };
 
   const handleReloadConfig = () => {
+    if (onReloadConfigProp) {
+      onReloadConfigProp();
+      return;
+    }
     reloadConfig.mutate(undefined, {
       onSuccess: () => {
-        setLastReloadTime(new Date());
+        setLocalLastReloadTime(new Date());
       }
     });
   };
 
   const getRelativeTimeString = (date: Date) => {
-    const diffMs = Date.now() - date.getTime();
+    const diffMs = Math.max(0, Date.now() - date.getTime());
     const diffSec = Math.floor(diffMs / 1000);
     const diffMin = Math.floor(diffSec / 60);
     const diffHour = Math.floor(diffMin / 60);
 
-    if (diffSec < 10) return 'Just now';
+    if (diffSec < 5) return 'Just now';
     if (diffSec < 60) return `${diffSec} seconds ago`;
     if (diffMin === 1) return '1 minute ago';
     if (diffMin < 60) return `${diffMin} minutes ago`;
@@ -435,11 +462,11 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
                   {can('editor') && (
                     <button
                       onClick={handleReloadConfig}
-                      disabled={reloadConfig.isPending || activeGateway.status !== 'active'}
+                      disabled={reloadPending || activeGateway.status !== 'active'}
                       className="mt-md w-full border border-outline-variant hover:bg-[#587c94]/5 hover:border-[#587c94] text-on-surface-variant hover:text-[#587c94] px-4 py-2 rounded-lg font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 disabled:opacity-50"
                     >
-                      <span className="material-symbols-outlined text-[16px]">refresh</span>
-                      Reload Configuration
+                      <span className={`material-symbols-outlined text-[16px] ${reloadPending ? 'animate-spin' : ''}`}>refresh</span>
+                      {reloadPending ? 'Reloading...' : 'Reload Configuration'}
                     </button>
                   )}
                 </div>

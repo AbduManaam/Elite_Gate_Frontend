@@ -3,7 +3,7 @@ import CopyKeyInput from './CopyKeyInput';
 
 interface ApiKeyGeneratedDialogProps {
     readonly apiKeyName: string;
-    readonly rawKey: string;
+    readonly rawKey: unknown;
     readonly onClose: () => void;
 }
 

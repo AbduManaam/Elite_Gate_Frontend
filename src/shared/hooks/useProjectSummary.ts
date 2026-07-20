@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getProjectSummary } from '../api/projectsApi';
 import { useActiveProject } from './useActiveProject';
 
-export function useProjectSummaryQuery() {
-    const { projectId, setActiveProjectRole } = useActiveProject();
+export function useProjectSummaryQuery(projectId: string | undefined) {
+    const { setActiveProjectRole } = useActiveProject();
 
     const query = useQuery({
         queryKey: ['project-summary', projectId],

@@ -10,6 +10,7 @@ export interface GatewayRecord {
     readonly public_port: string;
     readonly plan: string;
     readonly status: string;
+    readonly created_at?: string;
 }
 
 export interface ListGatewaysResponse {
@@ -29,7 +30,7 @@ export async function listProjectGateways(projectId: string): Promise<GatewayRec
 }
 
 export async function listAllGateways(): Promise<GatewayRecord[]> {
-    const { data } = await apiClient.get<ListGatewaysResponse>('/v1/gateways', { params: { limit: 200 } });
+    const { data } = await apiClient.get<ListGatewaysResponse>('/v1/gateways', { params: { limit: 100 } });
     return data.gateways ?? data.items ?? [];
 }
 

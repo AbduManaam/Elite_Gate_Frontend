@@ -3,7 +3,7 @@ import CopyKeyInput from './CopyKeyInput';
 
 interface RotateSuccessDialogProps {
     readonly apiKeyName: string;
-    readonly newRawKey: string;
+    readonly newRawKey: unknown;
     readonly onClose: () => void;
 }
 

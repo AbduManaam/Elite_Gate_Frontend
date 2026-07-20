@@ -33,6 +33,9 @@ export const GatewaysPage: React.FC = () => {
   const reloadConfig = useReloadConfigMutation(projectId ?? '');
 
   const [isAllGatewaysOpen, setIsAllGatewaysOpen] = useState(false);
+  const [lastReloadTime, setLastReloadTime] = useState<Date>(
+    () => new Date(Date.now() - 3 * 60 * 1000),
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const activeSubTab = searchParams.get('tab') || 'Projects';
   const setActiveSubTab = (tab: string) => {
@@ -46,7 +49,11 @@ export const GatewaysPage: React.FC = () => {
 
   const handleReloadConfig = () => {
     if (!projectId) return;
-    reloadConfig.mutate(undefined);
+    reloadConfig.mutate(undefined, {
+      onSuccess: () => {
+        setLastReloadTime(new Date());
+      },
+    });
   };
 
   const subTabs = [
@@ -112,9 +119,9 @@ export const GatewaysPage: React.FC = () => {
                     <button
                       onClick={handleReloadConfig}
                       disabled={reloadConfig.isPending}
-                      className="bg-[#113346] hover:bg-brand-hover text-white px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-2 cursor-pointer transition-all duration-200 shadow-sm disabled:opacity-50 whitespace-nowrap shrink-0"
+                      className="bg-[#113346] hover:bg-brand-hover text-white px-4 py-2 rounded-lg font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all duration-200 shadow-sm disabled:opacity-50 whitespace-nowrap shrink-0 min-w-[175px]"
                     >
-                      <span className="material-symbols-outlined text-[18px]">refresh</span>
+                      <span className={`material-symbols-outlined text-[18px] ${reloadConfig.isPending ? 'animate-spin' : ''}`}>refresh</span>
                       {reloadConfig.isPending ? 'Reloading...' : 'Reload Configuration'}
                     </button>
                   )}
@@ -146,6 +153,10 @@ export const GatewaysPage: React.FC = () => {
           <GatewaysOverview 
             showOnlyGateways={true} 
             onViewAllGateways={() => setIsAllGatewaysOpen(true)}
+            lastReloadTime={lastReloadTime}
+            onReloadConfig={handleReloadConfig}
+            reloadPending={reloadConfig.isPending}
+            reloadError={reloadConfig.error as Error | null}
           />
         )}
 
