@@ -10,13 +10,34 @@ export interface SignupResponse extends TokenResponse {
     project_id: string;
 }
 
+export interface ForgotPasswordResponse {
+    message: string;
+}
+
+export interface ResetPasswordResponse {
+    message: string;
+}
+
 export async function login(username: string, password: string): Promise<TokenResponse> {
     const { data } = await apiClient.post<TokenResponse>('/login', { username, password });
     return data;
 }
 
-export async function signup(username: string, password: string, company: string): Promise<SignupResponse> {
-    const { data } = await apiClient.post<SignupResponse>('/signup', { username, password, company });
+export async function signup(username: string, email: string, password: string, company: string): Promise<SignupResponse> {
+    const { data } = await apiClient.post<SignupResponse>('/signup', { username, email, password, company });
+    return data;
+}
+
+export async function forgotPassword(email: string): Promise<ForgotPasswordResponse> {
+    const { data } = await apiClient.post<ForgotPasswordResponse>('/forgot-password', { email });
+    return data;
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<ResetPasswordResponse> {
+    const { data } = await apiClient.post<ResetPasswordResponse>('/reset-password', {
+        token,
+        new_password: newPassword,
+    });
     return data;
 }
 

@@ -17,7 +17,7 @@ function describeSignupError(error: unknown): string {
     const backendMessage = (error.response.data as { error?: string } | undefined)?.error;
 
     if (status === 409) {
-      return 'This username is already taken. Please choose another one.';
+      return backendMessage ?? 'Account details already registered. Please use another username or email.';
     }
     if (status === 400) {
       return backendMessage ?? 'Invalid registration data or weak password.';
@@ -30,6 +30,7 @@ function describeSignupError(error: unknown): string {
 export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggleLogin }) => {
   const [companyName, setCompanyName] = useState('');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState('');
@@ -41,13 +42,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
     e.preventDefault();
     setFormError('');
 
-    if (!companyName.trim() || !username.trim() || !password.trim()) {
+    if (!companyName.trim() || !username.trim() || !email.trim() || !password.trim()) {
       setFormError('Please enter all the onboarding fields.');
       return;
     }
 
     signupMutation.mutate(
-      { company: companyName.trim(), username: username.trim(), password },
+      { company: companyName.trim(), username: username.trim(), email: email.trim(), password },
       {
         onSuccess: () => {
           onSignupSuccess();
@@ -124,6 +125,34 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
           </div>
         </div>
 
+        {/* Email Input */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-gray-700" htmlFor="signup-email">
+            Email Address
+          </label>
+          <div className="relative">
+            <input
+              className="w-full bg-[#f6f8fa] border border-gray-200 text-[#171c1f] text-sm rounded-2xl pl-4 pr-12 py-3.5 focus:border-[#0a1821] focus:ring-1 focus:ring-[#0a1821]/20 focus:outline-none transition-all duration-300 placeholder:text-gray-300"
+              id="signup-email"
+              placeholder="name@company.com"
+              type="email"
+              required
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck={false}
+              value={email}
+              disabled={isSubmitting}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setFormError('');
+              }}
+            />
+            <span className="material-symbols-outlined absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-[20px] pointer-events-none select-none">
+              mail
+            </span>
+          </div>
+        </div>
+
         {/* Password Input */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold text-gray-700" htmlFor="password">
@@ -145,7 +174,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSignupSuccess, onToggl
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[20px] select-none">
                 {showPassword ? 'visibility' : 'visibility_off'}

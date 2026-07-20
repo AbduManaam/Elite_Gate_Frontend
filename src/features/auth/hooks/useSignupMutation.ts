@@ -1,15 +1,22 @@
 import { useMutation } from '@tanstack/react-query';
-import { signup } from '../api/authApi';
+import { signup, SignupResponse } from '../api/authApi';
 import { useAuthStore } from '../../../store/authStore';
 
-export function useSignupMutation() {
-    const setSession = useAuthStore((s) => s.setSession);
+export interface SignupVariables {
+  username: string;
+  email: string;
+  password: string;
+  company: string;
+}
 
-    return useMutation({
-        mutationFn: ({ username, password, company }: { username: string; password: string; company: string }) =>
-            signup(username, password, company),
-        onSuccess: (data) => {
-            setSession(data.access_token);
-        },
-    });
+export function useSignupMutation() {
+  const setSession = useAuthStore((s) => s.setSession);
+
+  return useMutation<SignupResponse, Error, SignupVariables>({
+    mutationFn: ({ username, email, password, company }: SignupVariables) =>
+      signup(username, email, password, company),
+    onSuccess: (data) => {
+      setSession(data.access_token);
+    },
+  });
 }

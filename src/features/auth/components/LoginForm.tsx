@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { useLoginMutation } from '../hooks/useLoginMutation';
 
@@ -113,16 +114,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
             <label className="text-xs font-semibold text-gray-700" htmlFor="password">
               Password
             </label>
-            <a
+            <Link
               className="text-xs font-semibold text-[#C03E48] hover:text-[#a03038] transition-colors duration-300"
-              href="#recover"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Password recovery is handled by your system administrator.');
-              }}
+              to="/forgot-password"
             >
               Forgot password?
-            </a>
+            </Link>
           </div>
           <div className="relative">
             <input

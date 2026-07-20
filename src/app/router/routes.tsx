@@ -8,6 +8,7 @@ import { RootRedirect } from './RootRedirect';
 import { PLATFORM, ADMIN } from '../../shared/lib/platformPaths';
 import {
   LoginPage, OAuthCallbackPage, PlatformAdminsPage, RolesPermissionsPage, UnauthorizedPage,
+  ForgotPasswordPage, ResetPasswordPage,
 } from '../../features/auth';
 import { WelcomeDashboard } from '../../features/dashboard';
 import { ObservabilitySummaryPage, PlatformHealthPage, PlatformMetricsPage } from '../../features/observability';
@@ -22,6 +23,8 @@ const LoginRoute: React.FC = () => {
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginRoute /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/oauth/callback', element: <OAuthCallbackPage /> },
   { path: '/unauthorized', element: <UnauthorizedPage /> },
   {
