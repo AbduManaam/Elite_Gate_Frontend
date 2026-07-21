@@ -7,7 +7,7 @@
  * @returns Clean, normalized URL string
  */
 export function buildApiUrl(endpoint: string, overrideBaseUrl?: string): string {
-    const rawBase = overrideBaseUrl ?? (import.meta.env.VITE_API_BASE_URL || '');
+    const rawBase = overrideBaseUrl ?? (import.meta.env.VITE_API_BASE_URL || '/api/admin');
     const cleanBase = rawBase.replace(/\/+$/, '');
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
