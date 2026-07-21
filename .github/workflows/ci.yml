@@ -1,34 +1,41 @@
-name: CI Pipeline
+name: Frontend CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-test:
-    name: Build & Test Frontend
+  quality-and-build:
+    name: Frontend Quality and Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
-          cache: 'npm' # change to 'pnpm' or 'yarn' if you use them
+          node-version: 24
+          cache: npm
 
       - name: Install dependencies
-        run: npm ci # Uses clean install from package-lock.json
+        run: npm ci
 
-      - name: Run Linter
+      - name: Run ESLint
         run: npm run lint
 
-      - name: Run Tests
-        run: npm run test -- --ci --coverage
+      - name: Check TypeScript
+        run: npm run typecheck
 
-      - name: Build Application
+      - name: Run unit and component tests
+        run: npm run test:ci
+
+      - name: Build production application
         run: npm run build

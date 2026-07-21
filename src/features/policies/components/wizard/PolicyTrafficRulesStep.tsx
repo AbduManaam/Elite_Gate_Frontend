@@ -69,7 +69,7 @@ export const PolicyTrafficRulesStep: React.FC<PolicyTrafficRulesStepProps> = ({
     try {
       new URL(val);
       return null;
-    } catch (_) {
+    } catch {
       return 'Must be "*" or a valid absolute URL (e.g. https://admin.example.com).';
     }
   };

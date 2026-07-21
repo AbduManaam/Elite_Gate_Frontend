@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 export interface ConfirmModalProps {
   readonly isOpen: boolean;
@@ -14,8 +14,7 @@ export interface ConfirmModalProps {
   readonly requireConfirmText?: string;
 }
 
-export const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  isOpen,
+const ConfirmModalContent: React.FC<Omit<ConfirmModalProps, 'isOpen'>> = ({
   title,
   message,
   description,
@@ -28,15 +27,6 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   requireConfirmText,
 }) => {
   const [confirmInput, setConfirmInput] = useState('');
-
-  // Reset input whenever the modal opens.
-  useEffect(() => {
-    if (isOpen) {
-      setConfirmInput('');
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
 
   // Ignore case and whitespace when matching.
   const normalizedMatch =
@@ -138,6 +128,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       </div>
     </div>
   );
+};
+
+export const ConfirmModal: React.FC<ConfirmModalProps> = (props) => {
+  if (!props.isOpen) return null;
+  return <ConfirmModalContent key={props.isOpen ? 'open' : 'closed'} {...props} />;
 };
 
 export default ConfirmModal;

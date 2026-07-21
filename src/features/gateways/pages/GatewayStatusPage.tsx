@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { listAllGateways } from '../api/gatewaysApi';
 
 export const GatewayStatusPage: React.FC = () => {
-  const { data: gatewaysData, isLoading } = useQuery({ queryKey: ['platform', 'gateways'], queryFn: listAllGateways });
+  const { data: gatewaysData } = useQuery({ queryKey: ['platform', 'gateways'], queryFn: listAllGateways });
 
   const gateways = gatewaysData || [
     { endpoint_ip: '10.0.1.15', gateway_port: '8080', plan: 'dedicated-enterprise', status: 'active', external_id: 'gw-east-01' },

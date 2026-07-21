@@ -10,6 +10,7 @@ import {
 import { lookupMemberByEmail, UserLookupResult } from '../../members/api/membersApi';
 import { ProjectMember } from '../../members/api/membersApi';
 import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
+import { toApiError } from '../../../shared/api/apiError';
 
 export const MembersOverview: React.FC = () => {
   const { projectId } = useActiveProject();
@@ -40,8 +41,8 @@ export const MembersOverview: React.FC = () => {
     try {
       const res = await lookupMemberByEmail(projectId ?? '', emailQuery);
       setLookupResult(res);
-    } catch (err: any) {
-      setLookupError(err.response?.data?.error || 'No user found with this email.');
+    } catch (err: unknown) {
+      setLookupError(toApiError(err).message || 'No user found with this email.');
     } finally {
       setIsLookingUp(false);
     }
@@ -144,7 +145,9 @@ export const MembersOverview: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-3 px-md font-sans">
-                    {new Date(m.joined_at).toLocaleDateString()}
+                    {m.joined_at && !Number.isNaN(new Date(m.joined_at).getTime())
+                      ? new Date(m.joined_at).toLocaleDateString()
+                      : '—'}
                   </td>
                   {can('owner') && (
                     <td className="py-3 px-md text-right font-sans">
@@ -225,7 +228,7 @@ export const MembersOverview: React.FC = () => {
                   </select>
                 </label>
 
-                {inviteMember.error && <p className="text-error text-xs">{(inviteMember.error as any).message}</p>}
+                {inviteMember.error && <p className="text-error text-xs">{toApiError(inviteMember.error).message}</p>}
 
                 <div className="flex justify-end gap-sm mt-sm">
                   <button type="button" onClick={() => setIsInviteOpen(false)} className="px-3 py-1.5 text-xs text-on-surface-variant">
@@ -273,7 +276,7 @@ export const MembersOverview: React.FC = () => {
               </select>
             </label>
 
-            {changeRole.error && <p className="text-error text-xs">{(changeRole.error as any).message}</p>}
+            {changeRole.error && <p className="text-error text-xs">{toApiError(changeRole.error).message}</p>}
 
             <div className="flex justify-end gap-sm mt-sm">
               <button type="button" onClick={() => setEditingMember(null)} className="px-3 py-1.5 text-xs text-on-surface-variant">

@@ -1,40 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuthStore } from '../../../store/authStore';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useProjectsQuery } from '../../../shared/hooks/useProjects';
+import type { ProjectRole } from '../../../shared/api/projectsApi';
 
-export const ProfileSettings: React.FC = () => {
-  const user = useAuthStore((s) => s.user);
-  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
-  const { projectId, projectRole } = useActiveProject();
-  const { data: projectsData } = useProjectsQuery();
+function deriveDisplayNameFromUsername(username?: string): string {
+  if (!username) return 'User';
+  const part = username.split('@')[0].split('_')[0].split('.')[0];
+  return part.charAt(0).toUpperCase() + part.slice(1);
+}
 
-  const projects = projectsData?.items ?? [];
-  const selectedProject = projects.find((p) => p.id === projectId) ?? null;
+interface ProfileSettingsFormProps {
+  readonly user: { username: string };
+  readonly isSuperAdmin: boolean;
+  readonly projectRole?: ProjectRole | null;
+  readonly selectedProjectName?: string;
+}
 
-  if (!user) {
-    return (
-      <div className="flex h-[400px] w-full items-center justify-center">
-        <div className="flex flex-col items-center gap-sm">
-          <div className="w-8 h-8 border-4 border-[#587c94]/20 border-t-[#587c94] rounded-full animate-spin" />
-          <span className="text-on-surface-variant text-xs font-semibold">Loading profile...</span>
-        </div>
-      </div>
-    );
-  }
-
-  const defaultName = user.username.toLowerCase() === 'abdumanam@gmail.com' || user.username.toLowerCase() === 'abdumanam'
-    ? 'Abdu Manaam'
-    : user.username.split('@')[0].split('_')[0].split('.')[0].replace(/^\w/, (c) => c.toUpperCase());
-
+const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({
+  user,
+  isSuperAdmin,
+  projectRole,
+  selectedProjectName,
+}) => {
+  const defaultName = deriveDisplayNameFromUsername(user.username);
   const [profileName, setProfileName] = useState(defaultName);
-
-  useEffect(() => {
-    const name = user.username.toLowerCase() === 'abdumanam@gmail.com' || user.username.toLowerCase() === 'abdumanam'
-      ? 'Abdu Manaam'
-      : user.username.split('@')[0].split('_')[0].split('.')[0].replace(/^\w/, (c) => c.toUpperCase());
-    setProfileName(name);
-  }, [user]);
 
   const emailAddress = user.username.includes('@')
     ? user.username
@@ -75,7 +65,7 @@ export const ProfileSettings: React.FC = () => {
                 {initials}
               </div>
             </div>
-            <button className="absolute bottom-0 right-0 bg-[#587c94] text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#123749] transition-colors border-2 border-white cursor-pointer shadow-sm">
+            <button className="absolute bottom-0 right-0 bg-[#587c94] text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-[#123749] transition-colors border-2 border-white cursor-pointer shadow-sm" type="button">
               <span className="material-symbols-outlined text-[16px]">edit</span>
             </button>
           </div>
@@ -132,7 +122,7 @@ export const ProfileSettings: React.FC = () => {
             <div className="flex flex-col gap-1">
               <span className="text-xs text-on-surface-variant">Tenant Name</span>
               <span className="font-semibold text-on-surface">
-                {selectedProject ? selectedProject.name : 'No Active Tenant Selected'}
+                {selectedProjectName || 'No Active Tenant Selected'}
               </span>
             </div>
             <div className="flex flex-col gap-1">
@@ -147,13 +137,44 @@ export const ProfileSettings: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="pt-sm border-t border-outline-variant flex flex-col sm:flex-row justify-end gap-sm">
-          <button className="w-full sm:w-auto bg-white border border-outline-variant text-on-surface px-md py-2 rounded-lg hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-sm cursor-pointer text-sm font-semibold">
+          <button className="w-full sm:w-auto bg-white border border-outline-variant text-on-surface px-md py-2 rounded-lg hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-sm cursor-pointer text-sm font-semibold" type="button">
             <span className="material-symbols-outlined text-[18px]">key</span>
             Reset Password
           </button>
         </div>
       </div>
     </div>
+  );
+};
+
+export const ProfileSettings: React.FC = () => {
+  const user = useAuthStore((s) => s.user);
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
+  const { projectId, projectRole } = useActiveProject();
+  const { data: projectsData } = useProjectsQuery();
+
+  const projects = projectsData?.items ?? [];
+  const selectedProject = projects.find((p) => p.id === projectId) ?? null;
+
+  if (!user) {
+    return (
+      <div className="flex h-[400px] w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-sm">
+          <div className="w-8 h-8 border-4 border-[#587c94]/20 border-t-[#587c94] rounded-full animate-spin" />
+          <span className="text-on-surface-variant text-xs font-semibold">Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ProfileSettingsForm
+      key={user.username}
+      user={user}
+      isSuperAdmin={isSuperAdmin ?? false}
+      projectRole={projectRole}
+      selectedProjectName={selectedProject?.name}
+    />
   );
 };
 

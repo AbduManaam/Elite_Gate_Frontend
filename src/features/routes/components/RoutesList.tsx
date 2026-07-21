@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useRoles } from '../../../shared/hooks/useRoles';
 import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
@@ -33,14 +33,19 @@ export const RoutesList: React.FC = () => {
 
   const [routeToDelete, setRouteToDelete] = useState<RouteRecord | null>(null);
 
-  useEffect(() => {
+  const isCreateFromUrl = searchParams.get('action') === 'create-route';
+  const effectiveDrawerState = drawerState.isOpen
+    ? drawerState
+    : { isOpen: isCreateFromUrl, mode: 'create' as const };
+
+  const handleCloseDrawer = () => {
+    setDrawerState({ isOpen: false, mode: 'create' });
     if (searchParams.get('action') === 'create-route') {
-      setDrawerState({ isOpen: true, mode: 'create' });
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('action');
       setSearchParams(newParams, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  };
 
   const { data: routes, isLoading, error } = useRoutesQuery(projectId);
   const { data: policies } = usePoliciesQuery(projectId);
@@ -256,14 +261,14 @@ export const RoutesList: React.FC = () => {
         </div>
       </div>
 
-      {drawerState.isOpen && (
+      {effectiveDrawerState.isOpen && (
         <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
           <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
             <RouteFormDrawer
               projectId={projectId ?? ''}
-              mode={drawerState.mode}
-              route={drawerState.route}
-              onClose={() => setDrawerState({ isOpen: false, mode: 'create' })}
+              mode={effectiveDrawerState.mode}
+              route={effectiveDrawerState.route}
+              onClose={handleCloseDrawer}
             />
           </div>
         </div>

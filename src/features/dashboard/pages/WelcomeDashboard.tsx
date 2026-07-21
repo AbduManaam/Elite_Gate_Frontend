@@ -87,13 +87,11 @@ export const WelcomeDashboard: React.FC<WelcomeDashboardProps> = ({ className = 
   const upstreams = upstreamsQuery.data ?? [];
   const policies = policiesQuery.data ?? [];
   const apiKeys = apiKeysQuery.data?.keys ?? [];
-  const gateways = gatewaysQuery.data ?? [];
 
   const routeCount = routes.length;
   const upstreamCount = upstreams.length;
   const policyCount = policies.length;
   const apiKeyCount = apiKeys.length;
-  const gatewayCount = gateways.length;
 
   const hasNoResources =
     routeCount === 0 &&

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
 import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
@@ -115,17 +115,17 @@ export const ProjectWorkspace: React.FC = () => {
   const [createError, setCreateError] = useState('');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // Sync form when project changes
-  useEffect(() => {
-    if (currentProject) {
-      setFormName(currentProject.name);
-      setFormSlug(currentProject.slug);
-      setFormDesc(currentProject.description ?? '');
-      setIsDirty(false);
-      setSaveMsg('');
-      setSaveError('');
-    }
-  }, [currentProject?.id]);
+  const [prevProjectId, setPrevProjectId] = useState(currentProject?.id);
+
+  if (currentProject?.id !== prevProjectId) {
+    setPrevProjectId(currentProject?.id);
+    setFormName(currentProject?.name ?? '');
+    setFormSlug(currentProject?.slug ?? '');
+    setFormDesc(currentProject?.description ?? '');
+    setIsDirty(false);
+    setSaveMsg('');
+    setSaveError('');
+  }
 
   const handleFieldChange = (field: 'name' | 'slug' | 'desc', value: string) => {
     if (field === 'name') setFormName(value);
@@ -203,6 +203,7 @@ export const ProjectWorkspace: React.FC = () => {
   const formatDate = (iso?: string) => {
     if (!iso) return '—';
     const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
       ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + ' UTC';
   };
@@ -291,7 +292,7 @@ export const ProjectWorkspace: React.FC = () => {
                       {p.is_active ? 'Active' : 'Suspended'}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-xs font-semibold capitalize text-[#587c94]">{(p as any).role ?? '—'}</td>
+                  <td className="py-3 px-4 text-xs font-semibold capitalize text-[#587c94]">{p.role ?? '—'}</td>
                   <td className="py-3 px-4 text-right">
                     <button
                       onClick={(e) => { e.stopPropagation(); setActiveProjectId(p.id); setActiveView('summary'); }}
@@ -515,7 +516,7 @@ export const ProjectWorkspace: React.FC = () => {
                 <div>
                   <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest mb-1.5">Project ID</p>
                   <div className="flex items-center gap-2 bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2">
-                    <span className="font-mono text-[11px] text-on-surface flex-1 truncate">{currentProject.id.substring(0, 14)}…</span>
+                    <span className="font-mono text-[11px] text-on-surface flex-1 truncate">{currentProject?.id ? `${currentProject.id.substring(0, 14)}…` : '—'}</span>
                     <button onClick={handleCopyId} title="Copy full ID" className="cursor-pointer text-on-surface-variant hover:text-on-surface transition-colors">
                       <span className="material-symbols-outlined text-[16px]">{isCopied ? 'check' : 'content_copy'}</span>
                     </button>
@@ -525,21 +526,21 @@ export const ProjectWorkspace: React.FC = () => {
                 <div>
                   <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest mb-1.5">Status</p>
                   <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
-                    currentProject.is_active ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+                    currentProject?.is_active ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
                   }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${currentProject.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
-                    {currentProject.is_active ? 'Active' : 'Suspended'}
+                    <span className={`w-1.5 h-1.5 rounded-full ${currentProject?.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+                    {currentProject?.is_active ? 'Active' : 'Suspended'}
                   </span>
                 </div>
 
                 <div>
                   <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest mb-1">Created At</p>
-                  <p className="text-xs text-on-surface">{formatDate(currentProject.created_at)}</p>
+                  <p className="text-xs text-on-surface">{currentProject?.created_at ? formatDate(currentProject.created_at) : '—'}</p>
                 </div>
 
                 <div>
                   <p className="text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest mb-1">Last Updated</p>
-                  <p className="text-xs text-on-surface">{formatDate(currentProject.updated_at)}</p>
+                  <p className="text-xs text-on-surface">{currentProject?.updated_at ? formatDate(currentProject.updated_at) : '—'}</p>
                 </div>
               </div>
             </div>          </div>

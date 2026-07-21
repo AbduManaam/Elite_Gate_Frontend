@@ -5,7 +5,7 @@ export const PlatformHealthPage: React.FC = () => {
   const { data: health, isLoading, error, refetch } = usePlatformHealthQuery();
 
   const components = health?.gateway_health ?? [];
-  const isDegraded = components.some((c: any) => c.status === 'unreachable');
+  const isDegraded = components.some((c) => c.status === 'unreachable');
   const allActive = components.length > 0 && !isDegraded;
 
   if (isLoading) return <div className="text-center py-10 text-on-surface-variant font-medium">Loading platform health...</div>;
@@ -69,12 +69,12 @@ export const PlatformHealthPage: React.FC = () => {
           {components.length === 0 ? (
             <div className="p-lg text-center text-sm text-on-surface-variant">No gateway components are currently active or probed.</div>
           ) : (
-            components.map((comp: any, idx: number) => (
+            components.map((comp, idx: number) => (
               <div key={idx} className="px-lg py-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-[20px] text-[#587c94]">dns</span>
                   <div>
-                    <p className="font-semibold text-xs text-on-surface">Gateway Node ({comp.gateway_id.substring(0, 8)}...)</p>
+                    <p className="font-semibold text-xs text-on-surface">Gateway Node ({comp.gateway_id ? comp.gateway_id.substring(0, 8) : 'Unknown'}...)</p>
                     <p className="text-[10px] text-outline mt-0.5">Type: Ingress Router Proxy</p>
                   </div>
                 </div>

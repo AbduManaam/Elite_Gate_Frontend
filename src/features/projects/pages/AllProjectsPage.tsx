@@ -55,7 +55,7 @@ export const AllProjectsPage: React.FC = () => {
                 </td>
                 <td className="py-4 px-lg text-right">
                   <button
-                    onClick={() => handleOpenProject(p.id, (p as any).role)}
+                    onClick={() => handleOpenProject(p.id, p.role)}
                     className="px-3 py-1.5 border border-outline-variant text-xs font-semibold rounded-lg hover:bg-[#113346] hover:text-white transition-colors cursor-pointer"
                   >
                     Open Workspace

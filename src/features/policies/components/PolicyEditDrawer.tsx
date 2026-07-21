@@ -75,7 +75,7 @@ export const PolicyEditDrawer: React.FC<PolicyEditDrawerProps> = ({ projectId, p
     try {
       new URL(val);
       return null;
-    } catch (_) {
+    } catch {
       return 'Must be "*" or a valid absolute URL (e.g. https://admin.example.com).';
     }
   };

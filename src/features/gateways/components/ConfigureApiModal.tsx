@@ -40,20 +40,6 @@ export const ConfigureApiModal: React.FC<ConfigureApiModalProps> = ({ projectId,
     const [newProjectName, setNewProjectName] = useState('');
     const [projectError, setProjectError] = useState('');
 
-    const handleApplyTemplate = (type: 'details' | 'routes') => {
-        if (type === 'details') {
-            setServiceName('flight-details-service');
-            setServiceUrl('http://api.flightstats.com/v1/details');
-            setRouteName('flight-details-route');
-            setRoutePath('/flights/details');
-        } else {
-            setServiceName('flight-routes-service');
-            setServiceUrl('http://api.flightstats.com/v1/routes');
-            setRouteName('flight-routes-route');
-            setRoutePath('/flights/routes');
-        }
-    };
-
     const handleSave = async () => {
         if (!resolvedProjectId) {
             setErrorMsg('Please select or create a project workspace first.');
@@ -87,7 +73,7 @@ export const ConfigureApiModal: React.FC<ConfigureApiModalProps> = ({ projectId,
             });
 
             setCreatedRoutePath(routePath);
-        } catch (err: any) {
+        } catch (err: unknown) {
             const apiErr = toApiError(err);
             setErrorMsg(apiErr.message || 'Failed to configure new API.');
         } finally {
@@ -237,7 +223,7 @@ services:
                                                         plan: '',
                                                     });
                                                     setActiveProjectId(newProj.id);
-                                                } catch (err: any) {
+                                                } catch (err: unknown) {
                                                     const apiErr = toApiError(err);
                                                     setProjectError(apiErr.message || 'Failed to create project.');
                                                 }

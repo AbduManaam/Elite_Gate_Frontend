@@ -7,11 +7,11 @@ import {
   useProvisionGatewayMutation,
   useDecommissionGatewayMutation,
   useReloadConfigMutation,
-  useRestartGatewayMutation
 } from '../hooks/useGateways';
 import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 import { buildGatewayBaseUrl } from '../utils/gatewayUrl';
 import { CopyableUrl } from '../../../shared/components/ui/CopyableUrl';
+import { toApiError } from '../../../shared/api/apiError';
 
 interface GatewaysOverviewProps {
   readonly showOnlyProject?: boolean;
@@ -31,7 +31,6 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   lastReloadTime: lastReloadTimeProp,
   onReloadConfig: onReloadConfigProp,
   reloadPending: reloadPendingProp,
-  reloadError: reloadErrorProp,
 }) => {
   const showProject = !showOnlyGateways;
   const showGateways = !showOnlyProject;
@@ -63,7 +62,6 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   );
   const lastReloadTime = lastReloadTimeProp ?? localLastReloadTime;
   const reloadPending = reloadPendingProp ?? reloadConfig.isPending;
-  const reloadError = reloadErrorProp !== undefined ? reloadErrorProp : (reloadConfig.error as Error | null);
 
   const formatGatewayCreatedAt = (dateStr?: string) => {
     if (!dateStr) return 'Just now';
@@ -83,7 +81,7 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
   const activeGateway = gateways?.find((gw) => gw.status !== 'decommissioned');
   const gatewayBaseUrl = buildGatewayBaseUrl(activeGateway);
 
-  const fallbackCreatedAt = useMemo(() => new Date().toISOString(), [activeGateway?.id]);
+  const fallbackCreatedAt = useMemo(() => new Date().toISOString(), []);
 
   const gatewayCreatedAt = useMemo(() => {
     if (activeGateway?.created_at) {
@@ -93,12 +91,12 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
       return formatGatewayCreatedAt(currentProject.created_at);
     }
     return formatGatewayCreatedAt(fallbackCreatedAt);
-  }, [activeGateway?.created_at, activeGateway?.id, currentProject?.created_at, fallbackCreatedAt]);
+  }, [activeGateway?.created_at, currentProject?.created_at, fallbackCreatedAt]);
 
-  const [, setTick] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 1000);
+    const interval = setInterval(() => setNow(Date.now()), 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -163,8 +161,8 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
     });
   };
 
-  const getRelativeTimeString = (date: Date) => {
-    const diffMs = Math.max(0, Date.now() - date.getTime());
+  const getRelativeTimeString = (date: Date, currentNow = now) => {
+    const diffMs = Math.max(0, currentNow - date.getTime());
     const diffSec = Math.floor(diffMs / 1000);
     const diffMin = Math.floor(diffSec / 60);
     const diffHour = Math.floor(diffMin / 60);
@@ -305,7 +303,7 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
               )}
               {provisionGateway.error && (
                 <p className="text-error text-xs font-semibold mt-sm">
-                  {(provisionGateway.error as any).message || 'Failed to provision gateway.'}
+                  {toApiError(provisionGateway.error).message || 'Failed to provision gateway.'}
                 </p>
               )}
             </div>
@@ -315,12 +313,12 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
               {/* Error messages if any */}
               {reloadConfig.error && (
                 <div className="p-sm bg-red-50 border border-red-200 text-error text-xs font-semibold rounded-lg">
-                  {(reloadConfig.error as any).message || 'Failed to reload gateway configuration.'}
+                  {toApiError(reloadConfig.error).message || 'Failed to reload gateway configuration.'}
                 </div>
               )}
               {decommissionGateway.error && (
                 <div className="p-sm bg-red-50 border border-red-200 text-error text-xs font-semibold rounded-lg">
-                  {(decommissionGateway.error as any).message || 'Failed to delete gateway.'}
+                  {toApiError(decommissionGateway.error).message || 'Failed to delete gateway.'}
                 </div>
               )}
 
@@ -566,7 +564,7 @@ export const GatewaysOverview: React.FC<GatewaysOverviewProps> = ({
               />
             </label>
 
-            {createProject.error && <p className="text-error text-xs">{(createProject.error as any).message}</p>}
+            {createProject.error && <p className="text-error text-xs">{toApiError(createProject.error).message}</p>}
 
             <div className="flex justify-end gap-sm mt-sm">
               <button type="button" onClick={() => setIsCreateProjOpen(false)} className="px-3 py-1.5 text-xs text-on-surface-variant">

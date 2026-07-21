@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
@@ -30,14 +30,17 @@ export const PoliciesList: React.FC = () => {
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyRecord | null>(null);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | null>(null);
 
-  useEffect(() => {
+  const isCreateFromUrl = searchParams.get('action') === 'create-policy';
+  const effectiveDrawerMode = drawerMode ?? (isCreateFromUrl ? 'create' : null);
+
+  const handleCloseDrawer = () => {
+    setDrawerMode(null);
     if (searchParams.get('action') === 'create-policy') {
-      setDrawerMode('create');
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('action');
       setSearchParams(newParams, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  };
 
   const [deleteTarget, setDeleteTarget] = useState<PolicyRecord | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -98,11 +101,9 @@ export const PoliciesList: React.FC = () => {
   const filteredPolicies = policies.filter((p) => {
     // Search keyword match
     const term = searchText.toLowerCase();
-    const nameMatch = p.name.toLowerCase().includes(term);
-    const originsMatch = (p.allowed_origins || []).some((o) => o.toLowerCase().includes(term));
-    const rolesMatch = (p.allowed_roles || []).some((r) => r.toLowerCase().includes(term));
-    const scopesMatch = (p.allowed_scopes || []).some((s) => s.toLowerCase().includes(term));
-    const matchesSearch = nameMatch || originsMatch || rolesMatch || scopesMatch;
+    const matchesSearch =
+      p.name.toLowerCase().includes(term) ||
+      (p.description && p.description.toLowerCase().includes(term));
 
     if (!matchesSearch) return false;
 
@@ -220,25 +221,25 @@ export const PoliciesList: React.FC = () => {
       )}
 
       {/* Stepper Wizard Drawer for Creating Policy */}
-      {drawerMode === 'create' && (
+      {effectiveDrawerMode === 'create' && (
         <PolicyWizardDrawer
           projectId={projectId ?? ''}
-          onClose={() => setDrawerMode(null)}
+          onClose={handleCloseDrawer}
           onSuccess={() => {
-            setDrawerMode(null);
+            handleCloseDrawer();
             triggerToast('Policy created successfully.');
           }}
         />
       )}
 
       {/* Edit Drawer for Modifying Policy */}
-      {drawerMode === 'edit' && selectedPolicy && (
+      {effectiveDrawerMode === 'edit' && selectedPolicy && (
         <PolicyEditDrawer
           projectId={projectId ?? ''}
           policy={selectedPolicy}
-          onClose={() => setDrawerMode(null)}
+          onClose={handleCloseDrawer}
           onSuccess={() => {
-            setDrawerMode(null);
+            handleCloseDrawer();
             triggerToast('Policy changes saved successfully.');
           }}
         />

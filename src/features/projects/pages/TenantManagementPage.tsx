@@ -6,22 +6,23 @@ import {
   useDeleteTenantMutation,
 } from '../../../shared/hooks/usePlatform';
 import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
+import type { TenantSummary } from '../../../shared/api/projectsApi';
 
 export const TenantManagementPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const limit = 10;
-  const { data: tenantsData, isLoading, error, refetch } = useTenantsQuery(page, limit);
+  const { data: tenantsData, refetch } = useTenantsQuery(page, limit);
   const suspendTenant = useSuspendTenantMutation();
   const reactivateTenant = useReactivateTenantMutation();
   const deleteTenant = useDeleteTenantMutation();
 
-  const [selectedTenant, setSelectedTenant] = useState<any | null>(null);
+  const [selectedTenant, setSelectedTenant] = useState<TenantSummary | null>(null);
   const [confirmAction, setConfirmAction] = useState<'suspend' | 'reactivate' | 'delete' | null>(null);
 
   const tenants = tenantsData?.items ?? [];
   const totalPages = tenantsData?.pagination?.total_pages ?? 1;
 
-  const handleActionClick = (tenant: any, action: 'suspend' | 'reactivate' | 'delete') => {
+  const handleActionClick = (tenant: TenantSummary, action: 'suspend' | 'reactivate' | 'delete') => {
     setSelectedTenant(tenant);
     setConfirmAction(action);
   };

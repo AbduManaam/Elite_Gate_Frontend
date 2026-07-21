@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listAllGateways, restartGateway, reloadAllGateways, forceDecommissionGateway } from '../api/gatewaysApi';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { listAllGateways, restartGateway, reloadAllGateways, forceDecommissionGateway, type GatewayRecord } from '../api/gatewaysApi';
 import { ConfirmModal } from '../../../shared/components/ui/ConfirmModal';
 
 export const PlatformGatewaysPage: React.FC = () => {
-  const qc = useQueryClient();
   const { data: gatewaysData, refetch } = useQuery({ queryKey: ['platform', 'gateways'], queryFn: listAllGateways });
 
   const restartMut = useMutation({
@@ -22,17 +21,17 @@ export const PlatformGatewaysPage: React.FC = () => {
     onSuccess: () => refetch(),
   });
 
-  const [activeGateway, setActiveGateway] = useState<any | null>(null);
+  const [activeGateway, setActiveGateway] = useState<GatewayRecord | null>(null);
   const [modalAction, setModalAction] = useState<'restart' | 'reload_all' | 'force_decomm' | null>(null);
 
   // Fallback demo gateways if backend is not running
-  const gateways = gatewaysData || [
-    { id: 'gw-01', endpoint_ip: '10.0.1.15', gateway_port: '8080', plan: 'dedicated-enterprise', status: 'active', external_id: 'gw-east-01' },
-    { id: 'gw-02', endpoint_ip: '10.0.1.18', gateway_port: '8080', plan: 'dedicated-enterprise', status: 'active', external_id: 'gw-east-02' },
-    { id: 'gw-03', endpoint_ip: '10.0.2.4', gateway_port: '8080', plan: 'dedicated-enterprise', status: 'active', external_id: 'gw-west-01' },
+  const gateways: GatewayRecord[] = gatewaysData || [
+    { id: 'gw-01', project_id: 'proj-01', endpoint_ip: '10.0.1.15', gateway_port: '8080', public_host: 'gw1.example.com', public_port: '443', plan: 'dedicated-enterprise', status: 'active', external_id: 'gw-east-01' },
+    { id: 'gw-02', project_id: 'proj-01', endpoint_ip: '10.0.1.18', gateway_port: '8080', public_host: 'gw2.example.com', public_port: '443', plan: 'dedicated-enterprise', status: 'active', external_id: 'gw-east-02' },
+    { id: 'gw-03', project_id: 'proj-02', endpoint_ip: '10.0.2.4', gateway_port: '8080', public_host: 'gw3.example.com', public_port: '443', plan: 'dedicated-enterprise', status: 'active', external_id: 'gw-west-01' },
   ];
 
-  const handleActionClick = (gw: any, action: 'restart' | 'reload_all' | 'force_decomm') => {
+  const handleActionClick = (gw: GatewayRecord | null, action: 'restart' | 'reload_all' | 'force_decomm') => {
     setActiveGateway(gw);
     setModalAction(action);
   };

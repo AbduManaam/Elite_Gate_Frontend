@@ -2,16 +2,22 @@
 // It displays the Sidebar, Header, and the currently selected page, and handles
 // navigation-related UI such as logout and analytics tabs.
 
-import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from '../../shared/layouts/Sidebar/Sidebar';
-import { useAuthGate } from './AuthGate';
 import { useProjectSummaryQuery } from '../../shared/hooks/useProjectSummary';
 import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
 import { useActiveProject } from '../../shared/hooks/useActiveProject';
 import { useResolveSession } from '../../shared/hooks/useResolveSession';
 import { useWorkspacePath } from '../../shared/hooks/useWorkspacePath';
+import { useAuthGate } from './useAuthGate';
+
+function deriveDisplayNameFromUsername(username?: string): string {
+  if (!username) return 'User';
+  const part = username.split('@')[0].split('_')[0].split('.')[0];
+  return part.charAt(0).toUpperCase() + part.slice(1);
+}
 
 interface SearchItem {
   category: string;
@@ -23,7 +29,6 @@ interface SearchItem {
 export const AppRouter: React.FC = () => {
   useResolveSession();
   useProjectSummaryQuery();
-  const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuthGate();
   const isSidebarCollapsed = useUIStore((s) => s.isSidebarCollapsed);
@@ -33,21 +38,17 @@ export const AppRouter: React.FC = () => {
   const { projectRole } = useActiveProject();
   const getPath = useWorkspacePath();
 
-  const displayName = user?.username
-    ? user.username.toLowerCase() === 'abdumanam@gmail.com' || user.username.toLowerCase() === 'abdumanam'
-      ? 'Abdu Manaam'
-      : user.username.split('@')[0].split('_')[0].split('.')[0].replace(/^\w/, (c) => c.toUpperCase())
-    : '';
+  const displayName = user?.username ? deriveDisplayNameFromUsername(user.username) : '';
 
   const initials = displayName
-    ? displayName.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()
+    ? displayName.split(' ').filter(Boolean).map((n) => n[0]).join('').substring(0, 2).toUpperCase()
     : 'U';
 
   const displayRole = isSuperAdmin
     ? 'Super Admin'
     : projectRole
-    ? projectRole.charAt(0).toUpperCase() + projectRole.slice(1)
-    : 'System Administrator';
+      ? projectRole.charAt(0).toUpperCase() + projectRole.slice(1)
+      : 'System Administrator';
 
   useEffect(() => {
     const handleResize = () => {
@@ -61,13 +62,23 @@ export const AppRouter: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  
+
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const openSearch = useCallback(() => {
+    setSearchQuery('');
+    setSelectedIndex(0);
+    setIsSearchOpen(true);
+  }, []);
+
+  const closeSearch = useCallback(() => {
+    setIsSearchOpen(false);
+  }, []);
 
   const searchItems: SearchItem[] = [
     { category: 'Pages', title: 'Welcome Dashboard', path: getPath('/'), icon: 'dashboard' },
@@ -92,24 +103,24 @@ export const AppRouter: React.FC = () => {
   );
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsSearchOpen((prev) => !prev);
-      } else if (e.key === 'Escape') {
-        setIsSearchOpen(false);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        openSearch();
+      } else if (event.key === 'Escape') {
+        closeSearch();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [openSearch, closeSearch]);
 
   useEffect(() => {
-    if (isSearchOpen) {
-      setSearchQuery('');
-      setSelectedIndex(0);
-      setTimeout(() => searchInputRef.current?.focus(), 50);
-    }
+    if (!isSearchOpen) return;
+    const timeoutId = window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 50);
+    return () => window.clearTimeout(timeoutId);
   }, [isSearchOpen]);
 
   const handleKeyDownList = (e: React.KeyboardEvent) => {
@@ -165,7 +176,7 @@ export const AppRouter: React.FC = () => {
               </span>
               <input
                 readOnly
-                onClick={() => setIsSearchOpen(true)}
+                onClick={openSearch}
                 className="w-full h-8 pl-9 pr-16 text-sm bg-surface-container-low border border-outline-variant rounded focus:border-[#587c94] focus:ring-1 focus:ring-[#587c94] outline-none transition-all placeholder:text-outline text-on-surface cursor-pointer"
                 placeholder="Search..."
                 type="text"
@@ -236,11 +247,11 @@ export const AppRouter: React.FC = () => {
 
       {/* Global Command Palette Search Modal */}
       {isSearchOpen && (
-        <div 
+        <div
           onClick={() => setIsSearchOpen(false)}
           className="fixed inset-0 bg-black/40 z-50 flex items-start justify-center pt-[15vh] px-md backdrop-blur-xs"
         >
-          <div 
+          <div
             onClick={(e) => e.stopPropagation()}
             className="bg-white border border-outline-variant rounded-xl shadow-2xl w-[512px] max-w-full flex flex-col overflow-hidden max-h-[50vh] flex-shrink-0"
           >
@@ -276,11 +287,10 @@ export const AppRouter: React.FC = () => {
                     <button
                       key={item.title + item.path}
                       onClick={() => handleNavigate(item.path)}
-                      className={`w-full flex items-center justify-between px-md py-2.5 rounded-lg text-xs font-sans transition-all cursor-pointer ${
-                        isSelected 
-                          ? 'bg-[#113346] text-white' 
+                      className={`w-full flex items-center justify-between px-md py-2.5 rounded-lg text-xs font-sans transition-all cursor-pointer ${isSelected
+                          ? 'bg-[#113346] text-white'
                           : 'text-on-surface-variant hover:bg-slate-50'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-sm">
                         <span className={`material-symbols-outlined text-[18px] ${isSelected ? 'text-white' : 'text-outline'}`}>

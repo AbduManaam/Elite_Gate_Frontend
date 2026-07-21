@@ -1,5 +1,4 @@
 import React from 'react';
-import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 
 interface EnvironmentInfoProps {
   readonly projectId: string;

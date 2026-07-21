@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { addTeamMemberAdmin } from '../api/authApi';
+import { toApiError } from '../../../shared/api/apiError';
 
 export const PlatformAdminsPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -19,8 +20,8 @@ export const PlatformAdminsPage: React.FC = () => {
       setErrorMsg('');
       setTimeout(() => setSuccessMsg(''), 5000);
     },
-    onError: (err: any) => {
-      setErrorMsg(err.response?.data?.error || 'Failed to add admin user.');
+    onError: (err: unknown) => {
+      setErrorMsg(toApiError(err).message || 'Failed to add admin user.');
     },
   });
 

@@ -1,5 +1,13 @@
 import { apiClient } from '../../../lib/api/client';
 
+export type GatewayStatus =
+  | 'provisioning'
+  | 'active'
+  | 'running'
+  | 'stopped'
+  | 'failed'
+  | 'decommissioned';
+
 export interface GatewayRecord {
     readonly id: string;
     readonly project_id: string;
@@ -9,7 +17,7 @@ export interface GatewayRecord {
     readonly public_host: string;
     readonly public_port: string;
     readonly plan: string;
-    readonly status: string;
+    readonly status: GatewayStatus;
     readonly created_at?: string;
 }
 

@@ -1,5 +1,7 @@
 import { apiClient } from '../../lib/api/client';
 
+export type ProjectRole = 'owner' | 'editor' | 'viewer';
+
 /** Matches GET /v1/projects item shape from the Go backend. */
 export interface Project {
     readonly id: string;
@@ -11,7 +13,7 @@ export interface Project {
     readonly plan: string;
     readonly dashboard_allowed_origins: string[] | null;
     /** Per-project membership role — present when the list endpoint includes it. */
-    readonly role?: string;
+    readonly role?: ProjectRole;
     readonly created_at: string;
     readonly updated_at: string;
 }
@@ -22,7 +24,7 @@ export interface ProjectSummary {
     readonly slug: string;
     readonly description: string;
     readonly is_active: boolean;
-    readonly role?: string;
+    readonly role?: ProjectRole | null;
     readonly created_at: string;
     readonly updated_at: string;
     readonly metrics?: {

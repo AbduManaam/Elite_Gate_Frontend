@@ -12,7 +12,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
   LineChart,
   Line,
 } from 'recharts';
@@ -29,10 +28,12 @@ function fmtTime(ts: number): string {
 }
 
 /** Formats a numeric value with its unit for display in KPI cards. */
-function fmtKPI(value: number, unit: string): string {
-  if (unit === 'ms') return `${value.toFixed(1)} ms`;
-  if (unit === 'req/s') return `${value.toFixed(2)} req/s`;
-  if (unit === '%') return `${value.toFixed(1)}%`;
+function fmtKPI(value: number | undefined | null, unit: string | undefined | null): string {
+  if (value === undefined || value === null || Number.isNaN(value)) return '0';
+  const u = unit ?? '';
+  if (u === 'ms') return `${value.toFixed(1)} ms`;
+  if (u === 'req/s') return `${value.toFixed(2)} req/s`;
+  if (u === '%') return `${value.toFixed(1)}%`;
   return String(Math.round(value));
 }
 
@@ -210,9 +211,9 @@ export const ObservabilitySummaryPage: React.FC<ObservabilitySummaryProps> = ({ 
                 <span className={`material-symbols-outlined text-[18px] ${color}`}>{icon}</span>
               </div>
               <div className="text-[24px] font-bold text-on-surface">
-                {fmtKPI(raw.value, raw.unit)}
+                {fmtKPI(raw?.value, raw?.unit)}
               </div>
-              <div className="text-[11px] text-on-surface-variant mt-1">{raw.unit}</div>
+              <div className="text-[11px] text-on-surface-variant mt-1">{raw?.unit ?? ''}</div>
             </div>
           ))}
       </div>

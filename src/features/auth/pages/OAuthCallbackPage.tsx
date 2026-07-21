@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { refresh } from '../api/authApi';
 import { useAuthStore } from '../../../store/authStore';
@@ -6,12 +6,8 @@ import { useAuthStore } from '../../../store/authStore';
 export const OAuthCallbackPage: React.FC = () => {
     const navigate = useNavigate();
     const setSession = useAuthStore((s) => s.setSession);
-    const ranOnce = useRef(false);
 
     useEffect(() => {
-        if (ranOnce.current) return;
-        ranOnce.current = true;
-
         // 1. Check if token was passed in hash fragment (#access_token=...)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const hashAccessToken = hashParams.get('access_token');
@@ -30,23 +26,15 @@ export const OAuthCallbackPage: React.FC = () => {
         window.history.replaceState(null, '', window.location.pathname);
 
         // 3. Try refreshing session via HttpOnly cookie (works for both ?oauth=success and fallback)
-        let cancelled = false;
-
         refresh()
             .then((data) => {
-                if (cancelled) return;
                 setSession(data.access_token);
                 navigate('/', { replace: true });
             })
             .catch(() => {
-                if (cancelled) return;
                 const errParam = searchParams.get('oauth_error') || (oauthSuccess ? 'session_expired' : 'missing_tokens');
                 navigate(`/login?oauth_error=${encodeURIComponent(errParam)}`, { replace: true });
             });
-
-        return () => {
-            cancelled = true;
-        };
     }, [navigate, setSession]);
 
     return (

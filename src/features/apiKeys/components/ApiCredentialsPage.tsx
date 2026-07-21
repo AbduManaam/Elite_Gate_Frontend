@@ -74,32 +74,39 @@ export const ApiCredentialsPage: React.FC = () => {
         }
     }, [toastMessage]);
 
-    // Key details extractor helper
-    const extractKeyDetails = (res: any) => {
-        if (!res) return { name: '', key: '' };
+    const isRecord = (val: unknown): val is Record<string, unknown> =>
+        typeof val === 'object' && val !== null;
 
-        const name = res.name || res.api_key?.name || res.key?.name || 'API Key';
+    // Key details extractor helper
+    const extractKeyDetails = (res: unknown): { name: string; key: string } => {
+        if (!res) return { name: '', key: '' };
+        if (typeof res === 'string') return { name: 'API Key', key: res };
+        if (!isRecord(res)) return { name: '', key: '' };
+
+        const apiKeyObj = isRecord(res.api_key) ? res.api_key : undefined;
+        const keyObj = isRecord(res.key) ? res.key : undefined;
+
+        const name =
+            (typeof res.name === 'string' && res.name) ||
+            (apiKeyObj && typeof apiKeyObj.name === 'string' && apiKeyObj.name) ||
+            (keyObj && typeof keyObj.name === 'string' && keyObj.name) ||
+            'API Key';
+
         let key = '';
 
-        if (typeof res === 'string') {
-            key = res;
-        } else if (typeof res === 'object') {
-            if (typeof res.raw_key === 'string' && res.raw_key) key = res.raw_key;
-            else if (typeof res.api_key === 'string' && res.api_key) key = res.api_key;
-            else if (typeof res.key === 'string' && res.key) key = res.key;
-            else if (typeof res.token === 'string' && res.token) key = res.token;
-            else if (typeof res.secret === 'string' && res.secret) key = res.secret;
-            else if (res.api_key && typeof res.api_key === 'object') {
-                const nested = res.api_key;
-                if (typeof nested.raw_key === 'string' && nested.raw_key) key = nested.raw_key;
-                else if (typeof nested.api_key === 'string' && nested.api_key) key = nested.api_key;
-                else if (typeof nested.key === 'string' && nested.key) key = nested.key;
-            } else if (res.key && typeof res.key === 'object') {
-                const nested = res.key;
-                if (typeof nested.raw_key === 'string' && nested.raw_key) key = nested.raw_key;
-                else if (typeof nested.api_key === 'string' && nested.api_key) key = nested.api_key;
-                else if (typeof nested.key === 'string' && nested.key) key = nested.key;
-            }
+        if (typeof res.raw_key === 'string' && res.raw_key) key = res.raw_key;
+        else if (typeof res.api_key === 'string' && res.api_key) key = res.api_key;
+        else if (typeof res.key === 'string' && res.key) key = res.key;
+        else if (typeof res.token === 'string' && res.token) key = res.token;
+        else if (typeof res.secret === 'string' && res.secret) key = res.secret;
+        else if (apiKeyObj) {
+            if (typeof apiKeyObj.raw_key === 'string' && apiKeyObj.raw_key) key = apiKeyObj.raw_key;
+            else if (typeof apiKeyObj.api_key === 'string' && apiKeyObj.api_key) key = apiKeyObj.api_key;
+            else if (typeof apiKeyObj.key === 'string' && apiKeyObj.key) key = apiKeyObj.key;
+        } else if (keyObj) {
+            if (typeof keyObj.raw_key === 'string' && keyObj.raw_key) key = keyObj.raw_key;
+            else if (typeof keyObj.api_key === 'string' && keyObj.api_key) key = keyObj.api_key;
+            else if (typeof keyObj.key === 'string' && keyObj.key) key = keyObj.key;
         }
 
         return { name, key };

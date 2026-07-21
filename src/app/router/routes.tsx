@@ -1,13 +1,13 @@
-import React from 'react';
-import { createBrowserRouter, useNavigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { AppRouter } from './AppRouter';
 import { RequireAuth } from './AuthGate';
 import { RequireRole } from './RequireRole';
 import { ProjectLayout } from './ProjectLayout';
 import { RootRedirect } from './RootRedirect';
+import { LoginRoute } from './LoginRoute';
 import { PLATFORM, ADMIN } from '../../shared/lib/platformPaths';
 import {
-  LoginPage, OAuthCallbackPage, PlatformAdminsPage, RolesPermissionsPage, UnauthorizedPage,
+  OAuthCallbackPage, PlatformAdminsPage, RolesPermissionsPage, UnauthorizedPage,
   ForgotPasswordPage, ResetPasswordPage,
 } from '../../features/auth';
 import { WelcomeDashboard } from '../../features/dashboard';
@@ -15,11 +15,6 @@ import { ObservabilitySummaryPage, PlatformHealthPage, PlatformMetricsPage } fro
 import { GatewaysPage, PlatformGatewaysPage, GatewayStatusPage, GatewayMonitoringPage } from '../../features/gateways';
 import { ProjectSettings, TenantManagementPage, AllProjectsPage } from '../../features/projects';
 import { AuditLogsPage } from '../../features/auditLogs';
-
-const LoginRoute: React.FC = () => {
-  const navigate = useNavigate();
-  return <LoginPage onLoginSuccess={() => navigate('/', { replace: true })} />;
-};
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginRoute /> },

@@ -215,12 +215,14 @@ export const AuditLogsPage: React.FC = () => {
                 logs.map((log) => (
                   <tr key={log.id} className="hover:bg-surface-container-lowest transition-colors group cursor-pointer">
                     <td className="px-stack-md py-4 text-on-surface-variant">
-                      {new Date(log.created_at).toLocaleString()}
+                      {log.created_at && !Number.isNaN(new Date(log.created_at).getTime())
+                        ? new Date(log.created_at).toLocaleString()
+                        : '—'}
                     </td>
                     <td className="px-stack-md py-4 font-sans text-sm font-medium">{log.actor}</td>
                     <td className="px-stack-md py-4">
                       <span className="bg-[#587c94]/10 text-[#587c94] px-2 py-1 rounded font-bold text-[10px]">
-                        {log.action.toUpperCase().replace('.', '_')}
+                        {(log.action || '').toUpperCase().replace('.', '_')}
                       </span>
                     </td>
                     <td className="px-stack-md py-4 text-on-surface-variant">

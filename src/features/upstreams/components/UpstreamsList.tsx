@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
@@ -39,14 +39,19 @@ export const UpstreamsList: React.FC = () => {
         mode: 'create',
     });
 
-    useEffect(() => {
+    const isCreateFromUrl = searchParams.get('action') === 'create-upstream';
+    const effectiveFormDrawer = formDrawer.isOpen
+        ? formDrawer
+        : { isOpen: isCreateFromUrl, mode: 'create' as const };
+
+    const handleCloseFormDrawer = () => {
+        setFormDrawer({ isOpen: false, mode: 'create' });
         if (searchParams.get('action') === 'create-upstream') {
-            setFormDrawer({ isOpen: true, mode: 'create' });
             const newParams = new URLSearchParams(searchParams);
             newParams.delete('action');
             setSearchParams(newParams, { replace: true });
         }
-    }, [searchParams, setSearchParams]);
+    };
     const [deleteTarget, setDeleteTarget] = useState<UpstreamRecord | null>(null);
     const [selectedUpstreamForTargets, setSelectedUpstreamForTargets] = useState<UpstreamRecord | null>(null);
 
@@ -202,14 +207,14 @@ export const UpstreamsList: React.FC = () => {
             )}
 
             {/* Upstream Form Drawer (Create Stepper / Edit Form) */}
-            {formDrawer.isOpen && (
+            {effectiveFormDrawer.isOpen && (
                 <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
                     <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
                         <UpstreamFormDrawer
                             projectId={projectId ?? ''}
-                            mode={formDrawer.mode}
-                            upstream={formDrawer.upstream}
-                            onClose={() => setFormDrawer({ isOpen: false, mode: 'create' })}
+                            mode={effectiveFormDrawer.mode}
+                            upstream={effectiveFormDrawer.upstream}
+                            onClose={handleCloseFormDrawer}
                         />
                     </div>
                 </div>

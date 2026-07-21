@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { useLoginMutation } from '../hooks/useLoginMutation';
@@ -32,16 +32,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState('');
-  const loginMutation = useLoginMutation();
-
-  useEffect(() => {
-    const err = new URLSearchParams(window.location.search).get("oauth_error");
-
-    if (err) {
-      setFormError(decodeURIComponent(err));
+  const [formError, setFormError] = useState(() => {
+    const err = new URLSearchParams(window.location.search).get('oauth_error');
+    if (!err) return '';
+    const decoded = decodeURIComponent(err);
+    if (decoded === 'missing_tokens') {
+      return 'Google sign-in could not be completed due to a server authentication error. Please try again or log in with credentials.';
     }
-  }, []);
+    if (decoded === 'session_expired') {
+      return 'Your sign-in session expired. Please try signing in again.';
+    }
+    return decoded;
+  });
+  const loginMutation = useLoginMutation();
 
   const isSubmitting = loginMutation.isPending;
 
