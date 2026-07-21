@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { useLoginMutation } from '../hooks/useLoginMutation';
+import { buildApiUrl } from '../../../shared/lib/apiUrl';
 
 export interface LoginFormProps {
   readonly onLoginSuccess: () => void;
@@ -169,7 +170,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
         <button
           type="button"
           onClick={() => {
-            window.location.href = `${import.meta.env.VITE_API_BASE_URL}/google/login`;
+            window.location.href = buildApiUrl('/google/login');
           }}
           className="w-full bg-white border border-gray-200 text-gray-700 font-semibold text-sm py-3.5 rounded-full flex justify-center items-center gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all duration-200 cursor-pointer"
         >

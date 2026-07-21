@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { apiClient } from './client';
 import { tokenStore } from './tokenStore';
+import { buildApiUrl } from '../../shared/lib/apiUrl';
 
 interface RetriableRequestConfig extends InternalAxiosRequestConfig {
     _retry?: boolean;
@@ -31,7 +32,7 @@ let refreshPromise: Promise<string | null> | null = null;
 async function refreshAccessToken(): Promise<string | null> {
     try {
         const { data } = await axios.post<RefreshResponseBody>(
-            `${import.meta.env.VITE_API_BASE_URL}/refresh`,
+            buildApiUrl('/refresh'),
             {},
             { withCredentials: true }
         );
