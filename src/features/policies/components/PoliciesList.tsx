@@ -16,7 +16,7 @@ import { PolicyEmptyState } from './PolicyEmptyState';
 import { PolicyDeleteDialog } from './PolicyDeleteDialog';
 import { PolicyWizardDrawer } from './PolicyWizardDrawer';
 import { PolicyEditDrawer } from './PolicyEditDrawer';
-import { PolicyRecord } from '../api/policiesApi';
+import { PolicyRecord, PolicyInput } from '../api/policiesApi';
 import { toApiError } from '../../../shared/api/apiError';
 
 export const PoliciesList: React.FC = () => {
@@ -59,13 +59,15 @@ export const PoliciesList: React.FC = () => {
 
   // Duplicate handler
   const handleDuplicate = (policy: PolicyRecord) => {
-    const payload = {
+    const payload: PolicyInput = {
       name: `Copy of ${policy.name}`,
       auth_required: policy.auth_required,
       rate_limit_rpm: policy.rate_limit_rpm,
       allowed_origins: policy.allowed_origins || [],
       allowed_roles: policy.allowed_roles || [],
       allowed_scopes: policy.allowed_scopes || [],
+      ip_allowlist: policy.ip_allowlist || [],
+      ip_blocklist: policy.ip_blocklist || [],
     };
 
     createPolicy.mutate(payload, {
@@ -101,9 +103,7 @@ export const PoliciesList: React.FC = () => {
   const filteredPolicies = policies.filter((p) => {
     // Search keyword match
     const term = searchText.toLowerCase();
-    const matchesSearch =
-      p.name.toLowerCase().includes(term) ||
-      (p.description && p.description.toLowerCase().includes(term));
+    const matchesSearch = p.name.toLowerCase().includes(term);
 
     if (!matchesSearch) return false;
 
@@ -155,8 +155,8 @@ export const PoliciesList: React.FC = () => {
           {apiError.kind === 'forbidden'
             ? "You don't have permission to view policies for this project."
             : apiError.kind === 'network'
-            ? "Can't reach the server — check your connection."
-            : apiError.message}
+              ? "Can't reach the server — check your connection."
+              : apiError.message}
         </div>
       )}
 

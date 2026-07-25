@@ -8,11 +8,11 @@ export interface PolicyInput {
     name: string;
     auth_required: boolean;
     rate_limit_rpm: number;
-    allowed_origins: string[];
-    allowed_roles: string[];
-    allowed_scopes: string[];
-    ip_allowlist: string[];
-    ip_blocklist: string[];
+    allowed_origins?: string[];
+    allowed_roles?: string[];
+    allowed_scopes?: string[];
+    ip_allowlist?: string[];
+    ip_blocklist?: string[];
 }
 
 interface ListPoliciesResponse {
