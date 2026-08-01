@@ -15,6 +15,7 @@ import { ObservabilitySummaryPage, PlatformHealthPage, PlatformMetricsPage } fro
 import { GatewaysPage, PlatformGatewaysPage, GatewayStatusPage, GatewayMonitoringPage } from '../../features/gateways';
 import { ProjectSettings, TenantManagementPage, AllProjectsPage } from '../../features/projects';
 import { AuditLogsPage } from '../../features/auditLogs';
+import { CustomDomainsPage } from '../../features/customDomains';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginRoute /> },
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <WelcomeDashboard /> },
           { path: 'connectivity', element: <GatewaysPage /> },
+          { path: 'custom-domains', element: <RequireRole minProjectRole="viewer"><CustomDomainsPage /></RequireRole> },
           { path: 'analytics', element: <ObservabilitySummaryPage /> },
           { path: 'settings', element: <ProjectSettings /> },
           { path: 'logs', element: <AuditLogsPage /> },

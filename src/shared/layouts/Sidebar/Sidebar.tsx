@@ -41,6 +41,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
   const sections: { title?: string; items: { label: string; path: string; icon: string }[] }[] = [];
 
   if (isSuperAdmin) {
+    const projectItems = [
+      { label: 'All Projects', path: abs(PLATFORM.projects), icon: 'folder_open' },
+      { label: 'Gateway Management', path: abs(PLATFORM.gateways), icon: 'dns' },
+    ];
+    if (projectId) {
+      projectItems.push({ label: 'Custom Domains', path: getPath('/custom-domains'), icon: 'language' });
+    }
+
     sections.push(
       { items: [{ label: 'Dashboard', path: getPath('/'), icon: 'dashboard' }] },
       {
@@ -53,10 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
       },
       {
         title: 'Projects',
-        items: [
-          { label: 'All Projects', path: abs(PLATFORM.projects), icon: 'folder_open' },
-          { label: 'Gateway Management', path: abs(PLATFORM.gateways), icon: 'dns' },
-        ],
+        items: projectItems,
       },
       {
         title: 'Administration',
@@ -73,6 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         title: 'Projects',
         items: [
           { label: 'Configuration', path: getPath('/connectivity'), icon: 'settings' },
+          { label: 'Custom Domains', path: getPath('/custom-domains'), icon: 'language' },
           { label: 'Analytics', path: getPath('/analytics'), icon: 'monitoring' },
           { label: 'Audit log', path: getPath('/logs'), icon: 'history' },
         ],
@@ -86,6 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         items: [
           { label: 'Status', path: getPath('/gateway/status'), icon: 'dns' },
           { label: 'Monitoring', path: getPath('/gateway/monitoring'), icon: 'monitoring' },
+          { label: 'Custom Domains', path: getPath('/custom-domains'), icon: 'language' },
           { label: 'Logs', path: getPath('/logs'), icon: 'history' },
         ],
       }

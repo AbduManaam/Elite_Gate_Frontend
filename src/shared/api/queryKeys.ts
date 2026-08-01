@@ -11,4 +11,6 @@ export const queryKeys = {
     allGateways: () => ['gateways'] as const,
     members: (projectId: string) => ['projects', projectId, 'members'] as const,
     apiKeys: (projectId: string) => ['projects', projectId, 'apiKeys'] as const,
+    customDomains: (projectId: string) => ['projects', projectId, 'customDomains'] as const,
+    customDomain: (projectId: string, domainId: string) => ['projects', projectId, 'customDomains', domainId] as const,
 };
