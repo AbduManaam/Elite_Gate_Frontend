@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { CustomDomain } from '../api/domain.types';
 import { DomainStatusBadge, RoutingStatusBadge } from './DomainStatusBadge';
+import { ProvisioningStatusCard } from './ProvisioningStatusCard';
 import { CopyableText } from '../../../shared/components/ui/CopyableText';
 
 interface CustomDomainsTableProps {
+  projectId: string;
   domains: CustomDomain[];
   canVerify: boolean;
   canCheckRouting: boolean;
@@ -13,6 +15,7 @@ interface CustomDomainsTableProps {
   onCheckRouting: (domain: CustomDomain) => void;
   onActivate: (domain: CustomDomain) => void;
   onDelete: (domain: CustomDomain) => void;
+  onToast?: (msg: string, isError?: boolean) => void;
   pendingActionId: string | null;
 }
 
@@ -25,6 +28,7 @@ function formatRoutingError(error?: string): string {
 }
 
 export const CustomDomainsTable: React.FC<CustomDomainsTableProps> = ({
+  projectId,
   domains,
   canVerify,
   canCheckRouting,
@@ -34,6 +38,7 @@ export const CustomDomainsTable: React.FC<CustomDomainsTableProps> = ({
   onCheckRouting,
   onActivate,
   onDelete,
+  onToast,
   pendingActionId,
 }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -147,8 +152,16 @@ export const CustomDomainsTable: React.FC<CustomDomainsTableProps> = ({
                   <tr className="bg-slate-50/50">
                     <td colSpan={5} className="py-4 px-6 border-t border-b border-outline-variant/60">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-                        {/* Left column: DNS Instructions */}
+                        {/* Left column: DNS Instructions & Provisioning Status */}
                         <div className="flex flex-col gap-3">
+                          <ProvisioningStatusCard
+                            projectId={projectId}
+                            domainId={domain.id}
+                            isExpanded={isExpanded}
+                            canRetry={canActivate}
+                            onToast={onToast}
+                          />
+
                           {domain.status === 'pending_verification' && (
                             <div className="bg-amber-50/80 border border-amber-200 rounded-lg p-3 flex flex-col gap-2">
                               <span className="font-semibold text-amber-900 font-sans">Ownership Verification (TXT)</span>

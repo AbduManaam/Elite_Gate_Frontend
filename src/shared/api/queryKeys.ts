@@ -13,4 +13,6 @@ export const queryKeys = {
     apiKeys: (projectId: string) => ['projects', projectId, 'apiKeys'] as const,
     customDomains: (projectId: string) => ['projects', projectId, 'customDomains'] as const,
     customDomain: (projectId: string, domainId: string) => ['projects', projectId, 'customDomains', domainId] as const,
+    provisioningStatus: (projectId: string, domainId: string) =>
+        ['projects', projectId, 'customDomains', domainId, 'provisioningStatus'] as const,
 };

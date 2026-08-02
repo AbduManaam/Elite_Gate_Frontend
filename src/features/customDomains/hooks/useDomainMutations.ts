@@ -5,6 +5,7 @@ import {
   verifyDomainOwnership,
   checkDomainRouting,
   activateCustomDomain,
+  retryProvisioning,
   deleteCustomDomain,
   CreateCustomDomainInput,
 } from '../api/customDomainsApi';
@@ -43,8 +44,31 @@ export function useActivateDomainMutation(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (domainId: string) => activateCustomDomain(projectId, domainId),
-    onSuccess: () => {
+    onSuccess: (_, domainId) => {
       qc.invalidateQueries({ queryKey: queryKeys.customDomains(projectId) });
+      qc.invalidateQueries({ queryKey: queryKeys.provisioningStatus(projectId, domainId) });
+    },
+  });
+}
+
+export function useRetryProvisioningMutation(projectId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (domainId: string) => retryProvisioning(projectId, domainId),
+    onSuccess: (_, domainId) => {
+      qc.invalidateQueries({ queryKey: queryKeys.customDomains(projectId) });
+      qc.invalidateQueries({ queryKey: queryKeys.provisioningStatus(projectId, domainId) });
+    },
+  });
+}
+
+export function useRetryDeprovisioningMutation(projectId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (domainId: string) => retryDeprovisioning(projectId, domainId),
+    onSuccess: (_, domainId) => {
+      qc.invalidateQueries({ queryKey: queryKeys.customDomains(projectId) });
+      qc.invalidateQueries({ queryKey: queryKeys.provisioningStatus(projectId, domainId) });
     },
   });
 }
@@ -53,8 +77,9 @@ export function useDeleteDomainMutation(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (domainId: string) => deleteCustomDomain(projectId, domainId),
-    onSuccess: () => {
+    onSuccess: (_, domainId) => {
       qc.invalidateQueries({ queryKey: queryKeys.customDomains(projectId) });
+      qc.invalidateQueries({ queryKey: queryKeys.provisioningStatus(projectId, domainId) });
     },
   });
 }

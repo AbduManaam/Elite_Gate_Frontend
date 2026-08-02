@@ -198,8 +198,12 @@ describe('CustomDomainsPage', () => {
   it('handles activate action', async () => {
     vi.mocked(customDomainsApi.listCustomDomains).mockResolvedValue(mockDomains);
     vi.mocked(customDomainsApi.activateCustomDomain).mockResolvedValue({
-      ...mockDomains[2],
-      status: 'active',
+      message: 'activation queued',
+      status: 'provisioning_started',
+      custom_domain: {
+        ...mockDomains[2],
+        status: 'verified',
+      },
     });
 
     renderWithProviders('owner');

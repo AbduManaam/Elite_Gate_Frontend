@@ -112,8 +112,12 @@ export const CustomDomainsPage: React.FC = () => {
   const handleActivate = (domain: CustomDomain) => {
     setPendingActionId(domain.id);
     activateMutation.mutate(domain.id, {
-      onSuccess: () => {
-        triggerToast(`Domain "${domain.hostname}" activated!`);
+      onSuccess: (res) => {
+        if (res.status === 'provisioning_started' || res.status === 'provisioning_in_progress') {
+          triggerToast(`Certificate provisioning initiated for "${domain.hostname}".`);
+        } else {
+          triggerToast(`Domain "${domain.hostname}" is active.`);
+        }
       },
       onError: (err) => {
         triggerToast(`Activation failed: ${toApiError(err).message}`, true);
@@ -216,6 +220,7 @@ export const CustomDomainsPage: React.FC = () => {
         </div>
       ) : (
         <CustomDomainsTable
+          projectId={projectId ?? ''}
           domains={domains}
           canVerify={canVerify}
           canCheckRouting={canCheckRouting}
@@ -225,6 +230,7 @@ export const CustomDomainsPage: React.FC = () => {
           onCheckRouting={handleCheckRouting}
           onActivate={handleActivate}
           onDelete={(d) => setDomainToDelete(d)}
+          onToast={triggerToast}
           pendingActionId={pendingActionId}
         />
       )}

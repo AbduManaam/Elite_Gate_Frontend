@@ -1,5 +1,5 @@
 import React from 'react';
-import { DomainStatus, RoutingStatus } from '../api/domain.types';
+import { DomainStatus, RoutingStatus, ProvisioningStatus } from '../api/domain.types';
 
 export const DomainStatusBadge: React.FC<{ status: DomainStatus }> = ({ status }) => {
   switch (status) {
@@ -48,6 +48,31 @@ export const RoutingStatusBadge: React.FC<{ status?: RoutingStatus }> = ({ statu
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
           Routing Pending
+        </span>
+      );
+  }
+};
+
+export const ProvisioningStatusBadge: React.FC<{ status?: ProvisioningStatus }> = ({ status }) => {
+  if (!status || status === 'not_started') return null;
+  switch (status) {
+    case 'completed':
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          SSL Issued
+        </span>
+      );
+    case 'failed':
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-red-50 text-red-700 border border-red-200">
+          SSL Failed
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-spin" />
+          SSL Provisioning
         </span>
       );
   }
