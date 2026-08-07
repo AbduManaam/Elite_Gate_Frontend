@@ -87,17 +87,17 @@ export function useSystemRangeQuery(
 
 /**
  * Fetches project-scoped system metrics (CPU/Memory) for the active project's gateway.
- * Requires Owner or Editor role — Viewers cannot access system-level metrics.
+ * Accessible by Owner, Editor, and Viewer roles.
  */
 export function useProjectSystemRangeQuery(
   projectId: string | null,
-  service: string,
+  service: string = 'elitegate-gateway',
   metric: 'cpu' | 'memory',
   range = '1h',
   step = '60s',
   role?: string | null
 ) {
-  const canAccess = role === 'owner' || role === 'editor';
+  const canAccess = role === 'owner' || role === 'editor' || role === 'viewer';
   return useQuery({
     queryKey: ['metrics', 'project-system', projectId, service, metric, range, step],
     queryFn: () => queryProjectSystemRange(projectId as string, service, metric, range, step),
