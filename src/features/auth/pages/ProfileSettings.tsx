@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useProjectsQuery } from '../../../shared/hooks/useProjects';
@@ -23,6 +24,7 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({
   projectRole,
   selectedProjectName,
 }) => {
+  const navigate = useNavigate();
   const defaultName = deriveDisplayNameFromUsername(user.username);
   const [profileName, setProfileName] = useState(defaultName);
 
@@ -137,7 +139,11 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({
 
         {/* Action Buttons */}
         <div className="pt-sm border-t border-outline-variant flex flex-col sm:flex-row justify-end gap-sm">
-          <button className="w-full sm:w-auto bg-white border border-outline-variant text-on-surface px-md py-2 rounded-lg hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-sm cursor-pointer text-sm font-semibold" type="button">
+          <button
+            className="w-full sm:w-auto bg-white border border-outline-variant text-on-surface px-md py-2 rounded-lg hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-sm cursor-pointer text-sm font-semibold"
+            type="button"
+            onClick={() => navigate('/forgot-password')}
+          >
             <span className="material-symbols-outlined text-[18px]">key</span>
             Reset Password
           </button>
