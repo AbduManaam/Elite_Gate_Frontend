@@ -14,7 +14,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className 
   return (
     <div className={`bg-[#f3f5f8] text-[#171c1f] min-h-screen font-body-md w-full flex items-center justify-center p-4 md:p-8 select-none ${className}`}>
       {/* Outer rounded card */}
-      <div className="w-full max-w-[1200px] bg-white rounded-[32px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.06)] flex flex-col md:flex-row min-h-[620px] items-stretch">
+      <div className="w-full max-w-[1200px] rounded-[32px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.06)] flex flex-col md:flex-row min-h-[620px] items-stretch border border-white/60">
         
         {/* Left Side: Brand Banner */}
         <div 
@@ -46,7 +46,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className 
         </div>
 
         {/* Right Side: Authentication Forms */}
-        <div className="w-full md:w-1/2 bg-white flex flex-col justify-center">
+        <div className="w-full md:w-1/2 bg-white/70 backdrop-blur-md flex flex-col justify-center">
           {authMode === 'login' ? (
             <LoginForm onLoginSuccess={onLoginSuccess} onToggleSignup={() => setAuthMode('signup')} />
           ) : (
