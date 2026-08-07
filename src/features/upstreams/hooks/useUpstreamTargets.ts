@@ -21,6 +21,7 @@ export function useAddUpstreamTargetMutation(projectId: string, upstreamId: stri
         mutationFn: (input: UpstreamTargetInput) => addUpstreamTarget(projectId, upstreamId, input),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.upstreamTargets(projectId, upstreamId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.upstreamHealth(projectId, upstreamId) });
         },
     });
 }
@@ -31,6 +32,7 @@ export function useRemoveUpstreamTargetMutation(projectId: string, upstreamId: s
         mutationFn: (targetId: string) => removeUpstreamTarget(projectId, upstreamId, targetId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: queryKeys.upstreamTargets(projectId, upstreamId) });
+            queryClient.invalidateQueries({ queryKey: queryKeys.upstreamHealth(projectId, upstreamId) });
         },
     });
 }

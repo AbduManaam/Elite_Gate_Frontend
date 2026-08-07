@@ -1,7 +1,9 @@
 import React from 'react';
 import { UpstreamRecord } from '../api/types';
+import { UpstreamHealthBadge } from './UpstreamHealthBadge';
 
 interface UpstreamRowProps {
+    readonly projectId: string | null;
     readonly upstream: UpstreamRecord;
     readonly isExpanded: boolean;
     readonly onToggleExpand: () => void;
@@ -11,6 +13,7 @@ interface UpstreamRowProps {
 }
 
 export const UpstreamRow: React.FC<UpstreamRowProps> = ({
+    projectId,
     upstream,
     isExpanded,
     onToggleExpand,
@@ -86,12 +89,7 @@ export const UpstreamRow: React.FC<UpstreamRowProps> = ({
 
             {/* Health Column */}
             <td className="py-4 px-md">
-                <div className="flex items-center gap-1.5 font-medium text-xs">
-                    <span className={`w-2 h-2 rounded-full ${upstream.enabled ? 'bg-green-600' : 'bg-outline-variant'}`} />
-                    <span className={upstream.enabled ? 'text-green-700 font-semibold' : 'text-on-surface-variant'}>
-                        {upstream.enabled ? 'Healthy' : 'Disabled'}
-                    </span>
-                </div>
+                <UpstreamHealthBadge projectId={projectId} upstreamId={upstream.id} enabled={upstream.enabled} />
             </td>
 
             {/* Quick Actions Column */}

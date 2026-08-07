@@ -34,22 +34,23 @@ export interface ListGatewaysResponse {
     };
 }
 
-export function mapGatewayRecord(raw: any): GatewayRecord {
-    if (!raw) return raw;
-    const port = raw.public_port ?? raw.gateway_port ?? '';
+export function mapGatewayRecord(raw: unknown): GatewayRecord {
+    if (!raw || typeof raw !== 'object') return raw as unknown as GatewayRecord;
+    const r = raw as Record<string, unknown>;
+    const port = (r.public_port ?? r.gateway_port ?? '') as string | number;
     return {
-        id: raw.id ?? raw.gateway_id ?? '',
-        project_id: raw.project_id ?? '',
-        external_id: raw.external_id ?? raw.gateway_id ?? '',
-        endpoint_ip: raw.endpoint_ip ?? '',
-        gateway_port: String(raw.gateway_port ?? ''),
-        public_host: raw.public_host ?? '',
+        id: String(r.id ?? r.gateway_id ?? ''),
+        project_id: String(r.project_id ?? ''),
+        external_id: String(r.external_id ?? r.gateway_id ?? ''),
+        endpoint_ip: String(r.endpoint_ip ?? ''),
+        gateway_port: String(r.gateway_port ?? ''),
+        public_host: String(r.public_host ?? ''),
         public_port: port,
-        plan: raw.plan ?? '',
-        status: (raw.status ?? 'provisioning') as GatewayStatus,
-        created_at: raw.created_at,
-        public_endpoint: raw.public_endpoint,
-        protocol: raw.protocol,
+        plan: String(r.plan ?? ''),
+        status: (r.status ?? 'provisioning') as GatewayStatus,
+        created_at: r.created_at as string | undefined,
+        public_endpoint: r.public_endpoint as string | undefined,
+        protocol: r.protocol as string | undefined,
     };
 }
 
@@ -66,7 +67,7 @@ export async function listAllGateways(): Promise<GatewayRecord[]> {
 }
 
 export async function provisionGateway(projectId: string, plan: string): Promise<GatewayRecord> {
-    const { data } = await apiClient.post<any>(`/v1/projects/${projectId}/gateways`, {
+    const { data } = await apiClient.post<Record<string, unknown>>(`/v1/projects/${projectId}/gateways`, {
         project_id: projectId,
         plan,
     });

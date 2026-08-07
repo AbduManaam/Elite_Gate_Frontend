@@ -1,6 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../../shared/api/queryKeys';
-import { listUpstreams, disableUpstream, deleteUpstream, createUpstream, updateUpstream, UpstreamRecord, UpstreamInput } from '../api/upstreamsApi';
+import {
+    listUpstreams,
+    disableUpstream,
+    deleteUpstream,
+    createUpstream,
+    updateUpstream,
+    checkUpstreamHealth,
+    UpstreamRecord,
+    UpstreamInput,
+} from '../api/upstreamsApi';
 import { toApiError } from '../../../shared/api/apiError';
 
 export function useUpstreamsQuery(projectId: string | null) {
@@ -9,6 +18,28 @@ export function useUpstreamsQuery(projectId: string | null) {
         queryFn: () => listUpstreams(projectId as string),
         enabled: !!projectId,
         staleTime: 30_000,
+    });
+}
+
+/**
+ * Fetches real-time health for a single upstream target.
+ * Automatically polls every 30 seconds while the component is mounted and enabled.
+ */
+export function useUpstreamHealthQuery(
+    projectId: string | null,
+    upstreamId: string,
+    upstreamEnabled: boolean
+) {
+    return useQuery({
+        queryKey:
+            projectId && upstreamId
+                ? queryKeys.upstreamHealth(projectId, upstreamId)
+                : ['upstreams', 'health', 'idle'],
+        queryFn: () => checkUpstreamHealth(projectId as string, upstreamId),
+        enabled: !!projectId && !!upstreamId && upstreamEnabled,
+        staleTime: 5_000,
+        refetchInterval: 30_000,
+        refetchIntervalInBackground: false,
     });
 }
 

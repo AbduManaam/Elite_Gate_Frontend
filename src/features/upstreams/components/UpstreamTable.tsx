@@ -4,6 +4,7 @@ import { UpstreamRow } from './UpstreamRow';
 import { UpstreamExpandedRow } from './UpstreamExpandedRow';
 
 interface UpstreamTableProps {
+    readonly projectId: string | null;
     readonly upstreams: UpstreamRecord[];
     readonly expandedRowId: string | null;
     readonly onToggleExpand: (id: string) => void;
@@ -14,6 +15,7 @@ interface UpstreamTableProps {
 }
 
 export const UpstreamTable: React.FC<UpstreamTableProps> = ({
+    projectId,
     upstreams,
     expandedRowId,
     onToggleExpand,
@@ -58,6 +60,7 @@ export const UpstreamTable: React.FC<UpstreamTableProps> = ({
                             return (
                                 <React.Fragment key={upstream.id}>
                                     <UpstreamRow
+                                        projectId={projectId}
                                         upstream={upstream}
                                         isExpanded={isExpanded}
                                         onToggleExpand={() => onToggleExpand(upstream.id)}

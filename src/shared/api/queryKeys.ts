@@ -6,6 +6,8 @@ export const queryKeys = {
     upstreams: (projectId: string) => ['projects', projectId, 'upstreams'] as const,
     upstreamTargets: (projectId: string, upstreamId: string) =>
         ['projects', projectId, 'upstreams', upstreamId, 'targets'] as const,
+    upstreamHealth: (projectId: string, upstreamId: string) =>
+        ['projects', projectId, 'upstreams', upstreamId, 'health'] as const,
     policies: (projectId: string) => ['projects', projectId, 'policies'] as const,
     gateways: (projectId: string) => ['projects', projectId, 'gateways'] as const,
     allGateways: () => ['gateways'] as const,

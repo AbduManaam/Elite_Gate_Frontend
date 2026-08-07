@@ -73,19 +73,19 @@ describe('ObservabilitySummaryPage', () => {
       data: mockDashboardSummary,
       isLoading: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useMetricsModule.useDashboardSummaryQuery>);
 
     vi.spyOn(useMetricsModule, 'useProjectSystemRangeQuery').mockReturnValue({
       data: [{ timestamp: 1700000000000, value: 25 }],
       isLoading: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useMetricsModule.useProjectSystemRangeQuery>);
 
     vi.spyOn(useGatewaysModule, 'useGatewaysQuery').mockReturnValue({
       data: mockGateways,
       isLoading: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useGatewaysModule.useGatewaysQuery>);
   });
 
   it('renders both Project Analytics and Gateway Health section headers', () => {

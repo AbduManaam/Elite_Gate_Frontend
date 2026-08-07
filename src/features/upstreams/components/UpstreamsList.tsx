@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { useRoles } from '../../../shared/hooks/useRoles';
 import { PageHeaderActions } from '../../../shared/components/PageHeaderActions';
@@ -55,11 +56,18 @@ export const UpstreamsList: React.FC = () => {
     const [deleteTarget, setDeleteTarget] = useState<UpstreamRecord | null>(null);
     const [selectedUpstreamForTargets, setSelectedUpstreamForTargets] = useState<UpstreamRecord | null>(null);
 
+    const queryClient = useQueryClient();
+
     // Queries & Mutations
     const { data: upstreams, isLoading, error } = useUpstreamsQuery(projectId);
     const deleteUpstream = useDeleteUpstreamMutation(projectId ?? '');
     const disableUpstream = useDisableUpstreamMutation(projectId ?? '');
     const updateUpstream = useUpdateUpstreamMutation(projectId ?? '');
+
+    const handleRefreshHealth = () => {
+        if (!projectId) return;
+        queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'upstreams'] });
+    };
 
     const canManage = can('editor');
 
@@ -127,14 +135,27 @@ export const UpstreamsList: React.FC = () => {
                 description="Manage backend routing destinations and load balancing configurations."
                 titleScale="display"
                 actions={
-                    canManage && !hasNoUpstreams && (
-                        <button
-                            onClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
-                            className="bg-[#113346] text-white font-bold px-md py-sm rounded-lg hover:bg-[#123749] transition-colors flex items-center justify-center gap-sm h-[36px] cursor-pointer whitespace-nowrap shadow-sm"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">add</span>
-                            New Upstream
-                        </button>
+                    !hasNoUpstreams && (
+                        <div className="flex items-center gap-sm">
+                            <button
+                                type="button"
+                                onClick={handleRefreshHealth}
+                                className="bg-white border border-outline-variant text-on-surface font-semibold px-md py-sm rounded-lg hover:bg-surface-container transition-colors flex items-center justify-center gap-xs h-[36px] cursor-pointer text-xs whitespace-nowrap shadow-xs"
+                                title="Re-check health across all upstreams"
+                            >
+                                <span className="material-symbols-outlined text-[16px] text-outline">refresh</span>
+                                Refresh Health
+                            </button>
+                            {canManage && (
+                                <button
+                                    onClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
+                                    className="bg-[#113346] text-white font-bold px-md py-sm rounded-lg hover:bg-[#123749] transition-colors flex items-center justify-center gap-sm h-[36px] cursor-pointer whitespace-nowrap shadow-sm"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">add</span>
+                                    New Upstream
+                                </button>
+                            )}
+                        </div>
                     )
                 }
             />
@@ -179,6 +200,7 @@ export const UpstreamsList: React.FC = () => {
 
                             {/* Data Table */}
                             <UpstreamTable
+                                projectId={projectId}
                                 upstreams={filteredUpstreams}
                                 expandedRowId={expandedRowId}
                                 onToggleExpand={handleToggleExpand}
