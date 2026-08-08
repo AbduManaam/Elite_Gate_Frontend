@@ -17,7 +17,7 @@ export interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
-  const { projectId, setActiveProjectId, setActiveProjectRole } = useActiveProject();
+  const { projectId, projectRole, setActiveProjectId, setActiveProjectRole } = useActiveProject();
   const { data: projectsData } = useProjectsQuery();
   const isSidebarCollapsed = useUIStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
@@ -36,7 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
     setIsProjectDropdownOpen(false);
   };
 
-  const { isSuperAdmin, role: activeProjectRole } = useRoles();
+  const { isSuperAdmin } = useRoles();
 
   const sections: { title?: string; items: { label: string; path: string; icon: string }[] }[] = [];
 
@@ -47,6 +47,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
     ];
     if (projectId) {
       projectItems.push({ label: 'Custom Domains', path: getPath('/custom-domains'), icon: 'language' });
+      if (projectRole === 'owner') {
+        projectItems.push({ label: 'Security', path: getPath('/security'), icon: 'shield_lock' });
+      }
     }
 
     sections.push(
@@ -71,17 +74,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
         ],
       }
     );
-  } else if (activeProjectRole === 'owner' || activeProjectRole === 'editor') {
+  } else if (projectRole === 'owner' || projectRole === 'editor') {
+    const projectConfigurationItems = [
+      {
+        label: 'Configuration',
+        path: getPath('/connectivity'),
+        icon: 'settings',
+      },
+      {
+        label: 'Custom Domains',
+        path: getPath('/custom-domains'),
+        icon: 'language',
+      },
+      {
+        label: 'Analytics',
+        path: getPath('/analytics'),
+        icon: 'monitoring',
+      },
+      {
+        label: 'Audit log',
+        path: getPath('/logs'),
+        icon: 'history',
+      },
+    ];
+
+    if (projectRole === 'owner') {
+      projectConfigurationItems.push({
+        label: 'Security',
+        path: getPath('/security'),
+        icon: 'shield_lock',
+      });
+    }
+
     sections.push(
       { items: [{ label: 'Dashboard', path: getPath('/'), icon: 'dashboard' }] },
       {
         title: 'Projects',
-        items: [
-          { label: 'Configuration', path: getPath('/connectivity'), icon: 'settings' },
-          { label: 'Custom Domains', path: getPath('/custom-domains'), icon: 'language' },
-          { label: 'Analytics', path: getPath('/analytics'), icon: 'monitoring' },
-          { label: 'Audit log', path: getPath('/logs'), icon: 'history' },
-        ],
+        items: projectConfigurationItems,
       }
     );
   } else {

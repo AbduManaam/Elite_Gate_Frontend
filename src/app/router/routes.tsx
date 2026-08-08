@@ -16,6 +16,8 @@ import { GatewaysPage, PlatformGatewaysPage, GatewayStatusPage, GatewayMonitorin
 import { ProjectSettings, TenantManagementPage, AllProjectsPage } from '../../features/projects';
 import { AuditLogsPage } from '../../features/auditLogs';
 import { CustomDomainsPage } from '../../features/customDomains';
+import { RequireProjectOwner } from './RequireProjectOwner';
+import { ProjectJwtSecurityPage } from '../../features/projectJwt';
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginRoute /> },
@@ -37,6 +39,14 @@ export const router = createBrowserRouter([
           { index: true, element: <WelcomeDashboard /> },
           { path: 'connectivity', element: <GatewaysPage /> },
           { path: 'custom-domains', element: <RequireRole minProjectRole="viewer"><CustomDomainsPage /></RequireRole> },
+          {
+            path: 'security',
+            element: (
+              <RequireProjectOwner>
+                <ProjectJwtSecurityPage />
+              </RequireProjectOwner>
+            ),
+          },
           { path: 'analytics', element: <ObservabilitySummaryPage /> },
           { path: 'settings', element: <ProjectSettings /> },
           { path: 'logs', element: <AuditLogsPage /> },
