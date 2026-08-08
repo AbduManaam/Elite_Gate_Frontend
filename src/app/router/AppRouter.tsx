@@ -96,6 +96,15 @@ export const AppRouter: React.FC = () => {
     { category: 'Workspace Tabs', title: 'Team Collaboration tab', path: getPath('/connectivity?tab=Team Collaboration'), icon: 'group' },
   ];
 
+  if (projectRole === 'owner') {
+    searchItems.push({
+      category: 'Pages',
+      title: 'JWT Authentication',
+      path: getPath('/security'),
+      icon: 'shield_lock',
+    });
+  }
+
   const filteredItems = searchItems.filter(
     (item) =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

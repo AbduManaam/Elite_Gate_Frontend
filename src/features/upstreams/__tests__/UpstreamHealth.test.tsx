@@ -166,7 +166,9 @@ describe('UpstreamHealth Badge & Data-fetching', () => {
     await waitFor(() => {
       expect(screen.getByText('Healthy')).toBeInTheDocument();
       expect(screen.getByText('Unhealthy')).toBeInTheDocument();
-      expect(screen.getByText('Disabled')).toBeInTheDocument();
+      expect(
+        screen.getByLabelText('Upstream health: Disabled')
+      ).toBeInTheDocument();
     });
   });
 

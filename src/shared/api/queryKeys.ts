@@ -17,4 +17,6 @@ export const queryKeys = {
     customDomain: (projectId: string, domainId: string) => ['projects', projectId, 'customDomains', domainId] as const,
     provisioningStatus: (projectId: string, domainId: string) =>
         ['projects', projectId, 'customDomains', domainId, 'provisioningStatus'] as const,
+    projectJwt: (projectId: string) =>
+        ['projects', projectId, 'security', 'jwt'] as const,
 };
