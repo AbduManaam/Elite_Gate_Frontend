@@ -5,22 +5,22 @@ import { PolicyInput } from '../../api/policiesApi';
 interface PolicyTrafficRulesStepProps {
   readonly rate_limit_rpm: number;
   readonly enableRateLimiting: boolean;
-  readonly allowed_origins: string[];
-  readonly allowed_roles: string[];
-  readonly allowed_scopes: string[];
-  readonly ip_allowlist: string[];
-  readonly ip_blocklist: string[];
+  readonly allowed_origins?: string[];
+  readonly allowed_roles?: string[];
+  readonly allowed_scopes?: string[];
+  readonly ip_allowlist?: string[];
+  readonly ip_blocklist?: string[];
   readonly onChange: (fields: Partial<PolicyInput>) => void;
 }
 
 export const PolicyTrafficRulesStep: React.FC<PolicyTrafficRulesStepProps> = ({
   rate_limit_rpm,
   enableRateLimiting,
-  allowed_origins,
-  allowed_roles,
-  allowed_scopes,
-  ip_allowlist,
-  ip_blocklist,
+  allowed_origins = [],
+  allowed_roles = [],
+  allowed_scopes = [],
+  ip_allowlist = [],
+  ip_blocklist = [],
   onChange,
 }) => {
   const handleAddOrigin = (origin: string) => {

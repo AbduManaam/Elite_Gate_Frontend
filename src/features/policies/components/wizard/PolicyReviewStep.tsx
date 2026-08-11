@@ -38,11 +38,11 @@ export const PolicyReviewStep: React.FC<PolicyReviewStepProps> = ({ form }) => {
 
         <div className="p-md border-b border-outline-variant/60 flex flex-col gap-xs">
           <span className="font-bold text-on-surface-variant uppercase tracking-wider text-[10px] mb-1">Allowed Origins</span>
-          {form.allowed_origins.length === 0 ? (
+          {(form.allowed_origins ?? []).length === 0 ? (
             <span className="text-outline italic">No origins configured (will reject all requests if CORS checks trigger)</span>
           ) : (
             <div className="flex flex-wrap gap-xs font-mono text-[10.5px]">
-              {form.allowed_origins.map((o, idx) => (
+              {(form.allowed_origins ?? []).map((o, idx) => (
                 <span key={idx} className="bg-white border border-outline-variant px-2 py-0.5 rounded text-on-surface font-semibold">
                   {o}
                 </span>
@@ -53,11 +53,11 @@ export const PolicyReviewStep: React.FC<PolicyReviewStepProps> = ({ form }) => {
 
         <div className="p-md border-b border-outline-variant/60 flex flex-col gap-xs">
           <span className="font-bold text-on-surface-variant uppercase tracking-wider text-[10px] mb-1">Allowed Roles</span>
-          {form.allowed_roles.length === 0 ? (
+          {(form.allowed_roles ?? []).length === 0 ? (
             <span className="text-outline italic">No role restrictions (any user can access if authenticated)</span>
           ) : (
             <div className="flex flex-wrap gap-xs font-mono text-[10.5px]">
-              {form.allowed_roles.map((r, idx) => (
+              {(form.allowed_roles ?? []).map((r, idx) => (
                 <span key={idx} className="bg-white border border-outline-variant px-2 py-0.5 rounded text-on-surface font-semibold">
                   {r}
                 </span>
@@ -68,11 +68,11 @@ export const PolicyReviewStep: React.FC<PolicyReviewStepProps> = ({ form }) => {
 
         <div className="p-md flex flex-col gap-xs">
           <span className="font-bold text-on-surface-variant uppercase tracking-wider text-[10px] mb-1">Allowed Scopes</span>
-          {form.allowed_scopes.length === 0 ? (
+          {(form.allowed_scopes ?? []).length === 0 ? (
             <span className="text-outline italic">No scope restrictions</span>
           ) : (
             <div className="flex flex-wrap gap-xs font-mono text-[10.5px]">
-              {form.allowed_scopes.map((s, idx) => (
+              {(form.allowed_scopes ?? []).map((s, idx) => (
                 <span key={idx} className="bg-white border border-outline-variant px-2 py-0.5 rounded text-on-surface font-semibold">
                   {s}
                 </span>

@@ -173,44 +173,44 @@ export const PolicyEditDrawer: React.FC<PolicyEditDrawerProps> = ({ projectId, p
           <ChipInput
             label="Allowed Origins"
             placeholder='e.g. https://admin.example.com (or "*")'
-            chips={form.allowed_origins}
-            onAdd={(o) => handleFieldChange({ allowed_origins: [...form.allowed_origins, o] })}
-            onRemove={(o) => handleFieldChange({ allowed_origins: form.allowed_origins.filter((x) => x !== o) })}
+            chips={form.allowed_origins ?? []}
+            onAdd={(o) => handleFieldChange({ allowed_origins: [...(form.allowed_origins ?? []), o] })}
+            onRemove={(o) => handleFieldChange({ allowed_origins: (form.allowed_origins ?? []).filter((x) => x !== o) })}
             validation={validateOrigin}
           />
 
           <ChipInput
             label="IP Allowlist"
             placeholder="e.g. 192.168.1.50 or 10.0.0.0/24"
-            chips={form.ip_allowlist}
-            onAdd={(ip) => handleFieldChange({ ip_allowlist: [...form.ip_allowlist, ip] })}
-            onRemove={(ip) => handleFieldChange({ ip_allowlist: form.ip_allowlist.filter((x) => x !== ip) })}
+            chips={form.ip_allowlist ?? []}
+            onAdd={(ip) => handleFieldChange({ ip_allowlist: [...(form.ip_allowlist ?? []), ip] })}
+            onRemove={(ip) => handleFieldChange({ ip_allowlist: (form.ip_allowlist ?? []).filter((x) => x !== ip) })}
             validation={validateIPOrCIDR}
           />
 
           <ChipInput
             label="IP Blocklist"
             placeholder="e.g. 203.0.113.1"
-            chips={form.ip_blocklist}
-            onAdd={(ip) => handleFieldChange({ ip_blocklist: [...form.ip_blocklist, ip] })}
-            onRemove={(ip) => handleFieldChange({ ip_blocklist: form.ip_blocklist.filter((x) => x !== ip) })}
+            chips={form.ip_blocklist ?? []}
+            onAdd={(ip) => handleFieldChange({ ip_blocklist: [...(form.ip_blocklist ?? []), ip] })}
+            onRemove={(ip) => handleFieldChange({ ip_blocklist: (form.ip_blocklist ?? []).filter((x) => x !== ip) })}
             validation={validateIPOrCIDR}
           />
 
           <ChipInput
             label="Allowed Roles"
             placeholder="e.g. admin"
-            chips={form.allowed_roles}
-            onAdd={(r) => handleFieldChange({ allowed_roles: [...form.allowed_roles, r] })}
-            onRemove={(r) => handleFieldChange({ allowed_roles: form.allowed_roles.filter((x) => x !== r) })}
+            chips={form.allowed_roles ?? []}
+            onAdd={(r) => handleFieldChange({ allowed_roles: [...(form.allowed_roles ?? []), r] })}
+            onRemove={(r) => handleFieldChange({ allowed_roles: (form.allowed_roles ?? []).filter((x) => x !== r) })}
           />
 
           <ChipInput
             label="Allowed Scopes"
             placeholder="e.g. read"
-            chips={form.allowed_scopes}
-            onAdd={(s) => handleFieldChange({ allowed_scopes: [...form.allowed_scopes, s] })}
-            onRemove={(s) => handleFieldChange({ allowed_scopes: form.allowed_scopes.filter((x) => x !== s) })}
+            chips={form.allowed_scopes ?? []}
+            onAdd={(s) => handleFieldChange({ allowed_scopes: [...(form.allowed_scopes ?? []), s] })}
+            onRemove={(s) => handleFieldChange({ allowed_scopes: (form.allowed_scopes ?? []).filter((x) => x !== s) })}
           />
 
           {errorMsg && (

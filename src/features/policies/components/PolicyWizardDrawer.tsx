@@ -172,11 +172,11 @@ export const PolicyWizardDrawer: React.FC<PolicyWizardDrawerProps> = ({ projectI
             <PolicyTrafficRulesStep
               rate_limit_rpm={form.rate_limit_rpm}
               enableRateLimiting={enableRateLimiting}
-              allowed_origins={form.allowed_origins}
-              allowed_roles={form.allowed_roles}
-              allowed_scopes={form.allowed_scopes}
-              ip_allowlist={form.ip_allowlist}
-              ip_blocklist={form.ip_blocklist}
+              allowed_origins={form.allowed_origins ?? []}
+              allowed_roles={form.allowed_roles ?? []}
+              allowed_scopes={form.allowed_scopes ?? []}
+              ip_allowlist={form.ip_allowlist ?? []}
+              ip_blocklist={form.ip_blocklist ?? []}
               onChange={handleFieldChange}
             />
           )}
