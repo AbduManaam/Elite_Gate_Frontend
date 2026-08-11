@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useActiveProject } from '../../../shared/hooks/useActiveProject';
 import { queryKeys } from '../../../shared/api/queryKeys';
@@ -39,8 +39,9 @@ export const ProjectJwtSecurityPage: React.FC = () => {
 
   const { data: config, isLoading, isError, error, refetch } = useProjectJwtConfigQuery(projectId);
 
+  const secretInputRef = useRef<HTMLInputElement>(null);
+
   const [enabled, setEnabled] = useState(DEFAULT_FORM.enabled);
-  const [secret, setSecret] = useState('');
   const [issuer, setIssuer] = useState(DEFAULT_FORM.issuer);
   const [audiences, setAudiences] = useState(DEFAULT_FORM.audiences);
   const [subjectClaim, setSubjectClaim] = useState(DEFAULT_FORM.subjectClaim);
@@ -59,7 +60,9 @@ export const ProjectJwtSecurityPage: React.FC = () => {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setEnabled(DEFAULT_FORM.enabled);
-    setSecret('');
+    if (secretInputRef.current) {
+      secretInputRef.current.value = '';
+    }
     setIssuer(DEFAULT_FORM.issuer);
     setAudiences(DEFAULT_FORM.audiences);
     setSubjectClaim(DEFAULT_FORM.subjectClaim);
@@ -91,6 +94,8 @@ export const ProjectJwtSecurityPage: React.FC = () => {
 
     setFormError('');
     setSuccessMessage('');
+
+    const secret = secretInputRef.current?.value ?? '';
 
     // Validation
     const isSecretConfigured = Boolean(config?.secret_configured);
@@ -150,7 +155,9 @@ export const ProjectJwtSecurityPage: React.FC = () => {
         queryKeys.projectJwt(projectId),
         updated
       );
-      setSecret('');
+      if (secretInputRef.current) {
+        secretInputRef.current.value = '';
+      }
       setSuccessMessage('JWT authentication configuration saved successfully.');
     } catch (err) {
       setFormError(toApiError(err).message);
@@ -168,7 +175,9 @@ export const ProjectJwtSecurityPage: React.FC = () => {
     try {
       await deleteProjectJwtConfig(projectId);
       setIsDeleteModalOpen(false);
-      setSecret('');
+      if (secretInputRef.current) {
+        secretInputRef.current.value = '';
+      }
       setSuccessMessage('JWT authentication configuration deleted.');
       await refetch();
     } catch (err) {
@@ -317,11 +326,11 @@ export const ProjectJwtSecurityPage: React.FC = () => {
             JWT Secret <span className="text-red-500">{isSecretConfigured ? '' : '*'}</span>
           </label>
           <input
+            ref={secretInputRef}
             id="jwt-secret-input"
             type="password"
             autoComplete="new-password"
-            value={secret}
-            onChange={(e) => setSecret(e.target.value)}
+            defaultValue=""
             placeholder={isSecretConfigured ? 'Leave blank to keep existing secret' : 'Enter secret key (min 32 bytes)'}
             className="w-full border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface bg-white focus:outline-none focus:ring-1 focus:ring-[#587c94] focus:border-[#587c94] transition-all font-mono"
           />

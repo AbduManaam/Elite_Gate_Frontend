@@ -185,6 +185,32 @@ describe('ProjectJwtSecurityPage', () => {
     });
   });
 
+  it('7b. DOM/autofill-populated secret submits even without React onChange event', async () => {
+    vi.mocked(projectJwtApi.getProjectJwtConfig).mockResolvedValue(mockConfiguredResponse);
+    vi.mocked(projectJwtApi.configureProjectJwt).mockResolvedValue({
+      ...mockConfiguredResponse,
+      config_version: 3,
+    });
+
+    renderPage('owner');
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('https://auth.company.com')).toBeInTheDocument();
+    });
+
+    const secretInput = screen.getByLabelText(/JWT Secret/i) as HTMLInputElement;
+    // Directly mutate DOM input value simulating password manager / browser autofill without React synthetic change event
+    secretInput.value = 'autofilled-secret-value-at-least-32-bytes-long-1234';
+
+    fireEvent.click(screen.getByRole('button', { name: /Save JWT Configuration/i }));
+
+    await waitFor(() => {
+      expect(projectJwtApi.configureProjectJwt).toHaveBeenCalledWith('proj-123', expect.objectContaining({
+        secret: 'autofilled-secret-value-at-least-32-bytes-long-1234',
+      }));
+    });
+  });
+
   it('8. Secret input is cleared after successful save', async () => {
     vi.mocked(projectJwtApi.getProjectJwtConfig).mockResolvedValue(mockConfiguredResponse);
     vi.mocked(projectJwtApi.configureProjectJwt).mockResolvedValue(mockConfiguredResponse);
