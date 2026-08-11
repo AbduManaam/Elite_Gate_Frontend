@@ -44,7 +44,7 @@ export interface ProvisioningStatusResponse {
   status: DomainStatus;
   routingStatus: RoutingStatus;
   provisioningStatus: ProvisioningStatus;
-  certificateStatus?: 'pending_validation' | 'issued' | 'failed';
+  certificateStatus?: 'pending_validation' | 'issued' | 'failed' | string;
   certificateValidationName?: string;
   certificateValidationValue?: string;
   lastError?: string;
@@ -53,6 +53,9 @@ export interface ProvisioningStatusResponse {
   certificateIssuedAt?: string;
   certificateAttachedAt?: string;
   activatedAt?: string;
+  gatewayExternalId?: string;
+  gatewayType?: string;
+  hostRoutingActive: boolean;
 }
 
 export interface ActivateDomainResponse {

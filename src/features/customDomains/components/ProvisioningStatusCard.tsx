@@ -54,6 +54,16 @@ export const ProvisioningStatusCard: React.FC<ProvisioningStatusCardProps> = ({
         statusData.certificateValidationValue
     );
 
+  const showGatewayRouting =
+    statusData.status === 'active' ||
+    statusData.provisioningStatus === 'completed' ||
+    statusData.hostRoutingActive ||
+    Boolean(statusData.gatewayExternalId);
+
+  const isHttpsSecured =
+    (statusData.status === 'active' || statusData.provisioningStatus === 'completed') &&
+    statusData.certificateStatus?.toLowerCase() === 'issued';
+
   const isPending = retryProvisioningMutation.isPending || retryDeprovisioningMutation.isPending;
 
   const handleRetry = () => {
@@ -134,6 +144,89 @@ export const ProvisioningStatusCard: React.FC<ProvisioningStatusCardProps> = ({
                 ACM Validation CNAME Record Value:
               </span>
               <CopyableText value={statusData.certificateValidationValue} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {showGatewayRouting && (
+        <div className="bg-white border border-slate-200 rounded-lg p-3 flex flex-col gap-2.5">
+          <div className="flex items-center gap-1.5 font-semibold text-slate-800 border-b border-slate-100 pb-2">
+            <span className="material-symbols-outlined text-[16px] text-indigo-600">
+              alt_route
+            </span>
+            <span>Gateway Routing</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            {statusData.gatewayType && (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] text-slate-500 font-medium">Gateway Type</span>
+                <span className="font-semibold text-slate-800 capitalize">
+                  {statusData.gatewayType === 'dedicated' ? 'Dedicated' : statusData.gatewayType}
+                </span>
+              </div>
+            )}
+
+            {statusData.gatewayExternalId && (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] text-slate-500 font-medium">Gateway</span>
+                <span className="font-mono font-semibold text-slate-800">
+                  {statusData.gatewayExternalId}
+                </span>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[11px] text-slate-500 font-medium">ALB Host Routing</span>
+              <span
+                className={`font-semibold flex items-center gap-1 ${
+                  statusData.hostRoutingActive ? 'text-emerald-600' : 'text-amber-600'
+                }`}
+              >
+                {statusData.hostRoutingActive ? (
+                  <>
+                    Connected
+                    <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                  </>
+                ) : (
+                  'Not Connected'
+                )}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[11px] text-slate-500 font-medium">HTTPS</span>
+              <span
+                className={`font-semibold flex items-center gap-1 ${
+                  isHttpsSecured ? 'text-emerald-600' : 'text-amber-600'
+                }`}
+              >
+                {isHttpsSecured ? (
+                  <>
+                    Secured
+                    <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                  </>
+                ) : (
+                  'Pending'
+                )}
+              </span>
+            </div>
+          </div>
+
+          {statusData.hostRoutingActive && (
+            <div className="mt-1 pt-2 border-t border-slate-100 flex items-center gap-2 text-[11px] text-slate-600 overflow-x-auto">
+              <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-medium">
+                {statusData.hostname}
+              </span>
+              <span className="material-symbols-outlined text-[14px] text-slate-400">arrow_forward</span>
+              <span className="font-medium bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded">
+                Dedicated Gateway
+              </span>
+              <span className="material-symbols-outlined text-[14px] text-slate-400">arrow_forward</span>
+              <span className="font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded">
+                Project Routes
+              </span>
             </div>
           )}
         </div>

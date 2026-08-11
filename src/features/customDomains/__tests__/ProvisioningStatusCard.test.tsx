@@ -107,4 +107,54 @@ describe('ProvisioningStatusCard', () => {
       expect(onToast).toHaveBeenCalledWith('Provisioning retry initiated.');
     });
   });
+
+  it('renders Gateway Routing section with Connected and Secured for active domain', async () => {
+    const mockActiveStatus: ProvisioningStatusResponse = {
+      id: 'dom-1',
+      hostname: 'app.example.com',
+      status: 'active',
+      routingStatus: 'ready',
+      provisioningStatus: 'completed',
+      certificateStatus: 'ISSUED',
+      gatewayExternalId: 'gw_test123',
+      gatewayType: 'dedicated',
+      hostRoutingActive: true,
+      attempts: 0,
+    };
+    vi.mocked(customDomainsApi.getProvisioningStatus).mockResolvedValue(mockActiveStatus);
+
+    renderCard(true);
+
+    await waitFor(() => {
+      expect(screen.getByText('Gateway Routing')).toBeInTheDocument();
+      expect(screen.getByText('Dedicated')).toBeInTheDocument();
+      expect(screen.getByText('gw_test123')).toBeInTheDocument();
+      expect(screen.getByText('Connected')).toBeInTheDocument();
+      expect(screen.getByText('Secured')).toBeInTheDocument();
+    });
+  });
+
+  it('renders Gateway Routing with Not Connected when hostRoutingActive is false', async () => {
+    const mockInactiveStatus: ProvisioningStatusResponse = {
+      id: 'dom-1',
+      hostname: 'app.example.com',
+      status: 'active',
+      routingStatus: 'ready',
+      provisioningStatus: 'completed',
+      certificateStatus: 'ISSUED',
+      gatewayExternalId: 'gw_test123',
+      gatewayType: 'dedicated',
+      hostRoutingActive: false,
+      attempts: 0,
+    };
+    vi.mocked(customDomainsApi.getProvisioningStatus).mockResolvedValue(mockInactiveStatus);
+
+    renderCard(true);
+
+    await waitFor(() => {
+      expect(screen.getByText('Gateway Routing')).toBeInTheDocument();
+      expect(screen.getByText('Not Connected')).toBeInTheDocument();
+      expect(screen.queryByText('Connected')).not.toBeInTheDocument();
+    });
+  });
 });
