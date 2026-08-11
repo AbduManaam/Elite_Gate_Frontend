@@ -41,7 +41,7 @@ describe('ProvisioningStatusCard', () => {
     expect(screen.queryByText(/Loading provisioning status/i)).not.toBeInTheDocument();
   });
 
-  it('renders in-progress status with CNAME validation record name', async () => {
+  it('renders in-progress status with complete ACM CNAME validation record', async () => {
     const mockStatus: ProvisioningStatusResponse = {
       id: 'dom-1',
       hostname: 'app.example.com',
@@ -50,6 +50,7 @@ describe('ProvisioningStatusCard', () => {
       provisioningStatus: 'waiting_for_dns',
       certificateStatus: 'pending_validation',
       certificateValidationName: '_acm.app.example.com.',
+      certificateValidationValue: '_token.acm-validations.aws.',
       attempts: 1,
     };
     vi.mocked(customDomainsApi.getProvisioningStatus).mockResolvedValue(mockStatus);
@@ -59,6 +60,10 @@ describe('ProvisioningStatusCard', () => {
     await waitFor(() => {
       expect(screen.getByText('DNS Validation Pending')).toBeInTheDocument();
       expect(screen.getByText('_acm.app.example.com.')).toBeInTheDocument();
+      expect(screen.getByText('_token.acm-validations.aws.')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Create this CNAME record in your DNS provider/i)
+      ).toBeInTheDocument();
       expect(screen.getByText('Attempts: 1')).toBeInTheDocument();
     });
   });

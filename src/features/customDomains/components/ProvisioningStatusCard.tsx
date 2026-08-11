@@ -46,10 +46,13 @@ export const ProvisioningStatusCard: React.FC<ProvisioningStatusCardProps> = ({
   const isDeprovisionFailed = statusData.provisioningStatus === 'deprovision_failed';
   const isAnyFailed = isFailed || isDeprovisionFailed;
 
-  const showValidationName =
+  const showValidationRecord =
     (statusData.provisioningStatus === 'waiting_for_validation_record' ||
       statusData.provisioningStatus === 'waiting_for_dns') &&
-    Boolean(statusData.certificateValidationName);
+    Boolean(
+      statusData.certificateValidationName ||
+        statusData.certificateValidationValue
+    );
 
   const isPending = retryProvisioningMutation.isPending || retryDeprovisioningMutation.isPending;
 
@@ -109,10 +112,30 @@ export const ProvisioningStatusCard: React.FC<ProvisioningStatusCardProps> = ({
 
       <p className="text-slate-600 font-sans">{ui.description}</p>
 
-      {showValidationName && statusData.certificateValidationName && (
-        <div className="bg-white border border-slate-200 rounded-lg p-2.5 flex flex-col gap-1">
-          <span className="font-semibold text-slate-700 font-sans">ACM Validation CNAME Record Name:</span>
-          <CopyableText value={statusData.certificateValidationName} />
+      {showValidationRecord && (
+        <div className="bg-white border border-slate-200 rounded-lg p-2.5 flex flex-col gap-2">
+          <div className="text-slate-600 font-sans">
+            Create this CNAME record in your DNS provider. EliteGate will continue
+            automatically after ACM validates it.
+          </div>
+
+          {statusData.certificateValidationName && (
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold text-slate-700 font-sans">
+                ACM Validation CNAME Record Name:
+              </span>
+              <CopyableText value={statusData.certificateValidationName} />
+            </div>
+          )}
+
+          {statusData.certificateValidationValue && (
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold text-slate-700 font-sans">
+                ACM Validation CNAME Record Value:
+              </span>
+              <CopyableText value={statusData.certificateValidationValue} />
+            </div>
+          )}
         </div>
       )}
 

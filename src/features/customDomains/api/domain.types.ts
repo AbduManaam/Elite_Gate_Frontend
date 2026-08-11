@@ -46,6 +46,7 @@ export interface ProvisioningStatusResponse {
   provisioningStatus: ProvisioningStatus;
   certificateStatus?: 'pending_validation' | 'issued' | 'failed';
   certificateValidationName?: string;
+  certificateValidationValue?: string;
   lastError?: string;
   attempts: number;
   nextRetryAt?: string;
