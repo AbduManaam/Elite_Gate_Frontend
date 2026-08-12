@@ -6,7 +6,8 @@ export interface TokenResponse {
     token_type: string;
 }
 
-export interface SignupResponse extends TokenResponse {
+export interface SignupResponse {
+    message: string;
     project_id: string;
 }
 
@@ -15,6 +16,10 @@ export interface ForgotPasswordResponse {
 }
 
 export interface ResetPasswordResponse {
+    message: string;
+}
+
+export interface ResendVerificationResponse {
     message: string;
 }
 
@@ -38,6 +43,11 @@ export async function resetPassword(token: string, newPassword: string): Promise
         token,
         new_password: newPassword,
     });
+    return data;
+}
+
+export async function resendVerification(email: string): Promise<ResendVerificationResponse> {
+    const { data } = await apiClient.post<ResendVerificationResponse>('/resend-verification', { email });
     return data;
 }
 

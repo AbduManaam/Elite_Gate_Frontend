@@ -357,7 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
                     <NavLink
                       to={item.path}
                       end={
-                        item.path === '/' ||
+                        item.path === getPath('/') ||
                         item.path.includes('?')
                       }
                       onClick={() => {

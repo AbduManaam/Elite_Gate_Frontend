@@ -2,11 +2,17 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import { useLoginMutation } from '../hooks/useLoginMutation';
+import { useResendVerificationMutation } from '../hooks/useResendVerificationMutation';
 import { buildApiUrl } from '../../../shared/lib/apiUrl';
 
 export interface LoginFormProps {
   readonly onLoginSuccess: () => void;
   readonly onToggleSignup: () => void;
+}
+
+function isEmailAddress(value: string): boolean {
+  const trimmed = value.trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
 }
 
 function describeLoginError(error: unknown): string {
@@ -33,6 +39,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isEmailUnverified, setIsEmailUnverified] = useState(false);
+  const [resendSuccessMessage, setResendSuccessMessage] = useState<string | null>(null);
+  const [resendErrorMessage, setResendErrorMessage] = useState<string | null>(null);
+
   const [formError, setFormError] = useState(() => {
     const err = new URLSearchParams(window.location.search).get('oauth_error');
     if (!err) return '';
@@ -45,13 +55,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
     }
     return decoded;
   });
+
   const loginMutation = useLoginMutation();
+  const resendMutation = useResendVerificationMutation();
 
   const isSubmitting = loginMutation.isPending;
 
+  const clearMessages = () => {
+    setIsEmailUnverified(false);
+    setFormError('');
+    setResendSuccessMessage(null);
+    setResendErrorMessage(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError('');
+    clearMessages();
 
     if (!username.trim() || !password.trim()) {
       setFormError('Please enter both your email address and password.');
@@ -66,10 +85,39 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
         },
         onError: (error) => {
           console.error('[LoginForm] Login failed:', error);
+          if (isAxiosError(error) && error.response) {
+            const status = error.response.status;
+            const code = (error.response.data as { code?: string } | undefined)?.code;
+            if (status === 403 && code === 'EMAIL_NOT_VERIFIED') {
+              setIsEmailUnverified(true);
+              return;
+            }
+          }
           setFormError(describeLoginError(error));
         },
       }
     );
+  };
+
+  const handleResend = () => {
+    const emailToResend = username.trim();
+    if (!isEmailAddress(emailToResend)) return;
+
+    setResendSuccessMessage(null);
+    setResendErrorMessage(null);
+
+    resendMutation.mutate(emailToResend, {
+      onSuccess: () => {
+        setResendSuccessMessage('Verification email sent. Please check your inbox.');
+      },
+      onError: (error) => {
+        if (isAxiosError(error) && error.response?.status === 429) {
+          setResendErrorMessage('Too many requests. Please wait before trying again.');
+        } else {
+          setResendErrorMessage('Unable to request another verification email right now. Please try again later.');
+        }
+      },
+    });
   };
 
   return (
@@ -82,11 +130,57 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onToggleSi
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {formError && (
+        {isEmailUnverified ? (
+          <div className="bg-[#C03E48]/5 border border-[#C03E48]/20 rounded-2xl p-4 flex flex-col gap-3">
+            <div className="flex items-start gap-2.5">
+              <span className="material-symbols-outlined text-[#C03E48] text-[20px] shrink-0 mt-0.5 select-none">
+                mark_email_unread
+              </span>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-bold text-[#171c1f]">Email Verification Required</span>
+                <span className="text-xs text-gray-600 leading-relaxed">
+                  Please verify your email before signing in.
+                </span>
+              </div>
+            </div>
+
+            {resendSuccessMessage && (
+              <div className="text-[#155724] text-xs font-semibold border border-[#28a745]/20 bg-[#28a745]/10 px-3 py-2 rounded-xl">
+                {resendSuccessMessage}
+              </div>
+            )}
+
+            {resendErrorMessage && (
+              <div className="text-[#C03E48] text-xs font-semibold border border-[#C03E48]/20 bg-[#C03E48]/5 px-3 py-2 rounded-xl">
+                {resendErrorMessage}
+              </div>
+            )}
+
+            {isEmailAddress(username) ? (
+              <div className="pt-2 border-t border-gray-200/60 flex items-center justify-between flex-wrap gap-2">
+                <span className="text-xs text-gray-500">Didn't receive the verification email?</span>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendMutation.isPending}
+                  className="text-xs font-semibold text-[#0a1821] hover:underline cursor-pointer bg-transparent border-none outline-none disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  {resendMutation.isPending ? 'Sending...' : 'Resend verification email'}
+                </button>
+              </div>
+            ) : (
+              <div className="pt-2 border-t border-gray-200/60">
+                <p className="text-xs text-gray-500">
+                  Please enter your registered email address above to receive a new verification link.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : formError ? (
           <div className="text-[#C03E48] text-xs font-semibold border border-[#C03E48]/20 bg-[#C03E48]/5 px-4 py-3 rounded-2xl">
             {formError}
           </div>
-        )}
+        ) : null}
 
         {/* Email Address Input */}
         <div className="flex flex-col gap-1.5">

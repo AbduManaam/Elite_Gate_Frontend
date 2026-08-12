@@ -50,7 +50,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className 
           {authMode === 'login' ? (
             <LoginForm onLoginSuccess={onLoginSuccess} onToggleSignup={() => setAuthMode('signup')} />
           ) : (
-            <SignupForm onSignupSuccess={onLoginSuccess} onToggleLogin={() => setAuthMode('login')} />
+            <SignupForm onToggleLogin={() => setAuthMode('login')} />
           )}
         </div>
 
