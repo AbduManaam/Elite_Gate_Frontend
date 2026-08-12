@@ -23,6 +23,10 @@ export interface ResendVerificationResponse {
     message: string;
 }
 
+export interface VerifyEmailResponse {
+    message: string;
+}
+
 export async function login(username: string, password: string): Promise<TokenResponse> {
     const { data } = await apiClient.post<TokenResponse>('/login', { username, password });
     return data;
@@ -48,6 +52,11 @@ export async function resetPassword(token: string, newPassword: string): Promise
 
 export async function resendVerification(email: string): Promise<ResendVerificationResponse> {
     const { data } = await apiClient.post<ResendVerificationResponse>('/resend-verification', { email });
+    return data;
+}
+
+export async function verifyEmail(token: string): Promise<VerifyEmailResponse> {
+    const { data } = await apiClient.post<VerifyEmailResponse>('/verify-email', { token });
     return data;
 }
 

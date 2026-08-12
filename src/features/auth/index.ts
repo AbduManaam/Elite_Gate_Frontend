@@ -6,3 +6,5 @@ export { default as UnauthorizedPage } from './pages/UnauthorizedPage';
 export { default as OAuthCallbackPage } from './pages/OAuthCallbackPage';
 export { default as ForgotPasswordPage } from './pages/ForgotPasswordPage';
 export { default as ResetPasswordPage } from './pages/ResetPasswordPage';
+export { default as VerifyEmailPage } from './pages/VerifyEmailPage';
+

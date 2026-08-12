@@ -8,7 +8,7 @@ import { LoginRoute } from './LoginRoute';
 import { PLATFORM, ADMIN } from '../../shared/lib/platformPaths';
 import {
   OAuthCallbackPage, PlatformAdminsPage, RolesPermissionsPage, UnauthorizedPage,
-  ForgotPasswordPage, ResetPasswordPage,
+  ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage,
 } from '../../features/auth';
 import { WelcomeDashboard } from '../../features/dashboard';
 import { ObservabilitySummaryPage, PlatformHealthPage, PlatformMetricsPage } from '../../features/observability';
@@ -23,6 +23,7 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginRoute /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
+  { path: '/verify-email', element: <VerifyEmailPage /> },
   { path: '/oauth/callback', element: <OAuthCallbackPage /> },
   { path: '/unauthorized', element: <UnauthorizedPage /> },
   {
