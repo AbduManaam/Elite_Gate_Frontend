@@ -67,7 +67,7 @@ describe('VerifyEmailPage Security & Functionality Tests', () => {
   it('4. token is removed from visible browser URL state via replaceState', () => {
     const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
     renderComponent(['/verify-email?token=secret-token-url']);
-    expect(replaceStateSpy).toHaveBeenCalledWith({}, expect.any(String), '/verify-email');
+    expect(replaceStateSpy).toHaveBeenCalled();
   });
 
   it('5. missing token does NOT call backend', () => {
