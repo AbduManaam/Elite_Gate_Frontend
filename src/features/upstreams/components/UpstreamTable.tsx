@@ -7,6 +7,7 @@ interface UpstreamTableProps {
     readonly projectId: string | null;
     readonly upstreams: UpstreamRecord[];
     readonly expandedRowId: string | null;
+    readonly canManage: boolean;
     readonly onToggleExpand: (id: string) => void;
     readonly onEdit: (upstream: UpstreamRecord) => void;
     readonly onToggleEnabled: (upstream: UpstreamRecord) => void;
@@ -18,6 +19,7 @@ export const UpstreamTable: React.FC<UpstreamTableProps> = ({
     projectId,
     upstreams,
     expandedRowId,
+    canManage,
     onToggleExpand,
     onEdit,
     onToggleEnabled,
@@ -63,6 +65,7 @@ export const UpstreamTable: React.FC<UpstreamTableProps> = ({
                                         projectId={projectId}
                                         upstream={upstream}
                                         isExpanded={isExpanded}
+                                        canManage={canManage}
                                         onToggleExpand={() => onToggleExpand(upstream.id)}
                                         onEdit={() => onEdit(upstream)}
                                         onViewTargets={() => onViewTargets(upstream)}
@@ -71,6 +74,7 @@ export const UpstreamTable: React.FC<UpstreamTableProps> = ({
                                     {isExpanded && (
                                         <UpstreamExpandedRow
                                             upstream={upstream}
+                                            canManage={canManage}
                                             onEdit={() => onEdit(upstream)}
                                             onToggleEnabled={() => onToggleEnabled(upstream)}
                                             onViewTargets={() => onViewTargets(upstream)}

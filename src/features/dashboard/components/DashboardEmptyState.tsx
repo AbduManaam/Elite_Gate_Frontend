@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspacePath } from '../../../shared/hooks/useWorkspacePath';
+import { useRoles } from '../../../shared/hooks/useRoles';
 
 interface DashboardEmptyStateProps {
   readonly routeCount?: number;
@@ -17,6 +18,8 @@ export const DashboardEmptyState: React.FC<DashboardEmptyStateProps> = ({
 }) => {
   const navigate = useNavigate();
   const getPath = useWorkspacePath();
+  const { can } = useRoles();
+  const canManage = can('editor');
 
   // Project setup checklist steps
   const steps = [
@@ -59,14 +62,16 @@ export const DashboardEmptyState: React.FC<DashboardEmptyStateProps> = ({
 
           {/* Action Row */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md mt-xl pt-lg border-t border-outline-variant/60">
-            <button
-              onClick={() => navigate(getPath('/connectivity?tab=Routes&action=create-route'))}
-              className="bg-[#113346] hover:bg-brand-hover text-white px-xl py-2.5 rounded-lg font-bold text-sm flex items-center gap-xs cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[20px]">add</span>
-              Create First Route
-            </button>
+            {canManage && (
+              <button
+                onClick={() => navigate(getPath('/connectivity?tab=Routes&action=create-route'))}
+                className="bg-[#113346] hover:bg-brand-hover text-white px-xl py-2.5 rounded-lg font-bold text-sm flex items-center gap-xs cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[20px]">add</span>
+                Create First Route
+              </button>
+            )}
             <div className="flex items-center gap-xs text-xs font-semibold text-outline-variant select-none">
               <span className="material-symbols-outlined text-[18px] text-primary">
                 west
@@ -152,13 +157,15 @@ export const DashboardEmptyState: React.FC<DashboardEmptyStateProps> = ({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => navigate(getPath('/connectivity?tab=Upstreams&action=create-upstream'))}
-              className="mt-xl border border-outline-variant hover:border-primary/60 hover:bg-surface-container-low/20 text-on-surface-variant group-hover:text-primary py-2 px-lg rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer text-center w-full"
-              type="button"
-            >
-              Open Upstreams
-            </button>
+            {canManage && (
+              <button
+                onClick={() => navigate(getPath('/connectivity?tab=Upstreams&action=create-upstream'))}
+                className="mt-xl border border-outline-variant hover:border-primary/60 hover:bg-surface-container-low/20 text-on-surface-variant group-hover:text-primary py-2 px-lg rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer text-center w-full"
+                type="button"
+              >
+                Open Upstreams
+              </button>
+            )}
           </div>
 
           {/* Card 2: Configure Policies */}
@@ -176,13 +183,15 @@ export const DashboardEmptyState: React.FC<DashboardEmptyStateProps> = ({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => navigate(getPath('/connectivity?tab=Policies&action=create-policy'))}
-              className="mt-xl border border-outline-variant hover:border-primary/60 hover:bg-surface-container-low/20 text-on-surface-variant group-hover:text-primary py-2 px-lg rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer text-center w-full"
-              type="button"
-            >
-              Open Policies
-            </button>
+            {canManage && (
+              <button
+                onClick={() => navigate(getPath('/connectivity?tab=Policies&action=create-policy'))}
+                className="mt-xl border border-outline-variant hover:border-primary/60 hover:bg-surface-container-low/20 text-on-surface-variant group-hover:text-primary py-2 px-lg rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer text-center w-full"
+                type="button"
+              >
+                Open Policies
+              </button>
+            )}
           </div>
 
           {/* Card 3: Generate API Keys */}
@@ -200,13 +209,15 @@ export const DashboardEmptyState: React.FC<DashboardEmptyStateProps> = ({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => navigate(getPath('/connectivity?tab=API Credentials&action=create-apikey'))}
-              className="mt-xl border border-outline-variant hover:border-primary/60 hover:bg-surface-container-low/20 text-on-surface-variant group-hover:text-primary py-2 px-lg rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer text-center w-full"
-              type="button"
-            >
-              Open API Credentials
-            </button>
+            {canManage && (
+              <button
+                onClick={() => navigate(getPath('/connectivity?tab=API Credentials&action=create-apikey'))}
+                className="mt-xl border border-outline-variant hover:border-primary/60 hover:bg-surface-container-low/20 text-on-surface-variant group-hover:text-primary py-2 px-lg rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer text-center w-full"
+                type="button"
+              >
+                Open API Credentials
+              </button>
+            )}
           </div>
         </div>
       </div>

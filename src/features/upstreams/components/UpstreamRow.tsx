@@ -6,6 +6,7 @@ interface UpstreamRowProps {
     readonly projectId: string | null;
     readonly upstream: UpstreamRecord;
     readonly isExpanded: boolean;
+    readonly canManage: boolean;
     readonly onToggleExpand: () => void;
     readonly onEdit: () => void;
     readonly onViewTargets: () => void;
@@ -16,6 +17,7 @@ export const UpstreamRow: React.FC<UpstreamRowProps> = ({
     projectId,
     upstream,
     isExpanded,
+    canManage,
     onToggleExpand,
     onEdit,
     onViewTargets,
@@ -110,14 +112,16 @@ export const UpstreamRow: React.FC<UpstreamRowProps> = ({
                     </button>
 
                     {/* Edit */}
-                    <button
-                        type="button"
-                        onClick={onEdit}
-                        className="text-on-surface-variant hover:text-[#587c94] transition-colors p-xs cursor-pointer"
-                        title="Edit config"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
-                    </button>
+                    {canManage && (
+                        <button
+                            type="button"
+                            onClick={onEdit}
+                            className="text-on-surface-variant hover:text-[#587c94] transition-colors p-xs cursor-pointer"
+                            title="Edit config"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                    )}
 
                     {/* Targets */}
                     <button
@@ -130,14 +134,16 @@ export const UpstreamRow: React.FC<UpstreamRowProps> = ({
                     </button>
 
                     {/* Delete */}
-                    <button
-                        type="button"
-                        onClick={onDelete}
-                        className="text-on-surface-variant hover:text-error transition-colors p-xs cursor-pointer"
-                        title="Delete upstream"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
+                    {canManage && (
+                        <button
+                            type="button"
+                            onClick={onDelete}
+                            className="text-on-surface-variant hover:text-error transition-colors p-xs cursor-pointer"
+                            title="Delete upstream"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    )}
                 </div>
             </td>
         </tr>

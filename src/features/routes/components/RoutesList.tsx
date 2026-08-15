@@ -33,7 +33,11 @@ export const RoutesList: React.FC = () => {
 
   const [routeToDelete, setRouteToDelete] = useState<RouteRecord | null>(null);
 
-  const isCreateFromUrl = searchParams.get('action') === 'create-route';
+  const canManageRoutes = can('editor');
+
+  const isCreateFromUrl =
+    canManageRoutes &&
+    searchParams.get('action') === 'create-route';
   const effectiveDrawerState = drawerState.isOpen
     ? drawerState
     : { isOpen: isCreateFromUrl, mode: 'create' as const };
@@ -74,8 +78,6 @@ export const RoutesList: React.FC = () => {
       assignPolicy.mutate({ routeId, policyId });
     }
   };
-
-  const canManageRoutes = can('editor');
 
   const filteredRoutes = (routes ?? []).filter((route) => {
     const matchesSearch =
@@ -261,7 +263,7 @@ export const RoutesList: React.FC = () => {
         </div>
       </div>
 
-      {effectiveDrawerState.isOpen && (
+      {canManageRoutes && effectiveDrawerState.isOpen && (
         <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
           <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
             <RouteFormDrawer

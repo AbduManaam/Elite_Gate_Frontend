@@ -30,7 +30,11 @@ export const PoliciesList: React.FC = () => {
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyRecord | null>(null);
   const [drawerMode, setDrawerMode] = useState<'create' | 'edit' | null>(null);
 
-  const isCreateFromUrl = searchParams.get('action') === 'create-policy';
+  const canManage = can('editor');
+
+  const isCreateFromUrl =
+    canManage &&
+    searchParams.get('action') === 'create-policy';
   const effectiveDrawerMode = drawerMode ?? (isCreateFromUrl ? 'create' : null);
 
   const handleCloseDrawer = () => {
@@ -49,8 +53,6 @@ export const PoliciesList: React.FC = () => {
   const { data: policies = [], isLoading, error } = usePoliciesQuery(projectId);
   const deletePolicy = useDeletePolicyMutation(projectId ?? '');
   const createPolicy = useCreatePolicyMutation(projectId ?? '');
-
-  const canManage = can('editor');
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -171,7 +173,10 @@ export const PoliciesList: React.FC = () => {
       {!isLoading && !apiError && (
         <>
           {hasNoPolicies ? (
-            <PolicyEmptyState onCreateClick={() => setDrawerMode('create')} />
+            <PolicyEmptyState
+              onCreateClick={() => setDrawerMode('create')}
+              canManage={canManage}
+            />
           ) : (
             <div className="flex flex-col gap-lg w-full">
               {/* Summary operational statistics cards */}
@@ -221,7 +226,7 @@ export const PoliciesList: React.FC = () => {
       )}
 
       {/* Stepper Wizard Drawer for Creating Policy */}
-      {effectiveDrawerMode === 'create' && (
+      {canManage && effectiveDrawerMode === 'create' && (
         <PolicyWizardDrawer
           projectId={projectId ?? ''}
           onClose={handleCloseDrawer}
@@ -233,7 +238,7 @@ export const PoliciesList: React.FC = () => {
       )}
 
       {/* Edit Drawer for Modifying Policy */}
-      {effectiveDrawerMode === 'edit' && selectedPolicy && (
+      {canManage && effectiveDrawerMode === 'edit' && selectedPolicy && (
         <PolicyEditDrawer
           projectId={projectId ?? ''}
           policy={selectedPolicy}
@@ -246,7 +251,7 @@ export const PoliciesList: React.FC = () => {
       )}
 
       {/* Delete confirmation dialog */}
-      {deleteTarget && (
+      {canManage && deleteTarget && (
         <PolicyDeleteDialog
           isOpen={deleteTarget !== null}
           policy={deleteTarget}

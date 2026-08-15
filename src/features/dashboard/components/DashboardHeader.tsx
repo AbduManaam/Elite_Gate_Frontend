@@ -2,11 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
 import { useWorkspacePath } from '../../../shared/hooks/useWorkspacePath';
+import { useRoles } from '../../../shared/hooks/useRoles';
 
 export const DashboardHeader: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const getPath = useWorkspacePath();
+  const { can } = useRoles();
+
+  const canManage = can(`editor`);
 
   const displayName = user?.username
     ? user.username.split('@')[0].split('_')[0].replace(/^\w/, (c) => c.toUpperCase())
@@ -22,14 +26,16 @@ export const DashboardHeader: React.FC = () => {
           Manage your API Gateway from one place.
         </p>
       </div>
-      <button
-        onClick={() => navigate(getPath('/connectivity?tab=Routes&action=create-route'))}
-        className="self-start md:self-auto bg-[#113346] hover:bg-brand-hover text-white px-lg py-2 rounded-lg font-bold text-xs flex items-center gap-xs cursor-pointer transition-all duration-200 shadow-sm"
-        type="button"
-      >
-        <span className="material-symbols-outlined text-[18px]">add</span>
-        Create Route
-      </button>
+      {canManage && (
+        <button
+          onClick={() => navigate(getPath('/connectivity?tab=Routes&action=create-route'))}
+          className="self-start md:self-auto bg-[#113346] hover:bg-brand-hover text-white px-lg py-2 rounded-lg font-bold text-xs flex items-center gap-xs cursor-pointer transition-all duration-200 shadow-sm"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[18px]">add</span>
+          Create Route
+        </button>
+      )}
     </div>
   );
 };

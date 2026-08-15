@@ -2,9 +2,13 @@ import React from 'react';
 
 interface UpstreamEmptyStateProps {
     readonly onCreateClick: () => void;
+    readonly canManage: boolean;
 }
 
-export const UpstreamEmptyState: React.FC<UpstreamEmptyStateProps> = ({ onCreateClick }) => {
+export const UpstreamEmptyState: React.FC<UpstreamEmptyStateProps> = ({
+    onCreateClick,
+    canManage,
+}) => {
     return (
         <div className="flex flex-col items-center justify-center p-xl border border-dashed border-outline-variant bg-white rounded-xl text-center max-w-2xl mx-auto my-lg shadow-sm">
             {/* Hub Icon Container */}
@@ -21,14 +25,16 @@ export const UpstreamEmptyState: React.FC<UpstreamEmptyStateProps> = ({ onCreate
             </p>
 
             {/* CTA Button */}
-            <button
-                type="button"
-                onClick={onCreateClick}
-                className="bg-[#113346] text-white font-bold px-lg py-sm rounded-lg hover:bg-[#123749] transition-colors flex items-center gap-sm cursor-pointer shadow-sm"
-            >
-                <span className="material-symbols-outlined text-[18px]">add</span>
-                Create Upstream
-            </button>
+            {canManage && (
+                <button
+                    type="button"
+                    onClick={onCreateClick}
+                    className="bg-[#113346] text-white font-bold px-lg py-sm rounded-lg hover:bg-[#123749] transition-colors flex items-center gap-sm cursor-pointer shadow-sm"
+                >
+                    <span className="material-symbols-outlined text-[18px]">add</span>
+                    Create Upstream
+                </button>
+            )}
         </div>
     );
 };

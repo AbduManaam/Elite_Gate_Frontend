@@ -40,7 +40,11 @@ export const UpstreamsList: React.FC = () => {
         mode: 'create',
     });
 
-    const isCreateFromUrl = searchParams.get('action') === 'create-upstream';
+    const canManage = can('editor');
+
+    const isCreateFromUrl =
+        canManage &&
+        searchParams.get('action') === 'create-upstream';
     const effectiveFormDrawer = formDrawer.isOpen
         ? formDrawer
         : { isOpen: isCreateFromUrl, mode: 'create' as const };
@@ -68,8 +72,6 @@ export const UpstreamsList: React.FC = () => {
         if (!projectId) return;
         queryClient.invalidateQueries({ queryKey: ['projects', projectId, 'upstreams'] });
     };
-
-    const canManage = can('editor');
 
     // Toggle Enabled (Disables via PATCH, Enables via PUT update)
     const handleToggleEnabled = (u: UpstreamRecord) => {
@@ -184,6 +186,7 @@ export const UpstreamsList: React.FC = () => {
                     {hasNoUpstreams ? (
                         <UpstreamEmptyState
                             onCreateClick={() => setFormDrawer({ isOpen: true, mode: 'create' })}
+                            canManage={canManage}
                         />
                     ) : (
                         <div className="flex flex-col gap-lg">
@@ -203,6 +206,7 @@ export const UpstreamsList: React.FC = () => {
                                 projectId={projectId}
                                 upstreams={filteredUpstreams}
                                 expandedRowId={expandedRowId}
+                                canManage={canManage}
                                 onToggleExpand={handleToggleExpand}
                                 onEdit={(u) => setFormDrawer({ isOpen: true, mode: 'edit', upstream: u })}
                                 onToggleEnabled={handleToggleEnabled}
@@ -229,7 +233,7 @@ export const UpstreamsList: React.FC = () => {
             )}
 
             {/* Upstream Form Drawer (Create Stepper / Edit Form) */}
-            {effectiveFormDrawer.isOpen && (
+            {canManage && effectiveFormDrawer.isOpen && (
                 <div className="fixed inset-0 bg-black/40 z-50 flex justify-end">
                     <div className="bg-white h-full shadow-2xl border-l border-outline-variant animate-slide-in overflow-y-auto">
                         <UpstreamFormDrawer
@@ -243,7 +247,7 @@ export const UpstreamsList: React.FC = () => {
             )}
 
             {/* Delete Confirmation Modal */}
-            {deleteTarget && (
+            {canManage && deleteTarget && (
                 <UpstreamDeleteDialog
                     upstream={deleteTarget}
                     isOpen={!!deleteTarget}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspacePath } from '../../../shared/hooks/useWorkspacePath';
+import { useRoles } from '../../../shared/hooks/useRoles';
 
 interface QuickActionItem {
   title: string;
@@ -15,7 +16,12 @@ interface QuickActionItem {
 export const QuickActions: React.FC = () => {
   const navigate = useNavigate();
   const getPath = useWorkspacePath();
+  const { can } = useRoles();
+  const canManage = can('editor');
 
+  if (!canManage) {
+    return null;
+  }
   const actions: QuickActionItem[] = [
     {
       title: 'Create Route',

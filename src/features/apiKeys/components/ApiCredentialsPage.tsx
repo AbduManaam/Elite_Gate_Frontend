@@ -280,7 +280,7 @@ export const ApiCredentialsPage: React.FC = () => {
             </div>
 
             {/* Dialogs */}
-            {isCreateOpen && (
+            {hasPermission && isCreateOpen && (
                 <CreateApiKeyDialog
                     onClose={() => setIsCreateOpen(false)}
                     onSubmit={handleCreateSubmit}
@@ -297,7 +297,7 @@ export const ApiCredentialsPage: React.FC = () => {
                 />
             )}
 
-            {keyToRotate && (
+            {hasPermission && keyToRotate && (
                 <RotateApiKeyDialog
                     apiKey={keyToRotate}
                     onClose={() => setKeyToRotate(null)}
@@ -314,7 +314,7 @@ export const ApiCredentialsPage: React.FC = () => {
                 />
             )}
 
-            {keyToRevoke && (
+            {hasPermission && keyToRevoke && (
                 <RevokeApiKeyDialog
                     apiKey={keyToRevoke}
                     onClose={() => setKeyToRevoke(null)}
