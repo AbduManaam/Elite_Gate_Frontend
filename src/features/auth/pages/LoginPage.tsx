@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
-import loginBanner from '../../../assets/login_gateway_banner.png';
 
 export interface LoginPageProps {
   readonly onLoginSuccess: () => void;
@@ -17,11 +16,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, className 
       <div className="w-full max-w-[1200px] rounded-[32px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.06)] flex flex-col md:flex-row min-h-[620px] items-stretch border border-white/60">
         
         {/* Left Side: Brand Banner */}
-        <div 
+        <div
           className="hidden md:flex md:w-1/2 flex-col justify-between px-12 pb-12 pt-6 relative bg-center select-none"
-          style={{ 
-            backgroundImage: `url(${loginBanner})`,
-            backgroundSize: '115% 100%'
+          style={{
+            backgroundImage: "url('/login_gateway_banner.webp')",
+            backgroundSize: '115% 100%',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#2a2424',
           }}
         >
           {/* Top Brand Logo */}
